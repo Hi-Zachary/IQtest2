@@ -55,12 +55,12 @@ def make_inputs(bs=4):
 
 @torch.no_grad()
 def base_path_output(model, x, text):
-    """手动计算纯 B0 base path（不经过任何模块）。"""
+    """手动计算纯 B0 base path（不经过任何模块，含 v7.2 的 anchor LayerNorm）。"""
     spatial = model.resnet50(x)
     global_v = model.attnpool(spatial)
     _, _, global_t = model.encode_text(text)
-    v0 = model.base_visual_proj(global_v)
-    t0 = model.base_text_proj(global_t)
+    v0 = model.norm_v0(model.base_visual_proj(global_v))
+    t0 = model.norm_t0(model.base_text_proj(global_t))
     h = model.shared_fusion(torch.cat([v0, t0], dim=-1))
     q = model.quality_head(h)
     a = model.align_head(h)
@@ -89,25 +89,29 @@ def main():
         out_base = base_path_output(b0, x, text)
     check("B0 forward == base path", out_b0, out_base)
 
-    # ---- B1: DMSQR on，lambda_msqr=0 -> base path ----
+    # ---- B1: DMSQR on；v7.2 默认 gate_init=0.01，显式归零后 == base path ----
     b1 = build(True, False, use_dev=True)
-    assert b1.lambda_msqr.item() == 0.0, "lambda_msqr should init to 0"
+    assert abs(b1.lambda_msqr.item() - 0.01) < 1e-6, "lambda_msqr init should be 0.01"
     with torch.no_grad():
+        b1.lambda_msqr.fill_(0.0)
         out_b1 = b1(x, text)
         out_base1 = base_path_output(b1, x, text)
     check("B1 (lambda_msqr=0) == base path", out_b1, out_base1)
 
-    # ---- B2: DP-HCMI on，lambda_shcmi=0 -> base path ----
+    # ---- B2: DP-HCMI on；默认 gate_init=0.01，显式归零后 == base path ----
     b2 = build(False, True, use_pw=True, use_ab=True)
-    assert b2.lambda_shcmi.item() == 0.0, "lambda_shcmi should init to 0"
+    assert abs(b2.lambda_shcmi.item() - 0.01) < 1e-6, "lambda_shcmi init should be 0.01"
     with torch.no_grad():
+        b2.lambda_shcmi.fill_(0.0)
         out_b2 = b2(x, text)
         out_base2 = base_path_output(b2, x, text)
     check("B2 (lambda_shcmi=0) == base path", out_b2, out_base2)
 
-    # ---- Ours: DMSQR+DP-HCMI on，双 lambda=0 -> base path ----
+    # ---- Ours: DMSQR+DP-HCMI on，双 lambda 归零 -> base path ----
     ours = build(True, True, use_dev=True, use_pw=True, use_ab=True)
     with torch.no_grad():
+        ours.lambda_msqr.fill_(0.0)
+        ours.lambda_shcmi.fill_(0.0)
         out_ours = ours(x, text)
         out_base_ours = base_path_output(ours, x, text)
     check("Ours (all lambdas=0) == base path", out_ours, out_base_ours)

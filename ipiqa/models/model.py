@@ -91,6 +91,7 @@ class MSQRNet(BaseModel):
             use_align_bias=False,     # DP-HCMI discrepancy bias
             gamma_init=0.0,          # MSQR 内部 cross-scale gamma
             internal_gate_init=0.01,  # SHCMI 内部 eta/alpha/beta 初始值
+            outer_gate_init=0.01,    # v7.2: 外部门控 lambda_msqr/lambda_shcmi 初始值
             freeze_visual=True,
             freeze_text=True,
             module_lr_scale=1.0,     # 新模块 lr 倍数（FT-CLIP 用 10）
@@ -108,6 +109,7 @@ class MSQRNet(BaseModel):
         self.freeze_text = freeze_text
         self.module_lr_scale = module_lr_scale
         self.head_scale = head_scale
+        self.outer_gate_init = float(outer_gate_init)
 
         clip_ckpt = clip.load(base_ckpt, device="cpu")[0]
         self.resnet50 = clip_ckpt.visual
@@ -154,6 +156,15 @@ class MSQRNet(BaseModel):
         self.quality_head = nn.Linear(dim, 1)
         self.align_head = nn.Linear(dim, 1)
 
+        # ====================== v7.2 Residual Scale Calibration ======================
+        # 改进7.md：对 base anchor 与两个 residual delta 分别做 LayerNorm，
+        # 消除 DMSQR/DP-HCMI 的 norm 量级失衡（v7 里 msqr_ratio≈3.6 vs
+        # shcmi_ratio≈0.003，导致 Full 中 DP-HCMI 被自动关闭）。
+        self.norm_v0 = nn.LayerNorm(dim)
+        self.norm_t0 = nn.LayerNorm(dim)
+        self.norm_msqr = nn.LayerNorm(dim)
+        self.norm_shcmi = nn.LayerNorm(dim)
+
         # ====================== DMSQR residual branch ======================
         if use_msqr:
             self.msqr = MSQR(
@@ -167,7 +178,8 @@ class MSQRNet(BaseModel):
                 global_dim=CLIP_VISUAL_WIDTH,
             )
             self.visual_skip = MSQRVisualSkip(dim, drop)
-            self.lambda_msqr = nn.Parameter(torch.tensor(0.0))
+            # v7.2: 外门控小正初始化（lambda=0 会抑制 branch 梯度，形成赢家通吃）
+            self.lambda_msqr = nn.Parameter(torch.tensor(self.outer_gate_init))
         else:
             self.msqr = None
             self.visual_skip = None
@@ -183,7 +195,8 @@ class MSQRNet(BaseModel):
                 use_prompt_weight=use_prompt_weight,
                 use_align_bias=use_align_bias,
             )
-            self.lambda_shcmi = nn.Parameter(torch.tensor(0.0))
+            # v7.2: 与 lambda_msqr 完全相同的初始值，避免人为偏向某个模块
+            self.lambda_shcmi = nn.Parameter(torch.tensor(self.outer_gate_init))
         else:
             self.shcmi = None
             self.lambda_shcmi = None
@@ -248,9 +261,10 @@ class MSQRNet(BaseModel):
         # ===================== 2. Shared base tokens + B0 anchors =====================
         # v7（改进6.md 第 2 节）：fine/coarse base tokens 来自共享 spatial_proj，
         # B2 / Full 的 DP-HCMI 输入严格相同。
+        # v7.2（改进7.md 第 4 节）：anchor 也做 LayerNorm，保持稳定尺度。
         fine_base, coarse_base = self.build_plain_tokens(spatial)
-        v0 = self.base_visual_proj(global_v)              # [B, D]
-        t0 = self.base_text_proj(global_t)                # [B, D]
+        v0 = self.norm_v0(self.base_visual_proj(global_v))    # [B, D]
+        t0 = self.norm_t0(self.base_text_proj(global_t))      # [B, D]
         v = v0
         c = t0
 
@@ -260,8 +274,12 @@ class MSQRNet(BaseModel):
         if self.use_msqr:
             fine_d, coarse_d = self.msqr(fine_base, coarse_base, global_v)
             delta_v = self.visual_skip(fine_d, coarse_d)      # [B, D]
+            delta_v = self.norm_msqr(delta_v)                 # v7.2 residual 校准
             msqr_scale = torch.tanh(self.lambda_msqr)
             v = v0 + msqr_scale * delta_v
+            ratios["raw_msqr_ratio"] = (
+                delta_v.norm(dim=-1).mean() / v0.norm(dim=-1).mean()
+            ).item()
             ratios["msqr_ratio"] = (
                 (msqr_scale * delta_v).norm(dim=-1).mean() / v0.norm(dim=-1).mean()
             ).item()
@@ -271,8 +289,12 @@ class MSQRNet(BaseModel):
         # 只接收 fine_base / coarse_base，避免 hidden input change。
         if self.use_shcmi:
             delta_c = self.shcmi(fine_base, coarse_base, text_tokens, text_mask)  # [B, D]
+            delta_c = self.norm_shcmi(delta_c)                # v7.2 residual 校准
             shcmi_scale = torch.tanh(self.lambda_shcmi)
             c = t0 + shcmi_scale * delta_c
+            ratios["raw_shcmi_ratio"] = (
+                delta_c.norm(dim=-1).mean() / t0.norm(dim=-1).mean()
+            ).item()
             ratios["shcmi_ratio"] = (
                 (shcmi_scale * delta_c).norm(dim=-1).mean() / t0.norm(dim=-1).mean()
             ).item()
@@ -374,6 +396,7 @@ class MSQRNet(BaseModel):
         shcmi_use_multi_kernel = cfg.get("shcmi_use_multi_kernel", True)
         gamma_init = cfg.get("gamma_init", 0.0)
         internal_gate_init = cfg.get("internal_gate_init", 0.01)
+        outer_gate_init = cfg.get("outer_gate_init", 0.01)
         freeze_visual = cfg.get("freeze_visual", True)
         freeze_text = cfg.get("freeze_text", True)
         module_lr_scale = cfg.get("module_lr_scale", 1.0)
@@ -398,6 +421,7 @@ class MSQRNet(BaseModel):
             shcmi_use_multi_kernel=shcmi_use_multi_kernel,
             gamma_init=gamma_init,
             internal_gate_init=internal_gate_init,
+            outer_gate_init=outer_gate_init,
             freeze_visual=freeze_visual,
             freeze_text=freeze_text,
             module_lr_scale=module_lr_scale,
