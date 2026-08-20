@@ -100,6 +100,10 @@ class SHCMI(nn.Module):
             nn.Linear(dim, 1),
         )
 
+        # v7.3（改进8.md 第 6.3 节）：cross-modal residual 输出前的模块内部
+        # LayerNorm，保证与冻结 CLIP anchor 尺度兼容（不强化 baseline）。
+        self.out_norm = nn.LayerNorm(dim)
+
         self.alpha_f = nn.Parameter(torch.tensor(float(gamma_init)))
         self.beta_f = nn.Parameter(torch.tensor(float(gamma_init)))
         self.alpha_c = nn.Parameter(torch.tensor(float(gamma_init)))
@@ -179,6 +183,7 @@ class SHCMI(nn.Module):
         g_s = torch.sigmoid(self.scale_gate(torch.cat([C_f, C_c], dim=-1)))
         self._last_scale_gate = g_s.detach().float()
         delta_c = g_s * C_f + (1.0 - g_s) * C_c   # [B, D]
+        delta_c = self.out_norm(delta_c)          # v7.3 模块内部 residual 校准
 
         return delta_c
 

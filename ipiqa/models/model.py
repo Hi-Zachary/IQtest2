@@ -156,16 +156,10 @@ class MSQRNet(BaseModel):
         self.quality_head = nn.Linear(dim, 1)
         self.align_head = nn.Linear(dim, 1)
 
-        # ====================== v7.2 Residual Scale Calibration ======================
-        # 改进7.md：对 base anchor 与两个 residual delta 分别做 LayerNorm，
-        # 消除 DMSQR/DP-HCMI 的 norm 量级失衡（v7 里 msqr_ratio≈3.6 vs
-        # shcmi_ratio≈0.003，导致 Full 中 DP-HCMI 被自动关闭）。
-        self.norm_v0 = nn.LayerNorm(dim)
-        self.norm_t0 = nn.LayerNorm(dim)
-        self.norm_msqr = nn.LayerNorm(dim)
-        self.norm_shcmi = nn.LayerNorm(dim)
-
         # ====================== DMSQR residual branch ======================
+        # v7.3（改进8.md）：LayerNorm 只放在 proposed module 内部
+        # （MSQRVisualSkip / SHCMI 的 out_norm），不再对 anchor 或 model 层
+        # delta 做 LayerNorm——避免 v7.2 里 anchor LN 强化 B0 的问题。
         if use_msqr:
             self.msqr = MSQR(
                 dim=dim, num_heads=num_heads,
@@ -261,10 +255,10 @@ class MSQRNet(BaseModel):
         # ===================== 2. Shared base tokens + B0 anchors =====================
         # v7（改进6.md 第 2 节）：fine/coarse base tokens 来自共享 spatial_proj，
         # B2 / Full 的 DP-HCMI 输入严格相同。
-        # v7.2（改进7.md 第 4 节）：anchor 也做 LayerNorm，保持稳定尺度。
+        # v7.3（改进8.md 第 7 节）：anchor 恢复简单 base projection，不再加 LayerNorm。
         fine_base, coarse_base = self.build_plain_tokens(spatial)
-        v0 = self.norm_v0(self.base_visual_proj(global_v))    # [B, D]
-        t0 = self.norm_t0(self.base_text_proj(global_t))      # [B, D]
+        v0 = self.base_visual_proj(global_v)              # [B, D]
+        t0 = self.base_text_proj(global_t)                # [B, D]
         v = v0
         c = t0
 
@@ -273,8 +267,7 @@ class MSQRNet(BaseModel):
         # ===================== 3. DMSQR residual（refine base tokens） =====================
         if self.use_msqr:
             fine_d, coarse_d = self.msqr(fine_base, coarse_base, global_v)
-            delta_v = self.visual_skip(fine_d, coarse_d)      # [B, D]
-            delta_v = self.norm_msqr(delta_v)                 # v7.2 residual 校准
+            delta_v = self.visual_skip(fine_d, coarse_d)      # [B, D]（内部已 LayerNorm）
             msqr_scale = torch.tanh(self.lambda_msqr)
             v = v0 + msqr_scale * delta_v
             ratios["raw_msqr_ratio"] = (
@@ -288,8 +281,7 @@ class MSQRNet(BaseModel):
         # v7（改进6.md 第 4 节）：DP-HCMI 不接收 DMSQR 的 refined tokens，
         # 只接收 fine_base / coarse_base，避免 hidden input change。
         if self.use_shcmi:
-            delta_c = self.shcmi(fine_base, coarse_base, text_tokens, text_mask)  # [B, D]
-            delta_c = self.norm_shcmi(delta_c)                # v7.2 residual 校准
+            delta_c = self.shcmi(fine_base, coarse_base, text_tokens, text_mask)  # [B, D]（内部已 LayerNorm）
             shcmi_scale = torch.tanh(self.lambda_shcmi)
             c = t0 + shcmi_scale * delta_c
             ratios["raw_shcmi_ratio"] = (

@@ -55,12 +55,12 @@ def make_inputs(bs=4):
 
 @torch.no_grad()
 def base_path_output(model, x, text):
-    """手动计算纯 B0 base path（不经过任何模块，含 v7.2 的 anchor LayerNorm）。"""
+    """手动计算纯 B0 base path（v7.3：anchor 无 LayerNorm，简单 base projection）。"""
     spatial = model.resnet50(x)
     global_v = model.attnpool(spatial)
     _, _, global_t = model.encode_text(text)
-    v0 = model.norm_v0(model.base_visual_proj(global_v))
-    t0 = model.norm_t0(model.base_text_proj(global_t))
+    v0 = model.base_visual_proj(global_v)
+    t0 = model.base_text_proj(global_t)
     h = model.shared_fusion(torch.cat([v0, t0], dim=-1))
     q = model.quality_head(h)
     a = model.align_head(h)

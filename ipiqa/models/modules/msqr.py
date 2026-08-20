@@ -137,11 +137,16 @@ class MSQRVisualSkip(nn.Module):
             nn.GELU(),
             nn.Dropout(drop),
         )
+        # v7.3（改进8.md 第 5.2 节）：residual 输出前的模块内部 LayerNorm，
+        # 保证 DMSQR residual 与冻结 CLIP anchor 尺度兼容（不强化 baseline）。
+        self.out_norm = nn.LayerNorm(dim)
 
     def forward(self, fine, coarse):
         v_f = fine.mean(dim=1)      # [B, D]
         v_c = coarse.mean(dim=1)    # [B, D]
-        return self.fc(torch.cat([v_f, v_c], dim=-1))
+        delta_v = self.fc(torch.cat([v_f, v_c], dim=-1))
+        delta_v = self.out_norm(delta_v)
+        return delta_v
 
 
 # 向后兼容别名
