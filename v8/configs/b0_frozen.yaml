@@ -1,7 +1,7 @@
 # B0 (v8): Frozen CLIP ViT-B/16 baseline (no LoRA, no modules)
 # 调整/改进1.md 第 10/11/17 节: B0 Frozen baseline
 model:
-  arch: "msqr_dgmpq_dphcmi_v8"
+  arch: "msqr_dgmpq_hcmi_v8"
   model_name: "ckpt/clip-vit-base-patch16"
   context_length: 77
   output_dim: 2
@@ -12,14 +12,14 @@ model:
   dropout_rate: 0.1
   dim: 256
   num_heads: 4
-  mlp_ratio: 2.0
+  mlp_ratio: 1.0
   outer_gate_init: 0.01
   lora_lr_scale: 1.0
   module_lr_scale: 1.0
 
   use_lora: False
   use_dg_mpq: False
-  use_dp_hcmi: False
+  use_hcmi: False
 
 dataset:
   data_path: "data/aigc_qa_3k/mos_joint.xlsx"

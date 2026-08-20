@@ -11,7 +11,7 @@ for v in $RUNS; do
     B0)  cfg=configs/b0_frozen.yaml ;;
     R0)  cfg=configs/r0_lora.yaml ;;
     B1)  cfg=configs/b1_dgmpq.yaml ;;
-    B2)  cfg=configs/b2_dphcmi.yaml ;;
+    B2)  cfg=configs/b2_hcmi.yaml ;;
     Full) cfg=configs/full.yaml ;;
     *) echo "unknown variant: $v"; exit 1 ;;
   esac

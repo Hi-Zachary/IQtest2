@@ -3,7 +3,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ipiqa.models.model_v8 import MSQRNetV8
 
 t0 = time.time()
-m = MSQRNetV8(model_name='ckpt/clip-vit-base-patch16', use_lora=True, use_dg_mpq=True, use_dp_hcmi=True,
+m = MSQRNetV8(model_name='ckpt/clip-vit-base-patch16', use_lora=True, use_dg_mpq=True, use_hcmi=True,
               freeze_visual=True, freeze_text=True).cuda().train()
 t_load = time.time() - t0
 print(f"model load: {t_load:.1f}s")

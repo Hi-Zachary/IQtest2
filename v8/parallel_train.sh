@@ -19,7 +19,7 @@ declare -A CFG=(
   [B0]="configs/b0_frozen.yaml"
   [R0]="configs/r0_lora.yaml"
   [B1]="configs/b1_dgmpq.yaml"
-  [B2]="configs/b2_dphcmi.yaml"
+  [B2]="configs/b2_hcmi.yaml"
   [Full]="configs/full.yaml"
 )
 

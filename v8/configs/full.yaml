@@ -1,7 +1,7 @@
-# Full (v8): R0 + DG-MPQ + DP-HCMI-ViT
+# Full (v8 slim): R0 + DG-MPQ + HCMI-ViT
 # 调整/改进1.md: 最终模型, 双模块并行 + LoRA + 共享 fusion + 双头
 model:
-  arch: "msqr_dgmpq_dphcmi_v8"
+  arch: "msqr_dgmpq_hcmi_v8"
   model_name: "ckpt/clip-vit-base-patch16"
   context_length: 77
   output_dim: 2
@@ -12,7 +12,7 @@ model:
   dropout_rate: 0.1
   dim: 256
   num_heads: 4
-  mlp_ratio: 2.0
+  mlp_ratio: 1.0
   outer_gate_init: 0.01
   lora_lr_scale: 1.0
   module_lr_scale: 1.0
@@ -20,12 +20,11 @@ model:
   use_lora: True
   lora_r: 4
   lora_alpha: 8
-  lora_dropout: 0.05
+  lora_dropout: 0.0
   use_dg_mpq: True
-  use_dp_hcmi: True
-  dphcmi_use_multi_kernel: True
+  use_hcmi: True
+  hcmi_use_multi_kernel: True
   use_prompt_weight: True
-  use_align_bias: True
 
 dataset:
   data_path: "data/aigc_qa_3k/mos_joint.xlsx"

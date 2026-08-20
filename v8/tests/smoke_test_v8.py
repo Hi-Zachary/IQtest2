@@ -20,12 +20,12 @@ from ipiqa.models.model_v8 import MSQRNetV8
 CKPT = "ckpt/clip-vit-base-patch16"
 
 
-def build(use_lora, use_dg_mpq, use_dp_hcmi):
+def build(use_lora, use_dg_mpq, use_hcmi):
     m = MSQRNetV8(
         model_name=CKPT,
         use_lora=use_lora,
         use_dg_mpq=use_dg_mpq,
-        use_dp_hcmi=use_dp_hcmi,
+        use_hcmi=use_hcmi,
         freeze_visual=True,
         freeze_text=True,
     )
@@ -77,11 +77,11 @@ def check_lora_trainable(m, expect_trainable):
 
 def main():
     variants = [
-        ("B0", dict(use_lora=False, use_dg_mpq=False, use_dp_hcmi=False)),
-        ("R0", dict(use_lora=True, use_dg_mpq=False, use_dp_hcmi=False)),
-        ("B1", dict(use_lora=True, use_dg_mpq=True, use_dp_hcmi=False)),
-        ("B2", dict(use_lora=True, use_dg_mpq=False, use_dp_hcmi=True)),
-        ("Full", dict(use_lora=True, use_dg_mpq=True, use_dp_hcmi=True)),
+        ("B0", dict(use_lora=False, use_dg_mpq=False, use_hcmi=False)),
+        ("R0", dict(use_lora=True, use_dg_mpq=False, use_hcmi=False)),
+        ("B1", dict(use_lora=True, use_dg_mpq=True, use_hcmi=False)),
+        ("B2", dict(use_lora=True, use_dg_mpq=False, use_hcmi=True)),
+        ("Full", dict(use_lora=True, use_dg_mpq=True, use_hcmi=True)),
     ]
 
     print("=== registry model list ===")
@@ -103,8 +103,8 @@ def main():
 
     # ---- module input independence: B1 DG-MPQ input == Full DG-MPQ input ----
     print("\n=== module input independence (B1 == Full) ===")
-    b1 = build(use_lora=True, use_dg_mpq=True, use_dp_hcmi=False)
-    full = build(use_lora=True, use_dg_mpq=True, use_dp_hcmi=True)
+    b1 = build(use_lora=True, use_dg_mpq=True, use_hcmi=False)
+    full = build(use_lora=True, use_dg_mpq=True, use_hcmi=True)
     b1.eval(); full.eval()
     x = torch.randn(2, 3, 224, 224)
     text = ["a statue of a man in the park", "a tray of sushi on a table"]

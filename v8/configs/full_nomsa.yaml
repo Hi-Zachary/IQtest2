@@ -1,5 +1,5 @@
-# B1 (v8): R0 + DG-MPQ (Deviation-Guided Multi-Level Patch Quality)
-# 调整/改进1.md 第 6 节: Module 1, Quality branch
+# S2 (V8-Slim no MSA-T): R0 + DG-MPQ + HCMI-ViT (hcmi_use_multi_kernel=False)
+# 调整/改进1.md: 最终模型, 双模块并行 + LoRA + 共享 fusion + 双头
 model:
   arch: "msqr_dgmpq_hcmi_v8"
   model_name: "ckpt/clip-vit-base-patch16"
@@ -22,7 +22,9 @@ model:
   lora_alpha: 8
   lora_dropout: 0.0
   use_dg_mpq: True
-  use_hcmi: False
+  use_hcmi: True
+  hcmi_use_multi_kernel: False
+  use_prompt_weight: True
 
 dataset:
   data_path: "data/aigc_qa_3k/mos_joint.xlsx"
@@ -63,7 +65,7 @@ run:
   split_file: "splits/seed42_split3.json"
   output_dir: "run"
   best_criterion: "joint"
-  tag: "B1_dgmpq"
+  tag: "Full_nomsa"
 
   evaluate: False
   eval_freq: 1

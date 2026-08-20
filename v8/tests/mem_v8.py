@@ -7,7 +7,7 @@ torch.manual_seed(0)
 
 from ipiqa.models.model_v8 import MSQRNetV8
 m = MSQRNetV8(model_name="ckpt/clip-vit-base-patch16",
-              use_lora=True, use_dg_mpq=True, use_dp_hcmi=True,
+              use_lora=True, use_dg_mpq=True, use_hcmi=True,
               freeze_visual=True, freeze_text=True).cuda().train()
 
 text = ["a statue of a man in the park"] * 32

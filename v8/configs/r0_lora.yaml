@@ -1,7 +1,7 @@
 # R0 (v8): Frozen CLIP ViT-B/16 + Visual Q/K LoRA (strong reference)
 # 调整/改进1.md 第 10/17 节: R0 = B0 + LoRA, 验证 backbone adaptation
 model:
-  arch: "msqr_dgmpq_dphcmi_v8"
+  arch: "msqr_dgmpq_hcmi_v8"
   model_name: "ckpt/clip-vit-base-patch16"
   context_length: 77
   output_dim: 2
@@ -12,7 +12,7 @@ model:
   dropout_rate: 0.1
   dim: 256
   num_heads: 4
-  mlp_ratio: 2.0
+  mlp_ratio: 1.0
   outer_gate_init: 0.01
   lora_lr_scale: 1.0
   module_lr_scale: 1.0
@@ -20,9 +20,9 @@ model:
   use_lora: True
   lora_r: 4
   lora_alpha: 8
-  lora_dropout: 0.05
+  lora_dropout: 0.0
   use_dg_mpq: False
-  use_dp_hcmi: False
+  use_hcmi: False
 
 dataset:
   data_path: "data/aigc_qa_3k/mos_joint.xlsx"

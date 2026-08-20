@@ -1,10 +1,10 @@
-# IQtest v8：CLIP ViT-B/16 + Visual LoRA + DG-MPQ + DP-HCMI-ViT
+# IQtest v8：CLIP ViT-B/16 + Visual LoRA + DG-MPQ + HCMI-ViT
 
 缝合方案落地（`../调整/改进1.md`）。在 Frozen CLIP ViT-B/16 主干上：
 Visual Q/K LoRA 做 backbone adaptation，两个主创新模块并行：
 - **DG-MPQ**（Module 1，Quality）：multi-level ViT patch（L3/6/9/12）+ local-global
   semantic deviation 引导的 patch weighting → normalized quality residual
-- **DP-HCMI-ViT**（Module 2，Alignment）：detail-level（L6）/ semantic-level（L12）
+- **HCMI-ViT**（Module 2，Alignment）：detail-level（L6）/ semantic-level（L12）
   与真实 generation prompt 的双向跨模态交互 + discrepancy-guided attention bias
   + adaptive hierarchy fusion → normalized cross-modal residual
 
@@ -28,22 +28,22 @@ v8/
 │   └── models/
 │       ├── clip_vit_backbone.py  # Frozen CLIP ViT + Visual LoRA (q/k, r4 a8)
 │       ├── dg_mpq.py             # Module 1
-│       ├── dp_hcmi_vit.py        # Module 2
+│       ├── hcmi_vit.py        # Module 2
 │       ├── heads.py              # anchors + shared fusion + dual heads
-│       └── model_v8.py           # MSQRNetV8（消融开关 use_lora/dg_mpq/dp_hcmi）
+│       └── model_v8.py           # MSQRNetV8（消融开关 use_lora/dg_mpq/hcmi）
 ├── ckpt/clip-vit-base-patch16/   # HF openai/clip-vit-base-patch16 权重
-├── configs/                      # b0_frozen / r0_lora / b1_dgmpq / b2_dphcmi / full
+├── configs/                      # b0_frozen / r0_lora / b1_dgmpq / b2_hcmi / full
 ├── splits/seed42_split3.json     # 固定划分（沿用 v7 协议）
 ├── data -> ../../data            # 数据软链接
 └── run/                          # 训练输出（log.txt / checkpoints）
 ```
 
 参考源码在 `../参考源码/`：NR_IQA_AGM（LoRA 配置 r4/a8/dropout0.05/qk，已核对一致）、
-CLIP-AGIQA、LoDa（Plan B 备用）、及已有 CHPNet（DP-HCMI donor）。
+CLIP-AGIQA、LoDa（Plan B 备用）、及已有 CHPNet（HCMI-ViT donor）。
 
 ## 主消融（调整/改进1.md 第 10 节）
 
-| Model | Visual LoRA | DG-MPQ | DP-HCMI | 作用 |
+| Model | Visual LoRA | DG-MPQ | HCMI-ViT | 作用 |
 |---|---:|---:|---:|---|
 | B0 | × | × | × | Frozen CLIP baseline |
 | R0 | ✓ | × | × | LoRA-CLIP strong reference |
@@ -58,7 +58,7 @@ CLIP-AGIQA、LoDa（Plan B 备用）、及已有 CHPNet（DP-HCMI donor）。
 python train.py --cfg-path configs/b0_frozen.yaml  --seed 42 --num_cv 1
 python train.py --cfg-path configs/r0_lora.yaml   --seed 42 --num_cv 1
 python train.py --cfg-path configs/b1_dgmpq.yaml  --seed 42 --num_cv 1
-python train.py --cfg-path configs/b2_dphcmi.yaml --seed 42 --num_cv 1
+python train.py --cfg-path configs/b2_hcmi.yaml --seed 42 --num_cv 1
 python train.py --cfg-path configs/full.yaml      --seed 42 --num_cv 1
 
 # 一键串行
@@ -68,14 +68,15 @@ bash serial_train.sh
 python tests/smoke_test_v8.py
 ```
 
-## 协议要点（第 11 节）
+## 协议要点（第 11 节 + 改进2.md V8-Slim）
 
 - 224×224 / 30ep / batch 64 / AdamW / init_lr 1e-4（LoRA 与主模块同 1e-4，沿用 v7 batch64 协议）
-- LoRA r=4 α=8 dropout=0.05，target q_proj/k_proj；text 全冻结、visual base 冻结
+- LoRA r=4 α=8 **dropout=0**（train() 强制 vision_model.eval()，LoRA dropout 实际从未生效，故配置对齐为 0），target q_proj/k_proj；text 全冻结、visual base 冻结
+- **V8-Slim**：已删除 discrepancy-guided attention bias（beta_align≈0.002 无贡献）；HCMI-ViT mlp_ratio=1
 - 纯 MSE(Q)+MSE(A)，无额外 loss
 - split3 seed42，best_criterion=joint
-- 每 epoch 记录 lambda_q/lambda_a/beta_align/hier_gate/deviation/patch_w/
-  prompt_w/raw_ratio/ratio，用于判断模块是否训练、分支是否 collapse
+- 每 epoch 记录 lambda_q/lambda_a/hier_gate/deviation/patch_w/
+  prompt_w_valid_{mean,std,max,entropy}/raw_ratio/ratio，用于判断模块是否训练、分支是否 collapse
 
 ## 关键检查点
 

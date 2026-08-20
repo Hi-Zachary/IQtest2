@@ -1,4 +1,4 @@
-"""Shared attention primitives for DG-MPQ / DP-HCMI-ViT (v8).
+"""Shared attention primitives for DG-MPQ / HCMI-ViT (v8).
 
 Adapted (not copied verbatim) from:
   - CrossAttention / MSA_T: CHPNet (github.com/NUIST-Videocoding/CHPNet)
@@ -62,7 +62,7 @@ class CrossAttention(nn.Module):
             nn.Dropout(dropout),
         )
 
-    def forward(self, x, context=None, mask=None, attn_bias=None):
+    def forward(self, x, context=None, mask=None):
         # x: [B, Nq, Dq], context: [B, Nk, Dk]
         h = self.heads
         context = context if context is not None else x
@@ -77,9 +77,6 @@ class CrossAttention(nn.Module):
         v = v.reshape(B, Nk, h, -1).permute(0, 2, 1, 3)
 
         sim = (q @ k.transpose(-2, -1)) * self.scale     # [B, H, Nq, Nk]
-        if attn_bias is not None:
-            # attn_bias: [B, Nq, Nk]（或 [B,1,Nq,Nk]），broadcast over heads
-            sim = sim + attn_bias.unsqueeze(1)
         if mask is not None:
             # mask: [B, Nk], True = keep
             sim = sim.masked_fill(~mask.unsqueeze(1).unsqueeze(2), float("-inf"))

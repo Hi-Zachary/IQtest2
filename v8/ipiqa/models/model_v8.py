@@ -1,14 +1,16 @@
-"""MSQRNetV8 -- Frozen CLIP ViT-B/16 + Visual LoRA + DG-MPQ + DP-HCMI-ViT.
+"""MSQRNetV8 -- Frozen CLIP ViT-B/16 + Visual LoRA + DG-MPQ + HCMI-ViT.
 
-调整/改进1.md (v8 缝合方案):
+调整/改进1.md (v8) + 调整/改进2.md (V8-Slim):
 
     B0 = Frozen CLIP ViT-B/16 baseline (no LoRA, no modules)
     R0 = B0 + Visual Q/K LoRA                     (strong reference)
     B1 = R0 + DG-MPQ                              (quality module)
-    B2 = R0 + DP-HCMI-ViT                         (alignment module)
-    Full = R0 + DG-MPQ + DP-HCMI-ViT
+    B2 = R0 + HCMI-ViT                            (alignment module)
+    Full = R0 + DG-MPQ + HCMI-ViT
 
-  - 模块严格并行：DG-MPQ 与 DP-HCMI 都直接从 backbone hidden states 出发，
+  - V8-Slim：删除 discrepancy-guided attention bias（beta_align≈0.002 无贡献），
+    HCMI mlp_ratio=1（FFN 收窄），LoRA dropout=0（与 train() 强制 eval 的实际行为一致）。
+  - 模块严格并行：DG-MPQ 与 HCMI-ViT 都直接从 backbone hidden states 出发，
     互不串行（B1/B2 与 Full 的模块输入完全一致，消除 hidden input change）。
   - 纯 MSE 双任务损失（quality + alignment）。
   - 每个模块输出 normalized residual，以 ``tanh(lambda)`` gated residual
@@ -18,7 +20,7 @@ Data flow:
     feat = backbone(images, input_ids, attention_mask)
     v0 = heads.base_visual_proj(feat.global_v);  t0 = heads.base_text_proj(feat.global_t)
     delta_q = dg_mpq(H3, H6, H9, H12)                    (use_dg_mpq)
-    delta_a = dp_hcmi(H6[:,1:], H12[:,1:], T, mask)      (use_dp_hcmi)
+    delta_a = hcmi(H6[:,1:], H12[:,1:], T, mask)         (use_hcmi)
     v = v0 + tanh(lambda_q)*delta_q;  c = t0 + tanh(lambda_a)*delta_a
     h = heads.shared_fusion(concat[v, c])
     q = heads.quality_head(h);  a = heads.align_head(h)
@@ -31,13 +33,13 @@ import torch.nn.functional as F
 from ipiqa.models.base_model import BaseModel
 from ipiqa.models.clip_vit_backbone import CLIPViTBackbone
 from ipiqa.models.dg_mpq import DgMpq
-from ipiqa.models.dp_hcmi_vit import DpHcmiVit
+from ipiqa.models.hcmi_vit import HcmiVit
 from ipiqa.models.heads import DualTaskHeads
 
 from ipiqa.common.registry import registry
 
 
-@registry.register_model("msqr_dgmpq_dphcmi_v8")
+@registry.register_model("msqr_dgmpq_hcmi_v8")
 class MSQRNetV8(BaseModel):
     def __init__(
             self,
@@ -46,17 +48,16 @@ class MSQRNetV8(BaseModel):
             output_dim=2,
             dim=256,
             num_heads=4,
-            mlp_ratio=2.0,
+            mlp_ratio=1.0,
             drop=0.1,
             use_lora=True,
             lora_r=4,
             lora_alpha=8,
-            lora_dropout=0.05,
+            lora_dropout=0.0,
             use_dg_mpq=True,
-            use_dp_hcmi=True,
-            dphcmi_use_multi_kernel=True,
+            use_hcmi=True,
+            hcmi_use_multi_kernel=True,
             use_prompt_weight=True,
-            use_align_bias=True,
             freeze_visual=True,
             freeze_text=True,
             outer_gate_init=0.01,
@@ -68,7 +69,7 @@ class MSQRNetV8(BaseModel):
         self.output_dim = output_dim
         self.use_lora = use_lora
         self.use_dg_mpq = use_dg_mpq
-        self.use_dp_hcmi = use_dp_hcmi
+        self.use_hcmi = use_hcmi
         self.freeze_visual = freeze_visual
         self.freeze_text = freeze_text
         self.lora_lr_scale = lora_lr_scale
@@ -107,25 +108,24 @@ class MSQRNetV8(BaseModel):
             self.dg_mpq = None
             self.lambda_q = None
 
-        # ---------- DP-HCMI-ViT residual branch ----------
-        if use_dp_hcmi:
-            self.dp_hcmi = DpHcmiVit(
+        # ---------- HCMI-ViT residual branch ----------
+        if use_hcmi:
+            self.hcmi = HcmiVit(
                 width=self.backbone.visual_width,
                 text_width=self.backbone.text_width,
                 dim=dim,
                 num_heads=num_heads,
                 mlp_ratio=mlp_ratio,
                 drop=drop,
-                use_multi_kernel=dphcmi_use_multi_kernel,
+                use_multi_kernel=hcmi_use_multi_kernel,
                 use_prompt_weight=use_prompt_weight,
-                use_align_bias=use_align_bias,
                 gamma_init=self.outer_gate_init,
             )
             self.lambda_a = nn.Parameter(
                 torch.tensor(self.outer_gate_init)
             )
         else:
-            self.dp_hcmi = None
+            self.hcmi = None
             self.lambda_a = None
 
         self._last_ratios = {}
@@ -168,10 +168,10 @@ class MSQRNetV8(BaseModel):
                 (q_scale * delta_q).norm(dim=-1).mean() / v0.norm(dim=-1).mean()
             ).item()
 
-        # ===================== DP-HCMI-ViT residual =====================
-        if self.use_dp_hcmi:
+        # ===================== HCMI-ViT residual =====================
+        if self.use_hcmi:
             hs = feat["vision_hidden"]
-            delta_a = self.dp_hcmi(
+            delta_a = self.hcmi(
                 hs[6][:, 1:, :],
                 hs[12][:, 1:, :],
                 feat["text_tokens"],
@@ -208,20 +208,18 @@ class MSQRNetV8(BaseModel):
             if pw is not None:
                 out["patch_w_mean"] = round(pw.mean().item(), 4)
                 out["patch_w_std"] = round(pw.std().item(), 4)
-        if self.use_dp_hcmi:
+        if self.use_hcmi:
             out["lambda_a"] = torch.tanh(self.lambda_a).item()
-            out["alpha_d"] = self.dp_hcmi.alpha_d.item()
-            out["beta_d"] = self.dp_hcmi.beta_d.item()
-            out["alpha_s"] = self.dp_hcmi.alpha_s.item()
-            out["beta_s"] = self.dp_hcmi.beta_s.item()
-            if self.dp_hcmi.use_align_bias:
-                out["beta_align"] = torch.tanh(self.dp_hcmi.beta_align).item()
-            hg = getattr(self.dp_hcmi, "_last_hier_gate", None)
+            out["alpha_d"] = self.hcmi.alpha_d.item()
+            out["beta_d"] = self.hcmi.beta_d.item()
+            out["alpha_s"] = self.hcmi.alpha_s.item()
+            out["beta_s"] = self.hcmi.beta_s.item()
+            hg = getattr(self.hcmi, "_last_hier_gate", None)
             if hg is not None:
                 out["hier_gate_mean"] = round(hg.mean().item(), 4)
-            pw = getattr(self.dp_hcmi, "_last_prompt_weight", None)
-            if pw is not None:
-                out["prompt_w_mean"] = round(pw.mean().item(), 4)
+            ps = getattr(self.hcmi, "_last_prompt_stats", None)
+            if ps is not None:
+                out.update({f"prompt_w_{k}": v for k, v in ps.items()})
         return out
 
     # ------------------------------------------------------------------ #
@@ -268,7 +266,7 @@ class MSQRNetV8(BaseModel):
         lora = sum(p.numel() for n, p in self.named_parameters()
                    if n.startswith("backbone.clip.vision_model.") and p.requires_grad)
         dg = cnt("dg_mpq.") + (self.lambda_q.numel() if self.lambda_q is not None else 0)
-        dp = cnt("dp_hcmi.") + (self.lambda_a.numel() if self.lambda_a is not None else 0)
+        dp = cnt("hcmi.") + (self.lambda_a.numel() if self.lambda_a is not None else 0)
         head = cnt("heads.")
         text = sum(p.numel() for n, p in self.named_parameters()
                    if n.startswith("backbone.clip.text_model.") and p.requires_grad)
@@ -279,7 +277,7 @@ class MSQRNetV8(BaseModel):
             "trainable": sum(p.numel() for p in self.parameters() if p.requires_grad),
             "lora": lora,
             "dg_mpq": dg,
-            "dp_hcmi": dp,
+            "hcmi": dp,
             "heads": head,
             "text_trainable": text,
             "visual_base_trainable": sum(
@@ -301,12 +299,11 @@ class MSQRNetV8(BaseModel):
         use_lora = cfg.get('use_lora', True)
         lora_r = cfg.get('lora_r', 4)
         lora_alpha = cfg.get('lora_alpha', 8)
-        lora_dropout = cfg.get('lora_dropout', 0.05)
+        lora_dropout = cfg.get('lora_dropout', 0.0)
         use_dg_mpq = cfg.get('use_dg_mpq', True)
-        use_dp_hcmi = cfg.get('use_dp_hcmi', True)
-        dphcmi_use_multi_kernel = cfg.get('dphcmi_use_multi_kernel', True)
+        use_hcmi = cfg.get('use_hcmi', True)
+        hcmi_use_multi_kernel = cfg.get('hcmi_use_multi_kernel', True)
         use_prompt_weight = cfg.get('use_prompt_weight', True)
-        use_align_bias = cfg.get('use_align_bias', True)
         freeze_visual = cfg.get('freeze_visual', True)
         freeze_text = cfg.get('freeze_text', True)
         outer_gate_init = cfg.get('outer_gate_init', 0.01)
@@ -326,10 +323,9 @@ class MSQRNetV8(BaseModel):
             lora_alpha=lora_alpha,
             lora_dropout=lora_dropout,
             use_dg_mpq=use_dg_mpq,
-            use_dp_hcmi=use_dp_hcmi,
-            dphcmi_use_multi_kernel=dphcmi_use_multi_kernel,
+            use_hcmi=use_hcmi,
+            hcmi_use_multi_kernel=hcmi_use_multi_kernel,
             use_prompt_weight=use_prompt_weight,
-            use_align_bias=use_align_bias,
             freeze_visual=freeze_visual,
             freeze_text=freeze_text,
             outer_gate_init=outer_gate_init,
