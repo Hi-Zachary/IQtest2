@@ -4,8 +4,9 @@ v8/ckpt/
 # 数据软链接（绝对路径，本机专用；注意是 symlink，不能用带斜杠的目录匹配）
 v8/data
 
-# 训练输出（checkpoint / log / 每变体日志）
-v8/run/
+# 训练输出：只排除权重 checkpoint，训练日志(log.txt / *.log)保留进 git
+v8/run/*/checkpoint_*.pth
+v8/run/*/*/*.pth
 
 # Python 缓存
 __pycache__/
