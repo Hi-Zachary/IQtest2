@@ -97,15 +97,15 @@ python prepare_data.py --csv data/aigc_qa_3k/data.csv --out data/aigc_qa_3k/mos_
 
 ```bash
 # AGIQA-3K（split3 固定协议）
-python train.py --cfg-path projects/agiqa3k/b0_baseline.yaml      --seed 42 --num_cv 1  # 50ep Frozen
-python train.py --cfg-path projects/agiqa3k/b1_msqr.yaml          --seed 42 --num_cv 1  # 50ep
-python train.py --cfg-path projects/agiqa3k/b2_shcmi.yaml         --seed 42 --num_cv 1  # 50ep
-python train.py --cfg-path projects/agiqa3k/b3_msqr_shcmi.yaml    --seed 42 --num_cv 1  # 50ep
-python train.py --cfg-path projects/agiqa3k/b4_full.yaml          --seed 42 --num_cv 1  # 100ep
-python train.py --cfg-path projects/agiqa3k/ft_clip_reference.yaml --seed 42 --num_cv 1 # 100ep 强参考
+python train.py --cfg-path ablation/configs/agiqa3k/b0_baseline.yaml      --seed 42 --num_cv 1  # 50ep Frozen
+python train.py --cfg-path ablation/configs/agiqa3k/b1_msqr.yaml          --seed 42 --num_cv 1  # 50ep
+python train.py --cfg-path ablation/configs/agiqa3k/b2_shcmi.yaml         --seed 42 --num_cv 1  # 50ep
+python train.py --cfg-path ablation/configs/agiqa3k/b3_msqr_shcmi.yaml    --seed 42 --num_cv 1  # 50ep
+python train.py --cfg-path ablation/configs/agiqa3k/b4_full.yaml          --seed 42 --num_cv 1  # 100ep
+python train.py --cfg-path ablation/configs/agiqa3k/ft_clip_reference.yaml --seed 42 --num_cv 1 # 100ep 强参考
 
 # AIGCIQA2023
-python train.py --cfg-path projects/aigciqa2023/b4_full.yaml      --seed 42 --num_cv 1
+python train.py --cfg-path ablation/configs/aigciqa2023/b4_full.yaml      --seed 42 --num_cv 1
 ```
 
 ### 冒烟测试

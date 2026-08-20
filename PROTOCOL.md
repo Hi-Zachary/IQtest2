@@ -39,7 +39,7 @@ split1 系统性偏低（最难的折）。**正式实验统一采用 split3**�
 > 注意：若未来需报告"多折均值"，请额外补跑 split1/split2 并明确标注；
 > 默认正式结果只报 split3。
 
-## 2. 训练超参（正式配置 = `projects/agiqa3k/*.yaml` 非 quick 版本）
+## 2. 训练超参（正式配置 = `ablation/configs/agiqa3k/*.yaml` 非 quick 版本）
 
 | 项 | 值 |
 |---|---|
@@ -61,12 +61,12 @@ split1 系统性偏低（最难的折）。**正式实验统一采用 split3**�
 
 | 实验 | Frozen CLIP | MSQR | SHCMI | TAF | 配置 | epoch |
 |---|---|---:|---:|---:|---|---:|
-| B0 | ✓ | × | × | × | `projects/agiqa3k/b0_baseline.yaml` | 50 |
-| B1 | ✓ | ✓ | × | × | `projects/agiqa3k/b1_msqr.yaml` | 50 |
-| B2 | ✓ | × | ✓ | × | `projects/agiqa3k/b2_shcmi.yaml` | 50 |
-| B3 | ✓ | ✓ | ✓ | × | `projects/agiqa3k/b3_msqr_shcmi.yaml` | 50 |
-| B4 | ✓ | ✓ | ✓ | ✓ | `projects/agiqa3k/b4_full.yaml` | 100 |
-| FT-CLIP（强参考） | 仅 text | × | × | × | `projects/agiqa3k/ft_clip_reference.yaml` | 100 |
+| B0 | ✓ | × | × | × | `ablation/configs/agiqa3k/b0_baseline.yaml` | 50 |
+| B1 | ✓ | ✓ | × | × | `ablation/configs/agiqa3k/b1_msqr.yaml` | 50 |
+| B2 | ✓ | × | ✓ | × | `ablation/configs/agiqa3k/b2_shcmi.yaml` | 50 |
+| B3 | ✓ | ✓ | ✓ | × | `ablation/configs/agiqa3k/b3_msqr_shcmi.yaml` | 50 |
+| B4 | ✓ | ✓ | ✓ | ✓ | `ablation/configs/agiqa3k/b4_full.yaml` | 100 |
+| FT-CLIP（强参考） | 仅 text | × | × | × | `ablation/configs/agiqa3k/ft_clip_reference.yaml` | 100 |
 
 所有配置仅由 `use_msqr / use_shcmi / use_taf` 区分，其余字段完全一致。
 每个变体共享同一套 base path（base_visual_proj / base_text_proj /
@@ -84,12 +84,12 @@ TAF residual gate=0  : B4 → B3
 
 ```bash
 # 正式实验（split3, 100 epoch, batch32）
-python train.py --cfg-path projects/agiqa3k/b0_baseline.yaml --seed 42 --num_cv 1
-python train.py --cfg-path projects/agiqa3k/b4_full.yaml     --seed 42 --num_cv 1
+python train.py --cfg-path ablation/configs/agiqa3k/b0_baseline.yaml --seed 42 --num_cv 1
+python train.py --cfg-path ablation/configs/agiqa3k/b4_full.yaml     --seed 42 --num_cv 1
 # ... 其余变体同理
 
 # 快速趋势验证（split3, 20 epoch, batch48）——仅用于定位，不进入正式报告
-python train.py --cfg-path projects/agiqa3k/b4_full_quick20_bs48.yaml --seed 42 --num_cv 1
+python train.py --cfg-path ablation/configs/agiqa3k/b4_full_quick20_bs48.yaml --seed 42 --num_cv 1
 ```
 
 ## 5. 报告与表述注意
