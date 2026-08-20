@@ -1,6 +1,14 @@
-"""MSQRNet -- Frozen CLIP multimodal baseline + DMSQR / DP-HCMI (v6).
+"""MSQRNet -- Frozen CLIP multimodal baseline + DMSQR / DP-HCMI (v7).
 
-v6 架构（改进5.md）：
+v7（改进6.md）关键修复，目标解决 v6 的三个真实问题：
+    1. 共享 Spatial Projection：Conv1x1 (2048->D) 从 MSQR 内部提取到 model 的
+       ``spatial_proj``，B2 与 Full 的 DP-HCMI 拿到**完全相同**的 fine/coarse
+       base tokens（B2 不再用独立的 plain_multiscale_adapter）；
+    2. DP-HCMI 永远使用 base tokens，DMSQR 的 refinement 输出不再进入 DP-HCMI
+       （消除 hidden input change）；
+    3. 修复 prompt weighting（mask + 保幅值）与 discrepancy 双重 tanh 梯度死区。
+
+架构（与 v6 相同）：
 
     B0 = Frozen CLIP multimodal baseline
     B1 = B0 + DMSQR        (Distortion-aware Multi-Scale Quality Refinement)
@@ -18,19 +26,27 @@ Nested 性质（严格消融）：
     关闭 DP-HCMI         : B2 -> B0
     关闭 DMSQR + DP-HCMI : Ours -> B0
 
-Base path（base_visual_proj / base_text_proj / shared_fusion / quality_head /
-align_head）在 B0-B2 / Ours 中永远存在，任何变体都共享同一套 regression head。
+Base path（spatial_proj / base_visual_proj / base_text_proj / shared_fusion /
+quality_head / align_head）在 B0-B2 / Ours 中永远存在，任何变体都共享同一套
+regression head。
 
 数据流：
     spatial = CLIP RN50 (frozen)
     global_v = attnpool(spatial)
     global_t = text encoder (frozen)
 
+    base_map = spatial_proj(spatial)                # 共享投影
+    fine_base = flatten(base_map);  coarse_base = avg_pool2d(base_map, k=2)
+
     v0 = base_visual_proj(global_v)
     t0 = base_text_proj(global_t)
 
-    v = v0 + tanh(lambda_msqr)  * delta_v      (use_msqr)
-    c = t0 + tanh(lambda_shcmi) * delta_c      (use_shcmi)
+    fine_d, coarse_d = DMSQR(fine_base, coarse_base, global_v)   # (use_msqr)
+    delta_v = visual_skip(fine_d, coarse_d)
+    v = v0 + tanh(lambda_msqr) * delta_v
+
+    delta_c = DP-HCMI(fine_base, coarse_base, text_tokens, text_mask)  # (use_shcmi)
+    c = t0 + tanh(lambda_shcmi) * delta_c
 
     h = shared_fusion(concat[v, c])
     q = quality_head(h); a = align_head(h)
@@ -114,6 +130,13 @@ class MSQRNet(BaseModel):
         self.resnet50.attnpool = nn.Identity()
 
         # ====================== B0 base path (永远存在) ======================
+        # v7: Shared Spatial Projection（改进6.md 第 2 节）—— Conv1x1 2048->D
+        # 从 MSQR 内部提取为模型级共享投影，B0-B2 / Ours 完全一致，保证
+        # B2 与 Full 的 DP-HCMI 输入（fine/coarse base tokens）严格相同。
+        self.spatial_proj = nn.Sequential(
+            nn.Conv2d(2048, dim, kernel_size=1),
+            nn.GELU(),
+        )
         self.base_visual_proj = nn.Sequential(
             nn.Linear(CLIP_VISUAL_WIDTH, dim),
             nn.GELU(),
@@ -131,10 +154,10 @@ class MSQRNet(BaseModel):
         self.quality_head = nn.Linear(dim, 1)
         self.align_head = nn.Linear(dim, 1)
 
-        # ====================== MSQR residual branch ======================
+        # ====================== DMSQR residual branch ======================
         if use_msqr:
             self.msqr = MSQR(
-                in_channels=2048, dim=dim, num_heads=num_heads,
+                dim=dim, num_heads=num_heads,
                 mlp_ratio=mlp_ratio, drop=drop,
                 use_channel_attention=msqr_use_channel,
                 use_spatial_attention=msqr_use_spatial,
@@ -146,12 +169,7 @@ class MSQRNet(BaseModel):
             self.visual_skip = MSQRVisualSkip(dim, drop)
             self.lambda_msqr = nn.Parameter(torch.tensor(0.0))
         else:
-            # Plain Multi-Scale Adapter：仅为 SHCMI 提供多尺度 token，不含任何
-            # attention（B2 不能偷偷包含 MSQR）。
-            self.plain_multiscale_adapter = nn.Sequential(
-                nn.Conv2d(2048, dim, kernel_size=1),
-                nn.GELU(),
-            )
+            self.msqr = None
             self.visual_skip = None
             self.lambda_msqr = None
 
@@ -213,9 +231,9 @@ class MSQRNet(BaseModel):
         return x, mask, global_t
 
     def build_plain_tokens(self, spatial):
-        """fine/coarse tokens without any attention (Plain Multi-Scale Adapter)."""
-        f0 = self.plain_multiscale_adapter(spatial)       # [B, D, H, W]
-        B, C, H, W = f0.shape
+        """v7: 共享 spatial projection -> fine/coarse base tokens（无任何 attention）。
+        仅供 B2 / 参考使用，DMSQR 与 DP-HCMI 都从这一对 base tokens 出发。"""
+        f0 = self.spatial_proj(spatial)       # [B, D, H, W]
         fine = f0.flatten(2).transpose(1, 2)              # [B, H*W, D]
         coarse = F.avg_pool2d(f0, kernel_size=2).flatten(2).transpose(1, 2)
         return fine, coarse
@@ -227,7 +245,10 @@ class MSQRNet(BaseModel):
         global_v = self.attnpool(spatial)                 # [B,1024]
         text_tokens, text_mask, global_t = self.encode_text(text)
 
-        # ===================== 2. B0 anchors =====================
+        # ===================== 2. Shared base tokens + B0 anchors =====================
+        # v7（改进6.md 第 2 节）：fine/coarse base tokens 来自共享 spatial_proj，
+        # B2 / Full 的 DP-HCMI 输入严格相同。
+        fine_base, coarse_base = self.build_plain_tokens(spatial)
         v0 = self.base_visual_proj(global_v)              # [B, D]
         t0 = self.base_text_proj(global_t)                # [B, D]
         v = v0
@@ -235,21 +256,21 @@ class MSQRNet(BaseModel):
 
         ratios = {}
 
-        # ===================== 3. visual tokens =====================
+        # ===================== 3. DMSQR residual（refine base tokens） =====================
         if self.use_msqr:
-            fine, coarse = self.msqr(spatial, global_v)
-            delta_v = self.visual_skip(fine, coarse)      # [B, D]
+            fine_d, coarse_d = self.msqr(fine_base, coarse_base, global_v)
+            delta_v = self.visual_skip(fine_d, coarse_d)      # [B, D]
             msqr_scale = torch.tanh(self.lambda_msqr)
             v = v0 + msqr_scale * delta_v
             ratios["msqr_ratio"] = (
                 (msqr_scale * delta_v).norm(dim=-1).mean() / v0.norm(dim=-1).mean()
             ).item()
-        else:
-            fine, coarse = self.build_plain_tokens(spatial)
 
-        # ===================== 4. SHCMI residual =====================
+        # ===================== 4. DP-HCMI residual（永远用 base tokens） =====================
+        # v7（改进6.md 第 4 节）：DP-HCMI 不接收 DMSQR 的 refined tokens，
+        # 只接收 fine_base / coarse_base，避免 hidden input change。
         if self.use_shcmi:
-            delta_c = self.shcmi(fine, coarse, text_tokens, text_mask)  # [B, D]
+            delta_c = self.shcmi(fine_base, coarse_base, text_tokens, text_mask)  # [B, D]
             shcmi_scale = torch.tanh(self.lambda_shcmi)
             c = t0 + shcmi_scale * delta_c
             ratios["shcmi_ratio"] = (

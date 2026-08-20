@@ -17,6 +17,11 @@ branch —— 用 CLIP global visual 作语义基准，对偏离全局语义的�
 异常）以 sigmoid 权重增强（``tokens' = tokens * (1 + tanh(alpha)*weight)``），
 ``use_deviation=False`` 时退化为原始 MSQR（消融用）。
 
+v7 (改进6.md)：**Conv1x1 (2048 -> D) 已上移到 model 的 shared spatial_proj**，
+MSQR 不再自带投影，直接接收 model 给出的共享 fine/coarse base tokens；语义偏差
+从 L1 ``|tokens - global_token|`` 改为 **余弦 discrepancy ``1 - cos(f_i, g)``**，
+更贴近 CLIP 语义空间并降低 projection/scale 影响。
+
 Only one CLIP image forward is used (design section 4.1).
 """
 
@@ -32,7 +37,7 @@ from ipiqa.models.modules.attention import (
 
 
 class MSQR(nn.Module):
-    def __init__(self, in_channels=2048, dim=256, num_heads=4, mlp_ratio=2.0,
+    def __init__(self, dim=256, num_heads=4, mlp_ratio=2.0,
                  drop=0.1, use_channel_attention=True, use_spatial_attention=True,
                  use_cross_scale=True, gamma_init=0.0,
                  use_deviation=False, global_dim=1024, alpha_init=0.0):
@@ -43,17 +48,13 @@ class MSQR(nn.Module):
         self.use_cross_scale = use_cross_scale
         self.use_deviation = use_deviation
 
-        self.proj = nn.Sequential(
-            nn.Conv2d(in_channels, dim, kernel_size=1),
-            nn.GELU(),
-        )
-
-        # DMSQR: semantic deviation branch（改进4.md 第 1 节）
+        # DMSQR: semantic deviation branch（改进4.md 第 1 节；v7 改余弦，见 3.2）
         # 利用 CLIP 视觉特征与全局语义的不一致区域，增强 AIGC 异常区域感知。
         if use_deviation:
             self.global_proj = nn.Linear(global_dim, dim)
+            # v7: deviation 退化为逐 token 标量 1-cos，MLP 输入从 dim 改为 1
             self.deviation_mlp = nn.Sequential(
-                nn.Linear(dim, max(dim // 2, 8)),
+                nn.Linear(1, max(dim // 2, 8)),
                 nn.GELU(),
                 nn.Linear(max(dim // 2, 8), 1),
             )
@@ -75,31 +76,25 @@ class MSQR(nn.Module):
         self._last_dev_weight = None
 
     def _deviation_reweight(self, tokens, global_v):
-        """语义偏差重加权（DMSQR）：
+        """余弦语义偏差重加权（DMSQR v7, 改进6.md 第 3.2 节）：
             global_token = global_proj(global_v)
-            deviation    = |tokens - global_token|
+            deviation    = 1 - cos(tokens, global_token)   # [B, N, 1]
             weight       = sigmoid(MLP(deviation))
             tokens'      = tokens * (1 + alpha * weight)
         tokens: [B, N, D]; global_v: [B, global_dim]
         """
         global_token = self.global_proj(global_v).unsqueeze(1)   # [B, 1, D]
-        deviation = (tokens - global_token).abs()                # [B, N, D]
+        token_n = F.normalize(tokens, dim=-1)
+        global_n = F.normalize(global_token, dim=-1)
+        deviation = 1.0 - (token_n * global_n).sum(dim=-1, keepdim=True)  # [B, N, 1]
         score = self.deviation_mlp(deviation)                    # [B, N, 1]
         weight = torch.sigmoid(score)                            # [B, N, 1]
         self._last_dev_weight = weight.detach().float()
         return tokens * (1.0 + torch.tanh(self.alpha_dev) * weight)
 
-    def forward(self, feat, global_v=None):
-        # feat: [B, 2048, H, W], H = W = 16 at 512 input
-        f0 = self.proj(feat)                          # [B, D, H, W]
-        B, C, H, W = f0.shape
-
-        fine_map = f0
-        coarse_map = F.avg_pool2d(f0, kernel_size=2)  # [B, D, H//2, W//2]
-
-        fine = fine_map.flatten(2).transpose(1, 2)    # [B, H*W, D]
-        coarse = coarse_map.flatten(2).transpose(1, 2)  # [B, H/2*W/2, D]
-
+    def forward(self, fine, coarse, global_v=None):
+        # fine: [B, Nf, D], coarse: [B, Nc, D] —— model 的共享 spatial base tokens
+        # （v7 起 MSQR 不再自带 Conv1x1 投影，见 改进6.md 第 2/3 节）
         # DMSQR: 语义偏差重加权（在 channel/spatial/cross-scale 之前）
         if self.use_deviation:
             if global_v is None:
