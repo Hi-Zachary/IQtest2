@@ -1,0 +1,62 @@
+2026-08-20 12:37:48,216 [INFO] Start training
+2026-08-20 12:37:48,467 [INFO] number of trainable parameters: 40617570
+Not using distributed mode
+['msqr_baseline', 'msqr_shcmi_taf']
+Position interpolate from 7x7 to 16x16
+Freezing <class 'clip.model.Transformer'> ...
+Freezing <class 'torch.nn.modules.sparse.Embedding'> ...
+Freezing <class 'clip.model.LayerNorm'> ...
+Freezing <class 'torch.nn.parameter.Parameter'> ...
+Freezing <class 'torch.nn.parameter.Parameter'> ...
+2026-08-20 12:37:48,846 [INFO] Start training epoch 0, 74 iters per inner epoch.
+2026-08-20 12:38:12,549 [INFO] Averaged stats: lr: 0.000005  loss: 2.943541
+2026-08-20 12:38:12,646 [INFO] Evaluating on val.
+Train: data epoch: [0]  [ 0/74]  eta: 0:04:30  lr: 0.000000  loss: 7.4932  time: 3.6600  data: 0.0001  max mem: 9173
+Train: data epoch: [0]  [20/74]  eta: 0:00:23  lr: 0.000003  loss: 5.7169  time: 0.2800  data: 0.0000  max mem: 9486
+Train: data epoch: [0]  [40/74]  eta: 0:00:12  lr: 0.000005  loss: 2.0000  time: 0.2741  data: 0.0000  max mem: 9486
+Train: data epoch: [0]  [60/74]  eta: 0:00:04  lr: 0.000008  loss: 0.8140  time: 0.2718  data: 0.0000  max mem: 9486
+Train: data epoch: [0]  [73/74]  eta: 0:00:00  lr: 0.000010  loss: 0.5417  time: 0.2707  data: 0.0000  max mem: 9486
+Train: data epoch: [0] Total time: 0:00:23 (0.3203 s / it)
+2026-08-20 12:38:16,747 [INFO] Qual: EPOCH[0] -> PLCC: 0.778267, SROCC: 0.729242, KROCC: 0.528073, LOSS: 0.435869
+2026-08-20 12:38:16,747 [INFO] Align: EPOCH[0] -> PLCC: 0.666146, SROCC: 0.567724, KROCC: 0.389512, LOSS: 0.539149
+2026-08-20 12:38:16,758 [INFO] Saving checkpoint at epoch 0 to run/20260820123_B0_baseline_quick20/checkpoint_best.pth.
+2026-08-20 12:38:17,351 [INFO] Start training
+2026-08-20 12:38:17,660 [INFO] Start training epoch 1, 74 iters per inner epoch.
+2026-08-20 12:38:38,747 [INFO] Averaged stats: lr: 0.000010  loss: 0.335029
+2026-08-20 12:38:38,851 [INFO] Evaluating on val.
+Train: data epoch: [1]  [ 0/74]  eta: 0:01:29  lr: 0.000010  loss: 0.3164  time: 1.2104  data: 0.0001  max mem: 9486
+Train: data epoch: [1]  [20/74]  eta: 0:00:17  lr: 0.000010  loss: 0.3685  time: 0.2750  data: 0.0000  max mem: 9486
+Train: data epoch: [1]  [40/74]  eta: 0:00:10  lr: 0.000010  loss: 0.3581  time: 0.2718  data: 0.0000  max mem: 9486
+Train: data epoch: [1]  [60/74]  eta: 0:00:04  lr: 0.000010  loss: 0.2642  time: 0.2710  data: 0.0000  max mem: 9486
+Train: data epoch: [1]  [73/74]  eta: 0:00:00  lr: 0.000010  loss: 0.4009  time: 0.2697  data: 0.0000  max mem: 9486
+Train: data epoch: [1] Total time: 0:00:21 (0.2850 s / it)
+2026-08-20 12:38:42,882 [INFO] Qual: EPOCH[1] -> PLCC: 0.856919, SROCC: 0.793169, KROCC: 0.597265, LOSS: 0.347909
+2026-08-20 12:38:42,882 [INFO] Align: EPOCH[1] -> PLCC: 0.803417, SROCC: 0.657331, KROCC: 0.477724, LOSS: 0.364428
+2026-08-20 12:38:42,891 [INFO] Saving checkpoint at epoch 1 to run/20260820123_B0_baseline_quick20/checkpoint_best.pth.
+2026-08-20 12:38:43,716 [INFO] Start training
+2026-08-20 12:38:44,024 [INFO] Start training epoch 2, 74 iters per inner epoch.
+2026-08-20 12:39:05,134 [INFO] Averaged stats: lr: 0.000010  loss: 0.253253
+2026-08-20 12:39:05,240 [INFO] Evaluating on val.
+Train: data epoch: [2]  [ 0/74]  eta: 0:01:27  lr: 0.000010  loss: 0.2999  time: 1.1757  data: 0.0001  max mem: 9486
+Train: data epoch: [2]  [20/74]  eta: 0:00:17  lr: 0.000010  loss: 0.2259  time: 0.2743  data: 0.0000  max mem: 9486
+Train: data epoch: [2]  [40/74]  eta: 0:00:10  lr: 0.000010  loss: 0.3933  time: 0.2720  data: 0.0000  max mem: 9486
+Train: data epoch: [2]  [60/74]  eta: 0:00:04  lr: 0.000010  loss: 0.2997  time: 0.2735  data: 0.0000  max mem: 9486
+Train: data epoch: [2]  [73/74]  eta: 0:00:00  lr: 0.000010  loss: 0.2395  time: 0.2725  data: 0.0000  max mem: 9486
+Train: data epoch: [2] Total time: 0:00:21 (0.2853 s / it)
+2026-08-20 12:39:09,211 [INFO] Qual: EPOCH[2] -> PLCC: 0.865973, SROCC: 0.802902, KROCC: 0.608223, LOSS: 0.301748
+2026-08-20 12:39:09,211 [INFO] Align: EPOCH[2] -> PLCC: 0.820951, SROCC: 0.675570, KROCC: 0.493999, LOSS: 0.346418
+2026-08-20 12:39:09,220 [INFO] Saving checkpoint at epoch 2 to run/20260820123_B0_baseline_quick20/checkpoint_best.pth.
+2026-08-20 12:39:10,047 [INFO] Start training
+2026-08-20 12:39:10,367 [INFO] Start training epoch 3, 74 iters per inner epoch.
+2026-08-20 12:39:31,579 [INFO] Averaged stats: lr: 0.000010  loss: 0.210161
+2026-08-20 12:39:31,666 [INFO] Evaluating on val.
+Train: data epoch: [3]  [ 0/74]  eta: 0:01:30  lr: 0.000010  loss: 0.2572  time: 1.2253  data: 0.0001  max mem: 9486
+Train: data epoch: [3]  [20/74]  eta: 0:00:17  lr: 0.000010  loss: 0.2105  time: 0.2748  data: 0.0000  max mem: 9486
+Train: data epoch: [3]  [40/74]  eta: 0:00:10  lr: 0.000010  loss: 0.1567  time: 0.2747  data: 0.0000  max mem: 9486
+Train: data epoch: [3]  [60/74]  eta: 0:00:04  lr: 0.000010  loss: 0.2092  time: 0.2726  data: 0.0000  max mem: 9486
+Train: data epoch: [3]  [73/74]  eta: 0:00:00  lr: 0.000010  loss: 0.2160  time: 0.2721  data: 0.0000  max mem: 9486
+Train: data epoch: [3] Total time: 0:00:21 (0.2866 s / it)
+2026-08-20 12:39:35,968 [INFO] Qual: EPOCH[3] -> PLCC: 0.862746, SROCC: 0.805522, KROCC: 0.612446, LOSS: 0.316736
+2026-08-20 12:39:35,968 [INFO] Align: EPOCH[3] -> PLCC: 0.821426, SROCC: 0.697727, KROCC: 0.512765, LOSS: 0.360251
+2026-08-20 12:39:35,969 [INFO] Start training
+2026-08-20 12:39:36,293 [INFO] Start training epoch 4, 74 iters per inner epoch.

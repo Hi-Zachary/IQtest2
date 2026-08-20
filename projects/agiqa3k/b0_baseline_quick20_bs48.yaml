@@ -1,0 +1,70 @@
+# B0 (AGIQA-3K): 真正中性的 CLIP 图文基线
+# concat [global_v; global_t] -> MLP -> [quality, alignment]
+# 协议与 B1-B4 完全一致: seed42 固定划分 / batch 32 / 512 / 100 epoch / warmup+cosine
+model:
+  arch: "msqr_shcmi_taf"
+  base_ckpt: data/ckpt/clip/openai/resnet/RN50.pt
+  input_resolution: 512
+  output_dim: 2
+  freeze_text: True
+  head_scale: 10.
+  dropout_rate: 0.1
+
+  dim: 256
+  num_heads: 4
+  mlp_ratio: 2.0
+  gamma_init: 0.0
+
+  use_msqr: False
+  use_shcmi: False
+  use_taf: False
+
+dataset:
+  data_path: "data/aigc_qa_3k/mos_joint.xlsx"
+  vis_root: "data/aigc_qa_3k/AGIQA-3K/"
+  transform_train:
+    name: "image_train_processor"
+    cfg:
+      image_size: 512
+  transform_val:
+    name: "image_eval_processor"
+    cfg:
+      image_size: 512
+
+run:
+  task: "agiqa_doublescore"
+  resume_ckpt_path: null
+
+  lr_sched: "linear_warmup_cosine_lr"
+  lr_decay_rate: null
+  warmup_lr: 0
+  warmup_steps: 50
+  min_lr: 1e-6
+
+  init_lr: 1e-5
+  lr_layer_decay: 1
+  weight_decay: 0
+  beta2: 0.999
+
+  batch_size: 48
+  batch_size_val: 48
+  num_worker: 12
+
+  max_epoch: 20
+  log_freq: 20
+  accum_grad_iters: 1
+  grad_norm_clip: null
+
+  split_file: "splits/seed42_split3.json"
+  output_dir: "run"
+  best_criterion: "quality"
+  tag: "B0_baseline_quick20_bs48"
+
+  evaluate: False
+  eval_freq: 1
+  save_freq: 5
+
+  amp: True
+  device: "cuda"
+  distributed: False
+  dist_url: "env://"
