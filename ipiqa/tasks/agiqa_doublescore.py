@@ -3,6 +3,7 @@ from ipiqa.common.registry import registry
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.distributed as dist
 
 from ipiqa.common.dist_utils import get_rank, get_world_size, is_main_process, is_dist_avail_and_initialized
@@ -24,17 +25,28 @@ class AGIQADoubleScoresTask(BaseTask):
 
     @classmethod
     def setup_task(cls, **kwargs):
-        def iqa_loss(model,samples):
-            x,y,text = samples['images'], samples['score'], samples['text']
-            output = model(x,text)
+        # 改进3.md: Quality-Alignment Consistency Loss
+        # L = L_quality + L_alignment + lambda * (1 - cos(q_feat, a_feat))
+        cfg = kwargs.get('cfg', None)
+        consistency_weight = 0.0
+        if cfg is not None:
+            consistency_weight = float(cfg.run.get("consistency_weight", 0.0))
+
+        def iqa_loss(model, samples):
+            x, y, text = samples['images'], samples['score'], samples['text']
+            output, q_feat, a_feat = model(x, text)
             criterion = nn.MSELoss()
             loss = criterion(output, y)
+            if consistency_weight > 0:
+                # 缓解 Quality 与 Alignment 双任务优化冲突
+                cons_loss = 1.0 - F.cosine_similarity(q_feat, a_feat, dim=-1).mean()
+                loss = loss + consistency_weight * cons_loss
             loss_dict = {"loss": loss.detach().clone()}
-            return loss,loss_dict
+            return loss, loss_dict
 
-        def iqa_loss_eval(model,samples):
-            x,y,text = samples['images'], samples['score'], samples['text']
-            output = model(x,text)
+        def iqa_loss_eval(model, samples):
+            x, y, text = samples['images'], samples['score'], samples['text']
+            output, _, _ = model(x, text)
             criterion = nn.MSELoss(reduction='none')
             loss = criterion(output, y)
             loss_qual = loss.detach().cpu()[:,0].numpy().tolist()
@@ -46,7 +58,7 @@ class AGIQADoubleScoresTask(BaseTask):
             ret = zip(loss_qual,pred_qual,label_qual,loss_align,pred_align,label_align)
             return ret
 
-        return cls(train_fn=iqa_loss,val_fn=iqa_loss_eval)
+        return cls(train_fn=iqa_loss, val_fn=iqa_loss_eval)
 
     def evaluation(self, model, data_loader, cuda_enabled=True):
         results = []

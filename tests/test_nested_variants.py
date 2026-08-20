@@ -35,8 +35,6 @@ def build(use_msqr, use_shcmi, use_qta=False, use_ag=False, freeze_visual=True):
         output_dim=2,
         use_msqr=use_msqr,
         use_shcmi=use_shcmi,
-        use_qta=use_qta,
-        use_ag=use_ag,
         freeze_visual=freeze_visual,
         freeze_text=True,
         gamma_init=0.0,
@@ -60,8 +58,8 @@ def base_path_output(model, x, text):
     v0 = model.base_visual_proj(global_v)
     t0 = model.base_text_proj(global_t)
     h = model.shared_fusion(torch.cat([v0, t0], dim=-1))
-    q = model.quality_head(h)
-    a = model.align_head(h)
+    q, _ = model.quality_head(h)
+    a, _ = model.align_head(h)
     return torch.cat([q, a], dim=-1)
 
 
@@ -83,7 +81,7 @@ def main():
     # ---- B0: 全关，forward == base path ----
     b0 = build(False, False)
     with torch.no_grad():
-        out_b0 = b0(x, text)
+        out_b0, _, _ = b0(x, text)
         out_base = base_path_output(b0, x, text)
     check("B0 forward == base path", out_b0, out_base)
 
@@ -91,7 +89,7 @@ def main():
     b1 = build(True, False)
     assert b1.lambda_msqr.item() == 0.0, "lambda_msqr should init to 0"
     with torch.no_grad():
-        out_b1 = b1(x, text)
+        out_b1, _, _ = b1(x, text)
         out_base1 = base_path_output(b1, x, text)
     check("B1 (lambda_msqr=0) == base path", out_b1, out_base1)
 
@@ -99,21 +97,21 @@ def main():
     b2 = build(False, True)
     assert b2.lambda_shcmi.item() == 0.0, "lambda_shcmi should init to 0"
     with torch.no_grad():
-        out_b2 = b2(x, text)
+        out_b2, _, _ = b2(x, text)
         out_base2 = base_path_output(b2, x, text)
     check("B2 (lambda_shcmi=0) == base path", out_b2, out_base2)
 
     # ---- B3: MSQR+SHCMI on（QTA/AG off），双 lambda=0 -> base path ----
     b3 = build(True, True)
     with torch.no_grad():
-        out_b3 = b3(x, text)
+        out_b3, _, _ = b3(x, text)
         out_base3 = base_path_output(b3, x, text)
     check("B3 (lambdas=0) == base path", out_b3, out_base3)
 
     # ---- Ours: MSQR+SHCMI+QTA+AG on，lambda=0 -> base path ----
     ours = build(True, True, use_qta=True, use_ag=True)
     with torch.no_grad():
-        out_ours = ours(x, text)
+        out_ours, _, _ = ours(x, text)
         out_base_ours = base_path_output(ours, x, text)
     check("Ours (all lambdas=0) == base path", out_ours, out_base_ours)
 
@@ -121,7 +119,7 @@ def main():
     with torch.no_grad():
         ours.lambda_msqr.fill_(0.5)
         ours.lambda_shcmi.fill_(0.5)
-        out_ours_on = ours(x, text)
+        out_ours_on, _, _ = ours(x, text)
     diff = max_abs_diff(out_ours_on, out_base_ours)
     print(f"  [check] Ours with lambdas=0.5 deviates from base: {diff:.3e}")
     assert diff > 1e-3, "Ours lambdas should change output when turned on"

@@ -20,8 +20,6 @@ model:
 
   use_msqr: False
   use_shcmi: True
-  use_qta: False
-  use_ag: False
 
 dataset:
   data_path: "data/aigc_qa_3k/mos_joint.xlsx"
@@ -62,6 +60,7 @@ run:
   split_file: "splits/seed42_split3.json"
   output_dir: "run"
   best_criterion: "joint"
+  consistency_weight: 0
   tag: "B2_shcmi"
 
   evaluate: False

@@ -7,10 +7,9 @@ Adapted from CHPNet (IEEE TBC 2026, github.com/NUIST-Videocoding/CHPNet)
   - fine/coarse level each do bidirectional visual<->prompt interaction,
   - adaptive scale gate fuses the two cross-modal representations.
 
-v3 (改进2.md): 增加 **Alignment-guided Cross-modal Gate (AG)**。在进入
-cross-attention 前，用 visual token 与 text token 的余弦相似度生成视觉权重
-（softmax），加权视觉 token，显式利用 image-text alignment 信息。
-``use_ag=False`` 时退化为原始（B2/B3 消融用）。
+v3 的 Alignment-guided Cross-modal Gate (AG) 已在改进3.md 中删除——AG 仅微调
+alignment 且整体未超过 B3，改用 Quality-Alignment Consistency Loss 解决双任务
+冲突。SHCMI 恢复标准结构。
 
 Output semantics (v2): SHCMI outputs a **cross-modal residual** ``delta_c``;
 the caller combines it as ``c = t0 + tanh(lambda_shcmi) * delta_c``.
@@ -18,9 +17,8 @@ the caller combines it as ``c = t0 + tanh(lambda_shcmi) * delta_c``.
 Data flow (design sections 8-13):
     T0 [B, L, C_text] --Linear--> T [B, L, D]
     T_e = T + eta * MSA_T(T)
-    (AG) align_score = norm(V) @ norm(T)^T ; visual_weight = softmax(mean_j)
-    fine :  V_f' = (w_f * F_fine) + alpha_f * CA(F_fine, T_e);  T_f' = T_e + beta_f * CA(T_e, F_fine)
-    coarse: V_c' = (w_c * F_coarse) + alpha_c * CA(F_coarse, T_e); T_c' = T_e + beta_c * CA(T_e, F_coarse)
+    fine :  V_f' = F_fine + alpha_f * CA(F_fine, T_e);  T_f' = T_e + beta_f * CA(T_e, F_fine)
+    coarse: V_c' = F_coarse + alpha_c * CA(F_coarse, T_e); T_c' = T_e + beta_c * CA(T_e, F_coarse)
     C_f = MLP([MeanPool(V_f'); MaskedMeanPool(T_f')])
     C_c = MLP([MeanPool(V_c'); MaskedMeanPool(T_c')])
     g_s = Sigmoid(MLP([C_f; C_c]))
@@ -41,12 +39,10 @@ from ipiqa.models.modules.attention import (
 
 class SHCMI(nn.Module):
     def __init__(self, text_dim=512, dim=256, num_heads=4, mlp_ratio=2.0,
-                 drop=0.1, gamma_init=0.01, use_multi_kernel=True,
-                 use_ag=True):
+                 drop=0.1, gamma_init=0.01, use_multi_kernel=True):
         super().__init__()
         self.dim = dim
         self.use_multi_kernel = use_multi_kernel
-        self.use_ag = use_ag
 
         self.text_proj = nn.Linear(text_dim, dim)
 
@@ -78,20 +74,6 @@ class SHCMI(nn.Module):
         self.beta_c = nn.Parameter(torch.tensor(float(gamma_init)))
 
         self._last_scale_gate = None
-        self._last_align_gate = None
-
-    def _align_gate(self, V, T):
-        """Alignment-guided gate: 视觉 token 按与文本 token 的余弦相似度加权。
-
-        V: [B, N, D] (fine or coarse)
-        T: [B, L, D]
-        Returns: visual_weight [B, N] (softmax over N)
-        """
-        V_norm = F.normalize(V, dim=-1)
-        T_norm = F.normalize(T, dim=-1)
-        align_score = torch.matmul(V_norm, T_norm.transpose(1, 2))  # [B, N, L]
-        visual_weight = align_score.mean(dim=-1)                    # [B, N]
-        return torch.softmax(visual_weight, dim=1)                  # [B, N]
 
     def forward(self, fine, coarse, text_tokens, text_mask):
         # fine: [B, Nf, D], coarse: [B, Nc, D]
@@ -105,27 +87,13 @@ class SHCMI(nn.Module):
         else:
             T_e = T
 
-        # ---- alignment-guided gate (AG) ----
-        if self.use_ag:
-            fine_w = self._align_gate(fine, T_e)        # [B, Nf]
-            coarse_w = self._align_gate(coarse, T_e)    # [B, Nc]
-            self._last_align_gate = {
-                "fine": fine_w.detach().float(),
-                "coarse": coarse_w.detach().float(),
-            }
-            fine_in = fine * fine_w.unsqueeze(-1)
-            coarse_in = coarse * coarse_w.unsqueeze(-1)
-        else:
-            fine_in = fine
-            coarse_in = coarse
-
         # fine-level bidirectional interaction
-        V_f = fine_in + self.alpha_f * self.fine_cross_v(fine_in, T_e, mask=text_mask)
-        T_f = T_e + self.beta_f * self.fine_cross_t(T_e, fine_in)
+        V_f = fine + self.alpha_f * self.fine_cross_v(fine, T_e, mask=text_mask)
+        T_f = T_e + self.beta_f * self.fine_cross_t(T_e, fine)
 
         # coarse-level bidirectional interaction
-        V_c = coarse_in + self.alpha_c * self.coarse_cross_v(coarse_in, T_e, mask=text_mask)
-        T_c = T_e + self.beta_c * self.coarse_cross_t(T_e, coarse_in)
+        V_c = coarse + self.alpha_c * self.coarse_cross_v(coarse, T_e, mask=text_mask)
+        T_c = T_e + self.beta_c * self.coarse_cross_t(T_e, coarse)
 
         # per-scale cross-modal representations
         v_f = V_f.mean(dim=1)                     # [B, D]

@@ -81,56 +81,30 @@ class MSQR(nn.Module):
         return fine, coarse
 
 
-class QualityAwareMSQRSkip(nn.Module):
-    """Visual skip from MSQR outputs (设计 15 节) + Quality-aware Token
-    Aggregation (QTA, 改进2.md 第二节).
+class MSQRVisualSkip(nn.Module):
+    """Visual skip from MSQR outputs (设计 15 节, v4 恢复):
 
-    v2:        F_fine -> MeanPool --+
-                                   +--> concat -> Linear -> delta_v [B, D]
-              F_coarse-> MeanPool --+
+        F_fine  -> MeanPool --+
+                              +--> concat -> Linear -> delta_v [B, D]
+        F_coarse-> MeanPool --+
 
-    QTA (use_qta=True): 不再对所有 token 平均，而是用 quality_gate 学习每个
-    token 的质量权重（softmax），加权求和。解决 AIGC-IQA 局部异常敏感问题。
-    use_qta=False 时退化为原始 mean pooling（B1/B3 消融用）。
+    v3 的 Quality-aware Token Aggregation (QTA) 已在改进3.md 中删除——QTA 未带来
+    quality 提升，恢复简单的 mean pooling。
     """
 
-    def __init__(self, dim=256, drop=0.1, use_qta=True):
+    def __init__(self, dim=256, drop=0.1):
         super().__init__()
-        self.use_qta = use_qta
         self.fc = nn.Sequential(
             nn.Linear(dim * 2, dim),
             nn.GELU(),
             nn.Dropout(drop),
         )
-        if use_qta:
-            self.quality_gate = nn.Sequential(
-                nn.Linear(dim, max(dim // 2, 8)),
-                nn.GELU(),
-                nn.Linear(max(dim // 2, 8), 1),
-            )
-        self._last_fine_weight = None
-        self._last_coarse_weight = None
-
-    def _pool(self, tokens):
-        # tokens: [B, N, D]
-        if not self.use_qta:
-            return tokens.mean(dim=1)  # [B, D]
-        score = self.quality_gate(tokens)          # [B, N, 1]
-        weight = torch.softmax(score, dim=1)       # [B, N, 1]
-        return (weight * tokens).sum(dim=1)        # [B, D]
 
     def forward(self, fine, coarse):
-        if self.use_qta:
-            # 记录权重分布供日志
-            fs = self.quality_gate(fine)
-            cs = self.quality_gate(coarse)
-            self._last_fine_weight = torch.softmax(fs, dim=1).detach().float()
-            self._last_coarse_weight = torch.softmax(cs, dim=1).detach().float()
-
-        v_f = self._pool(fine)      # [B, D]
-        v_c = self._pool(coarse)    # [B, D]
+        v_f = fine.mean(dim=1)      # [B, D]
+        v_c = coarse.mean(dim=1)    # [B, D]
         return self.fc(torch.cat([v_f, v_c], dim=-1))
 
 
 # 向后兼容别名
-MSQRVisualSkip = QualityAwareMSQRSkip
+QualityAwareMSQRSkip = MSQRVisualSkip
