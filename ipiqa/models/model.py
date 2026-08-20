@@ -1,26 +1,25 @@
-"""MSQRNet -- Frozen CLIP multimodal baseline + DMSQR / PCS-HCMI (v5).
+"""MSQRNet -- Frozen CLIP multimodal baseline + DMSQR / DP-HCMI (v6).
 
-v5 架构（改进4.md）：
+v6 架构（改进5.md）：
 
     B0 = Frozen CLIP multimodal baseline
-    B1 = B0 + DMSQR        (MSQR + semantic deviation)
-    B2 = B0 + PCS-HCMI     (SHCMI + prompt weighting + alignment bias)
-    B3 = B0 + DMSQR + PCS-HCMI
-    Ours = B3 + Shared-Task Consistency Loss
+    B1 = B0 + DMSQR        (Distortion-aware Multi-Scale Quality Refinement)
+    B2 = B0 + DP-HCMI      (Discrepancy-aware Prompt-conditioned HCMI)
+    Ours = B0 + DMSQR + DP-HCMI
 
-TAF / QTA / AG 均已删除。MSQR/SHCMI 之上新增：
-    - DMSQR：Distortion-aware Multi-Scale Quality Refinement（语义偏差增强）
-    - PCS-HCMI：Prompt-Conditioned Scale-Hierarchical Cross-Modal Interaction
-    - Shared-Task Consistency Loss（shared_feat 同时约束 quality/align 特征）
+TAF / QTA / AG / Consistency Loss 均已删除。创新点收敛为 2 个，各对应一个任务：
+    - DMSQR → Quality：CLIP 视觉语义偏差感知 AIGC 局部生成缺陷
+    - DP-HCMI → Alignment：显式建模图像与 prompt 的语义不一致（discrepancy）
+
+Loss 保持纯 MSE（quality + alignment），不引入额外训练变量。
 
 Nested 性质（严格消融）：
-    关闭 MSQR            : B1 -> B0
-    关闭 SHCMI           : B2 -> B0
-    关闭 MSQR + SHCMI    : B3 -> B0
+    关闭 DMSQR           : B1 -> B0
+    关闭 DP-HCMI         : B2 -> B0
+    关闭 DMSQR + DP-HCMI : Ours -> B0
 
-Base path（base_visual_proj / base_text_proj / shared_fusion / shared_adapter /
-quality_adapter / align_adapter / quality_head / align_head）在 B0-B3 / Ours
-中永远存在，任何变体都共享同一套 regression head。
+Base path（base_visual_proj / base_text_proj / shared_fusion / quality_head /
+align_head）在 B0-B2 / Ours 中永远存在，任何变体都共享同一套 regression head。
 
 数据流：
     spatial = CLIP RN50 (frozen)
@@ -34,13 +33,7 @@ quality_adapter / align_adapter / quality_head / align_head）在 B0-B3 / Ours
     c = t0 + tanh(lambda_shcmi) * delta_c      (use_shcmi)
 
     h = shared_fusion(concat[v, c])
-    shared_feat  = shared_adapter(h)
-    quality_feat = quality_adapter(h)
-    align_feat   = align_adapter(h)
-    q = quality_head(quality_feat); a = align_head(align_feat)
-
-forward 返回 (output, shared_feat, quality_feat, align_feat)，供
-Shared-Task Consistency Loss 使用。
+    q = quality_head(h); a = align_head(h)
 """
 
 import os
@@ -78,8 +71,8 @@ class MSQRNet(BaseModel):
             msqr_use_cross_scale=True,
             shcmi_use_multi_kernel=True,
             use_deviation=False,     # DMSQR 语义偏差
-            use_prompt_weight=False,  # PCS-HCMI prompt 加权
-            use_align_bias=False,     # PCS-HCMI alignment bias
+            use_prompt_weight=False,  # DP-HCMI prompt 加权
+            use_align_bias=False,     # DP-HCMI discrepancy bias
             gamma_init=0.0,          # MSQR 内部 cross-scale gamma
             internal_gate_init=0.01,  # SHCMI 内部 eta/alpha/beta 初始值
             freeze_visual=True,
@@ -134,22 +127,7 @@ class MSQRNet(BaseModel):
             nn.GELU(),
             nn.Dropout(drop),
         )
-        # v5: shared/task adapters（改进4.md 第 3 节）
-        self.shared_adapter = nn.Sequential(
-            nn.Linear(dim, dim),
-            nn.GELU(),
-            nn.Dropout(drop),
-        )
-        self.quality_adapter = nn.Sequential(
-            nn.Linear(dim, dim),
-            nn.GELU(),
-            nn.Dropout(drop),
-        )
-        self.align_adapter = nn.Sequential(
-            nn.Linear(dim, dim),
-            nn.GELU(),
-            nn.Dropout(drop),
-        )
+        # v6: 简单 head（改进5.md 第 4 节，不引入 shared/task adapter）
         self.quality_head = nn.Linear(dim, 1)
         self.align_head = nn.Linear(dim, 1)
 
@@ -243,7 +221,7 @@ class MSQRNet(BaseModel):
         return fine, coarse
 
     def forward(self, x, text):
-        """Return (output [B,2], shared_feat [B,D], quality_feat [B,D], align_feat [B,D])."""
+        """Return output [B, 2] = concat(quality, alignment)."""
         # ===================== 1. Frozen CLIP backbone =====================
         spatial = self.resnet50(x)                        # [B,2048,16,16]
         global_v = self.attnpool(spatial)                 # [B,1024]
@@ -281,15 +259,12 @@ class MSQRNet(BaseModel):
         # ===================== 5. Shared representation =====================
         h = self.shared_fusion(torch.cat([v, c], dim=-1))  # [B, D]
 
-        # ===================== 6. shared/task adapters + heads =====================
-        shared_feat = self.shared_adapter(h)               # [B, D]
-        quality_feat = self.quality_adapter(h)             # [B, D]
-        align_feat = self.align_adapter(h)                 # [B, D]
-        q = self.quality_head(quality_feat)
-        a = self.align_head(align_feat)
+        # ===================== 6. same task heads =====================
+        q = self.quality_head(h)
+        a = self.align_head(h)
 
         self._last_ratios = ratios
-        return torch.cat([q, a], dim=-1), shared_feat, quality_feat, align_feat
+        return torch.cat([q, a], dim=-1)
 
     # ---------------- gate / residual logging ----------------
     def get_gate_log(self):

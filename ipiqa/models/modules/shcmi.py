@@ -1,4 +1,4 @@
-"""SHCMI / PCS-HCMI -- Scale-Hierarchical Cross-Modal Interaction (主创新 2).
+"""SHCMI / DP-HCMI -- Discrepancy-aware Prompt-conditioned HCMI (主创新 2).
 
 Adapted from CHPNet (IEEE TBC 2026, github.com/NUIST-Videocoding/CHPNet)
 ``MSA_T`` + ``DualAttn`` logic, but:
@@ -7,21 +7,23 @@ Adapted from CHPNet (IEEE TBC 2026, github.com/NUIST-Videocoding/CHPNet)
   - fine/coarse level each do bidirectional visual<->prompt interaction,
   - adaptive scale gate fuses the two cross-modal representations.
 
-v5 (改进4.md)：新增 **PCS-HCMI（Prompt-Conditioned SHCMI）** 两个增强（各自
-可开关，``use_prompt_weight=False`` / ``use_align_bias=False`` 时退化为标准
-SHCMI，消融用）：
+v6 (改进5.md)：在 SHCMI 之上增加 **DP-HCMI** 的两个机制（各自可开关，
+``use_prompt_weight=False`` / ``use_align_bias=False`` 时退化为标准 SHCMI，
+消融用）：
   1. Prompt-conditioned text weighting：prompt_gate 对 text tokens 学习
      softmax 权重，突出与质量/一致性相关的 prompt token。
-  2. Alignment-guided attention bias：在 cross-attention 中加入视觉-文本
-     相似度 bias（``attn_score += tanh(beta) * align_bias``），显式利用
-     image-text alignment。
+  2. Discrepancy-aware attention bias：cross-attention 中
+     ``attn_score -= beta * (1 - cos(V, T))``，显式建模图像与 prompt 的
+     语义不一致——匹配区域增强、不匹配区域抑制（AIGC 条件一致性评价）。
+
+v5 的 PCS-HCMI（alignment-guided bias）在本版升级为 discrepancy-guided。
 
 Output semantics (v2): SHCMI outputs a **cross-modal residual** ``delta_c``;
 the caller combines it as ``c = t0 + tanh(lambda_shcmi) * delta_c``.
 
 Data flow (design sections 8-13):
     T0 [B, L, C_text] --Linear--> T [B, L, D]
-    (PCS) T = prompt_weight * T
+    (DP) T = prompt_weight * T
     T_e = T + eta * MSA_T(T)
     fine :  V_f' = F_fine + alpha_f * CA(F_fine, T_e);  T_f' = T_e + beta_f * CA(T_e, F_fine)
     coarse: V_c' = F_coarse + alpha_c * CA(F_coarse, T_e); T_c' = T_e + beta_c * CA(T_e, F_coarse)
@@ -98,10 +100,18 @@ class SHCMI(nn.Module):
         self._last_prompt_weight = None
 
     def _align_bias(self, V, T):
-        """Alignment-guided attention bias [B, N_visual, N_text]（余弦相似度）。"""
+        """Discrepancy-aware attention bias（DP-HCMI, 改进5.md 第 3.2/3.3 节）。
+
+        discrepancy matrix: D_ij = 1 - cos(V_i, T_j)，[B, Nv, Nt]
+        在 cross-attention 中做 attention_score -= beta * D：
+            匹配区域（cos 高 → D 小）几乎不减分；
+            不匹配区域（cos 低 → D 大）被抑制。
+        """
         V_norm = F.normalize(V, dim=-1)
         T_norm = F.normalize(T, dim=-1)
-        return torch.matmul(V_norm, T_norm.transpose(1, 2))   # [B, Nv, Nt]
+        cos_sim = torch.matmul(V_norm, T_norm.transpose(1, 2))   # [B, Nv, Nt]
+        discrepancy = 1.0 - cos_sim                              # [B, Nv, Nt]
+        return -torch.tanh(self.beta_align) * discrepancy        # [B, Nv, Nt]
 
     def forward(self, fine, coarse, text_tokens, text_mask):
         # fine: [B, Nf, D], coarse: [B, Nc, D]

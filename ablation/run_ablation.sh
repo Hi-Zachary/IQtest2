@@ -16,10 +16,9 @@ run_task() {
 }
 
 run_task "B0 Frozen baseline"   "ablation/configs/agiqa3k/b0_baseline.yaml"
-run_task "B1 +MSQR"             "ablation/configs/agiqa3k/b1_msqr.yaml"
-run_task "B2 +SHCMI"            "ablation/configs/agiqa3k/b2_shcmi.yaml"
-run_task "B3 +MSQR+SHCMI"       "ablation/configs/agiqa3k/b3_msqr_shcmi.yaml"
-run_task "B4 Full (all)"        "ablation/configs/agiqa3k/b4_full.yaml"
+run_task "B1 +DMSQR"            "ablation/configs/agiqa3k/b1_msqr.yaml"
+run_task "B2 +DP-HCMI"          "ablation/configs/agiqa3k/b2_shcmi.yaml"
+run_task "Ours (all)"           "ablation/configs/agiqa3k/ours.yaml"
 
 if [ "${INCLUDE_FT:-0}" = "1" ]; then
     run_task "FT-CLIP reference" "ablation/configs/agiqa3k/ft_clip_reference.yaml"

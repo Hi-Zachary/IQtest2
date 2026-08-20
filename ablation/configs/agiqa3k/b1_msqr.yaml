@@ -1,4 +1,4 @@
-# B1_msqr (AGIQA-3K, split3): use_msqr=True use_shcmi=False use_taf=False
+# B1_msqr (AGIQA-3K, split3): use_msqr=True use_shcmi=False (DMSQR)
 # 改进1.md v2: Frozen CLIP + residual branches, init_lr 1e-4, 无 head_scale
 model:
   arch: "msqr_shcmi"
@@ -20,7 +20,7 @@ model:
 
   use_msqr: True
   use_shcmi: False
-  use_deviation: False
+  use_deviation: True
   use_prompt_weight: False
   use_align_bias: False
 
@@ -63,7 +63,6 @@ run:
   split_file: "splits/seed42_split3.json"
   output_dir: "run"
   best_criterion: "joint"
-  consistency_weight: 0
   tag: "B1_msqr"
 
   evaluate: False

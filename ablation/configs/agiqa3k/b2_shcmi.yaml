@@ -1,4 +1,4 @@
-# B2_shcmi (AGIQA-3K, split3): use_msqr=False use_shcmi=True use_taf=False
+# B2_shcmi (AGIQA-3K, split3): use_msqr=False use_shcmi=True (DP-HCMI)
 # 改进1.md v2: Frozen CLIP + residual branches, init_lr 1e-4, 无 head_scale
 model:
   arch: "msqr_shcmi"
@@ -21,8 +21,8 @@ model:
   use_msqr: False
   use_shcmi: True
   use_deviation: False
-  use_prompt_weight: False
-  use_align_bias: False
+  use_prompt_weight: True
+  use_align_bias: True
 
 dataset:
   data_path: "data/aigc_qa_3k/mos_joint.xlsx"
@@ -63,7 +63,6 @@ run:
   split_file: "splits/seed42_split3.json"
   output_dir: "run"
   best_criterion: "joint"
-  consistency_weight: 0
   tag: "B2_shcmi"
 
   evaluate: False
