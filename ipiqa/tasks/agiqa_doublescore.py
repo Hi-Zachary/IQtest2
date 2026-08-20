@@ -25,8 +25,9 @@ class AGIQADoubleScoresTask(BaseTask):
 
     @classmethod
     def setup_task(cls, **kwargs):
-        # 改进3.md: Quality-Alignment Consistency Loss
-        # L = L_quality + L_alignment + lambda * (1 - cos(q_feat, a_feat))
+        # 改进4.md: Shared-Task Consistency Loss
+        # L = L_quality + L_alignment + lambda * L_cons
+        # L_cons = (1 - cos(shared_feat, quality_feat)) + (1 - cos(shared_feat, align_feat))
         cfg = kwargs.get('cfg', None)
         consistency_weight = 0.0
         if cfg is not None:
@@ -34,19 +35,21 @@ class AGIQADoubleScoresTask(BaseTask):
 
         def iqa_loss(model, samples):
             x, y, text = samples['images'], samples['score'], samples['text']
-            output, q_feat, a_feat = model(x, text)
+            output, shared_feat, quality_feat, align_feat = model(x, text)
             criterion = nn.MSELoss()
             loss = criterion(output, y)
             if consistency_weight > 0:
-                # 缓解 Quality 与 Alignment 双任务优化冲突
-                cons_loss = 1.0 - F.cosine_similarity(q_feat, a_feat, dim=-1).mean()
+                # Shared-Task Consistency：shared 表征同时约束 quality/align 特征
+                cons_shared_q = 1.0 - F.cosine_similarity(shared_feat, quality_feat, dim=-1).mean()
+                cons_shared_a = 1.0 - F.cosine_similarity(shared_feat, align_feat, dim=-1).mean()
+                cons_loss = cons_shared_q + cons_shared_a
                 loss = loss + consistency_weight * cons_loss
             loss_dict = {"loss": loss.detach().clone()}
             return loss, loss_dict
 
         def iqa_loss_eval(model, samples):
             x, y, text = samples['images'], samples['score'], samples['text']
-            output, _, _ = model(x, text)
+            output, _, _, _ = model(x, text)
             criterion = nn.MSELoss(reduction='none')
             loss = criterion(output, y)
             loss_qual = loss.detach().cpu()[:,0].numpy().tolist()

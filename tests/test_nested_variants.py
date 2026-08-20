@@ -1,4 +1,4 @@
-"""Nested / identity regression tests (改进1/2.md Step 0).
+"""Nested / identity regression tests (改进1-4.md Step 0).
 
 验证 Frozen B0-B3 / Ours 的严格嵌套关系。由于每个变体是独立模型实例（base
 path 随机初始化不同），正确的验证方式是**在同一实例内**比较：
@@ -6,7 +6,7 @@ path 随机初始化不同），正确的验证方式是**在同一实例内**�
     1. 各变体 forward 输出 == 手动只走 base path（B0 计算图）的输出
        （模块外部门控 lambda 均初始化为 0）
     2. 给 lambda 赋值后，输出确实偏离 base path（模块真的能影响结果）
-    3. Ours（QTA/AG 开启，但 lambda=0）仍 == base path；lambda 非 0 时偏离
+    3. Ours（DMSQR/PCS 开启，但 lambda=0）仍 == base path；lambda 非 0 时偏离
 
 即证明：lambda=0 时任何模块都严格退化为纯 base path（B0）。
 
@@ -28,13 +28,17 @@ from ipiqa.models.model import MSQRNet
 BASE_CKPT = "data/ckpt/clip/openai/resnet/RN50.pt"
 
 
-def build(use_msqr, use_shcmi, use_qta=False, use_ag=False, freeze_visual=True):
+def build(use_msqr, use_shcmi, use_dev=False, use_pw=False, use_ab=False,
+          freeze_visual=True):
     return MSQRNet(
         base_ckpt=BASE_CKPT,
         input_resolution=512,
         output_dim=2,
         use_msqr=use_msqr,
         use_shcmi=use_shcmi,
+        use_deviation=use_dev,
+        use_prompt_weight=use_pw,
+        use_align_bias=use_ab,
         freeze_visual=freeze_visual,
         freeze_text=True,
         gamma_init=0.0,
@@ -58,8 +62,11 @@ def base_path_output(model, x, text):
     v0 = model.base_visual_proj(global_v)
     t0 = model.base_text_proj(global_t)
     h = model.shared_fusion(torch.cat([v0, t0], dim=-1))
-    q, _ = model.quality_head(h)
-    a, _ = model.align_head(h)
+    sf = model.shared_adapter(h)
+    qf = model.quality_adapter(h)
+    af = model.align_adapter(h)
+    q = model.quality_head(qf)
+    a = model.align_head(af)
     return torch.cat([q, a], dim=-1)
 
 
@@ -81,37 +88,37 @@ def main():
     # ---- B0: 全关，forward == base path ----
     b0 = build(False, False)
     with torch.no_grad():
-        out_b0, _, _ = b0(x, text)
+        out_b0, *_ = b0(x, text)
         out_base = base_path_output(b0, x, text)
     check("B0 forward == base path", out_b0, out_base)
 
-    # ---- B1: MSQR on (QTA off)，lambda_msqr=0 -> base path ----
+    # ---- B1: MSQR on，lambda_msqr=0 -> base path ----
     b1 = build(True, False)
     assert b1.lambda_msqr.item() == 0.0, "lambda_msqr should init to 0"
     with torch.no_grad():
-        out_b1, _, _ = b1(x, text)
+        out_b1, *_ = b1(x, text)
         out_base1 = base_path_output(b1, x, text)
     check("B1 (lambda_msqr=0) == base path", out_b1, out_base1)
 
-    # ---- B2: SHCMI on (AG off)，lambda_shcmi=0 -> base path ----
+    # ---- B2: SHCMI on，lambda_shcmi=0 -> base path ----
     b2 = build(False, True)
     assert b2.lambda_shcmi.item() == 0.0, "lambda_shcmi should init to 0"
     with torch.no_grad():
-        out_b2, _, _ = b2(x, text)
+        out_b2, *_ = b2(x, text)
         out_base2 = base_path_output(b2, x, text)
     check("B2 (lambda_shcmi=0) == base path", out_b2, out_base2)
 
-    # ---- B3: MSQR+SHCMI on（QTA/AG off），双 lambda=0 -> base path ----
+    # ---- B3: MSQR+SHCMI on，双 lambda=0 -> base path ----
     b3 = build(True, True)
     with torch.no_grad():
-        out_b3, _, _ = b3(x, text)
+        out_b3, *_ = b3(x, text)
         out_base3 = base_path_output(b3, x, text)
     check("B3 (lambdas=0) == base path", out_b3, out_base3)
 
-    # ---- Ours: MSQR+SHCMI+QTA+AG on，lambda=0 -> base path ----
-    ours = build(True, True, use_qta=True, use_ag=True)
+    # ---- Ours: DMSQR/PCS on，lambda=0 -> base path ----
+    ours = build(True, True, use_dev=True, use_pw=True, use_ab=True)
     with torch.no_grad():
-        out_ours, _, _ = ours(x, text)
+        out_ours, *_ = ours(x, text)
         out_base_ours = base_path_output(ours, x, text)
     check("Ours (all lambdas=0) == base path", out_ours, out_base_ours)
 
@@ -119,7 +126,7 @@ def main():
     with torch.no_grad():
         ours.lambda_msqr.fill_(0.5)
         ours.lambda_shcmi.fill_(0.5)
-        out_ours_on, _, _ = ours(x, text)
+        out_ours_on, *_ = ours(x, text)
     diff = max_abs_diff(out_ours_on, out_base_ours)
     print(f"  [check] Ours with lambdas=0.5 deviates from base: {diff:.3e}")
     assert diff > 1e-3, "Ours lambdas should change output when turned on"

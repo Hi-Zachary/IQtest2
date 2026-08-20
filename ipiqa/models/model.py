@@ -1,22 +1,26 @@
-"""MSQRNet -- Frozen CLIP multimodal baseline + residual MSQR / SHCMI (v4).
+"""MSQRNet -- Frozen CLIP multimodal baseline + DMSQR / PCS-HCMI (v5).
 
-v4 架构（改进3.md）：
+v5 架构（改进4.md）：
 
     B0 = Frozen CLIP multimodal baseline
-    B1 = B0 + Residual MSQR
-    B2 = B0 + Residual SHCMI
-    B3 = B0 + MSQR + SHCMI
-    Ours = B3 + Quality-Alignment Consistency Loss
+    B1 = B0 + DMSQR        (MSQR + semantic deviation)
+    B2 = B0 + PCS-HCMI     (SHCMI + prompt weighting + alignment bias)
+    B3 = B0 + DMSQR + PCS-HCMI
+    Ours = B3 + Shared-Task Consistency Loss
 
-TAF / QTA / AG 均已删除。双任务冲突改由 consistency loss 解决。
+TAF / QTA / AG 均已删除。MSQR/SHCMI 之上新增：
+    - DMSQR：Distortion-aware Multi-Scale Quality Refinement（语义偏差增强）
+    - PCS-HCMI：Prompt-Conditioned Scale-Hierarchical Cross-Modal Interaction
+    - Shared-Task Consistency Loss（shared_feat 同时约束 quality/align 特征）
 
 Nested 性质（严格消融）：
     关闭 MSQR            : B1 -> B0
     关闭 SHCMI           : B2 -> B0
     关闭 MSQR + SHCMI    : B3 -> B0
 
-Base path（base_visual_proj / base_text_proj / shared_fusion / quality_head /
-align_head）在 B0-B3 / Ours 中永远存在，任何变体都共享同一套 regression head。
+Base path（base_visual_proj / base_text_proj / shared_fusion / shared_adapter /
+quality_adapter / align_adapter / quality_head / align_head）在 B0-B3 / Ours
+中永远存在，任何变体都共享同一套 regression head。
 
 数据流：
     spatial = CLIP RN50 (frozen)
@@ -30,10 +34,13 @@ align_head）在 B0-B3 / Ours 中永远存在，任何变体都共享同一套 r
     c = t0 + tanh(lambda_shcmi) * delta_c      (use_shcmi)
 
     h = shared_fusion(concat[v, c])
-    q = quality_head(h); a = align_head(h)
+    shared_feat  = shared_adapter(h)
+    quality_feat = quality_adapter(h)
+    align_feat   = align_adapter(h)
+    q = quality_head(quality_feat); a = align_head(align_feat)
 
-forward 返回 (output, q_feat, a_feat)，其中 q_feat/a_feat 为 task head 的
-中间特征，供 Quality-Alignment Consistency Loss 使用。
+forward 返回 (output, shared_feat, quality_feat, align_feat)，供
+Shared-Task Consistency Loss 使用。
 """
 
 import os
@@ -53,24 +60,6 @@ CLIP_TEXT_WIDTH = 512   # RN50 text transformer width
 CLIP_VISUAL_WIDTH = 1024  # RN50 attnpool output dim
 
 
-class TaskHead(nn.Module):
-    """回归头：返回 (score, feature)。feature 供 consistency loss 使用。"""
-
-    def __init__(self, dim=256, drop=0.1):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(dim, dim),
-            nn.GELU(),
-            nn.Dropout(drop),
-        )
-        self.head = nn.Linear(dim, 1)
-
-    def forward(self, x):
-        feat = self.net(x)          # [B, D]
-        score = self.head(feat)     # [B, 1]
-        return score, feat
-
-
 @registry.register_model("msqr_shcmi")
 class MSQRNet(BaseModel):
     def __init__(
@@ -88,6 +77,9 @@ class MSQRNet(BaseModel):
             msqr_use_spatial=True,
             msqr_use_cross_scale=True,
             shcmi_use_multi_kernel=True,
+            use_deviation=False,     # DMSQR 语义偏差
+            use_prompt_weight=False,  # PCS-HCMI prompt 加权
+            use_align_bias=False,     # PCS-HCMI alignment bias
             gamma_init=0.0,          # MSQR 内部 cross-scale gamma
             internal_gate_init=0.01,  # SHCMI 内部 eta/alpha/beta 初始值
             freeze_visual=True,
@@ -100,6 +92,9 @@ class MSQRNet(BaseModel):
         self.dim = dim
         self.use_msqr = use_msqr
         self.use_shcmi = use_shcmi
+        self.use_deviation = use_deviation
+        self.use_prompt_weight = use_prompt_weight
+        self.use_align_bias = use_align_bias
         self.freeze_visual = freeze_visual
         self.freeze_text = freeze_text
         self.module_lr_scale = module_lr_scale
@@ -139,8 +134,24 @@ class MSQRNet(BaseModel):
             nn.GELU(),
             nn.Dropout(drop),
         )
-        self.quality_head = TaskHead(dim, drop)
-        self.align_head = TaskHead(dim, drop)
+        # v5: shared/task adapters（改进4.md 第 3 节）
+        self.shared_adapter = nn.Sequential(
+            nn.Linear(dim, dim),
+            nn.GELU(),
+            nn.Dropout(drop),
+        )
+        self.quality_adapter = nn.Sequential(
+            nn.Linear(dim, dim),
+            nn.GELU(),
+            nn.Dropout(drop),
+        )
+        self.align_adapter = nn.Sequential(
+            nn.Linear(dim, dim),
+            nn.GELU(),
+            nn.Dropout(drop),
+        )
+        self.quality_head = nn.Linear(dim, 1)
+        self.align_head = nn.Linear(dim, 1)
 
         # ====================== MSQR residual branch ======================
         if use_msqr:
@@ -151,6 +162,8 @@ class MSQRNet(BaseModel):
                 use_spatial_attention=msqr_use_spatial,
                 use_cross_scale=msqr_use_cross_scale,
                 gamma_init=gamma_init,
+                use_deviation=use_deviation,
+                global_dim=CLIP_VISUAL_WIDTH,
             )
             self.visual_skip = MSQRVisualSkip(dim, drop)
             self.lambda_msqr = nn.Parameter(torch.tensor(0.0))
@@ -171,6 +184,8 @@ class MSQRNet(BaseModel):
                 mlp_ratio=mlp_ratio, drop=drop,
                 gamma_init=internal_gate_init,
                 use_multi_kernel=shcmi_use_multi_kernel,
+                use_prompt_weight=use_prompt_weight,
+                use_align_bias=use_align_bias,
             )
             self.lambda_shcmi = nn.Parameter(torch.tensor(0.0))
         else:
@@ -228,7 +243,7 @@ class MSQRNet(BaseModel):
         return fine, coarse
 
     def forward(self, x, text):
-        """Return (output [B,2], q_feat [B,D], a_feat [B,D])."""
+        """Return (output [B,2], shared_feat [B,D], quality_feat [B,D], align_feat [B,D])."""
         # ===================== 1. Frozen CLIP backbone =====================
         spatial = self.resnet50(x)                        # [B,2048,16,16]
         global_v = self.attnpool(spatial)                 # [B,1024]
@@ -244,7 +259,7 @@ class MSQRNet(BaseModel):
 
         # ===================== 3. visual tokens =====================
         if self.use_msqr:
-            fine, coarse = self.msqr(spatial)
+            fine, coarse = self.msqr(spatial, global_v)
             delta_v = self.visual_skip(fine, coarse)      # [B, D]
             msqr_scale = torch.tanh(self.lambda_msqr)
             v = v0 + msqr_scale * delta_v
@@ -266,12 +281,15 @@ class MSQRNet(BaseModel):
         # ===================== 5. Shared representation =====================
         h = self.shared_fusion(torch.cat([v, c], dim=-1))  # [B, D]
 
-        # ===================== 6. task heads (score + feature) =====================
-        q, q_feat = self.quality_head(h)
-        a, a_feat = self.align_head(h)
+        # ===================== 6. shared/task adapters + heads =====================
+        shared_feat = self.shared_adapter(h)               # [B, D]
+        quality_feat = self.quality_adapter(h)             # [B, D]
+        align_feat = self.align_adapter(h)                 # [B, D]
+        q = self.quality_head(quality_feat)
+        a = self.align_head(align_feat)
 
         self._last_ratios = ratios
-        return torch.cat([q, a], dim=-1), q_feat, a_feat
+        return torch.cat([q, a], dim=-1), shared_feat, quality_feat, align_feat
 
     # ---------------- gate / residual logging ----------------
     def get_gate_log(self):
@@ -282,6 +300,12 @@ class MSQRNet(BaseModel):
             out["lambda_msqr"] = torch.tanh(self.lambda_msqr).item()
             out["gamma_f"] = self.msqr.gamma_f.item()
             out["gamma_c"] = self.msqr.gamma_c.item()
+            if self.use_deviation:
+                out["alpha_dev"] = torch.tanh(self.msqr.alpha_dev).item()
+                dw = getattr(self.msqr, "_last_dev_weight", None)
+                if dw is not None:
+                    out["dev_w_mean"] = round(dw.mean().item(), 4)
+                    out["dev_w_std"] = round(dw.std().item(), 4)
         if self.use_shcmi:
             out["lambda_shcmi"] = torch.tanh(self.lambda_shcmi).item()
             out["eta"] = self.shcmi.eta.item()
@@ -293,6 +317,13 @@ class MSQRNet(BaseModel):
             if sg is not None:
                 out["scale_gate_mean"] = round(sg.mean().item(), 4)
                 out["scale_gate_std"] = round(sg.std().item(), 4)
+            if self.use_prompt_weight:
+                pw = getattr(self.shcmi, "_last_prompt_weight", None)
+                if pw is not None:
+                    out["prompt_w_mean"] = round(pw.mean().item(), 4)
+                    out["prompt_w_std"] = round(pw.std().item(), 4)
+            if self.use_align_bias:
+                out["beta_align"] = torch.tanh(self.shcmi.beta_align).item()
         return out
 
     # ------------------------------------------------------------------ #
@@ -338,6 +369,9 @@ class MSQRNet(BaseModel):
         drop = cfg.get("dropout_rate", 0.1)
         use_msqr = cfg.get("use_msqr", True)
         use_shcmi = cfg.get("use_shcmi", True)
+        use_deviation = cfg.get("use_deviation", False)
+        use_prompt_weight = cfg.get("use_prompt_weight", False)
+        use_align_bias = cfg.get("use_align_bias", False)
         msqr_use_channel = cfg.get("msqr_use_channel", True)
         msqr_use_spatial = cfg.get("msqr_use_spatial", True)
         msqr_use_cross_scale = cfg.get("msqr_use_cross_scale", True)
@@ -359,6 +393,9 @@ class MSQRNet(BaseModel):
             drop=drop,
             use_msqr=use_msqr,
             use_shcmi=use_shcmi,
+            use_deviation=use_deviation,
+            use_prompt_weight=use_prompt_weight,
+            use_align_bias=use_align_bias,
             msqr_use_channel=msqr_use_channel,
             msqr_use_spatial=msqr_use_spatial,
             msqr_use_cross_scale=msqr_use_cross_scale,

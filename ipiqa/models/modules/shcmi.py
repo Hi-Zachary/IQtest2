@@ -1,4 +1,4 @@
-"""SHCMI -- Scale-Hierarchical Cross-Modal Interaction (主创新 2).
+"""SHCMI / PCS-HCMI -- Scale-Hierarchical Cross-Modal Interaction (主创新 2).
 
 Adapted from CHPNet (IEEE TBC 2026, github.com/NUIST-Videocoding/CHPNet)
 ``MSA_T`` + ``DualAttn`` logic, but:
@@ -7,15 +7,21 @@ Adapted from CHPNet (IEEE TBC 2026, github.com/NUIST-Videocoding/CHPNet)
   - fine/coarse level each do bidirectional visual<->prompt interaction,
   - adaptive scale gate fuses the two cross-modal representations.
 
-v3 的 Alignment-guided Cross-modal Gate (AG) 已在改进3.md 中删除——AG 仅微调
-alignment 且整体未超过 B3，改用 Quality-Alignment Consistency Loss 解决双任务
-冲突。SHCMI 恢复标准结构。
+v5 (改进4.md)：新增 **PCS-HCMI（Prompt-Conditioned SHCMI）** 两个增强（各自
+可开关，``use_prompt_weight=False`` / ``use_align_bias=False`` 时退化为标准
+SHCMI，消融用）：
+  1. Prompt-conditioned text weighting：prompt_gate 对 text tokens 学习
+     softmax 权重，突出与质量/一致性相关的 prompt token。
+  2. Alignment-guided attention bias：在 cross-attention 中加入视觉-文本
+     相似度 bias（``attn_score += tanh(beta) * align_bias``），显式利用
+     image-text alignment。
 
 Output semantics (v2): SHCMI outputs a **cross-modal residual** ``delta_c``;
 the caller combines it as ``c = t0 + tanh(lambda_shcmi) * delta_c``.
 
 Data flow (design sections 8-13):
     T0 [B, L, C_text] --Linear--> T [B, L, D]
+    (PCS) T = prompt_weight * T
     T_e = T + eta * MSA_T(T)
     fine :  V_f' = F_fine + alpha_f * CA(F_fine, T_e);  T_f' = T_e + beta_f * CA(T_e, F_fine)
     coarse: V_c' = F_coarse + alpha_c * CA(F_coarse, T_e); T_c' = T_e + beta_c * CA(T_e, F_coarse)
@@ -39,12 +45,27 @@ from ipiqa.models.modules.attention import (
 
 class SHCMI(nn.Module):
     def __init__(self, text_dim=512, dim=256, num_heads=4, mlp_ratio=2.0,
-                 drop=0.1, gamma_init=0.01, use_multi_kernel=True):
+                 drop=0.1, gamma_init=0.01, use_multi_kernel=True,
+                 use_prompt_weight=False, use_align_bias=False,
+                 beta_init=0.0):
         super().__init__()
         self.dim = dim
         self.use_multi_kernel = use_multi_kernel
+        self.use_prompt_weight = use_prompt_weight
+        self.use_align_bias = use_align_bias
 
         self.text_proj = nn.Linear(text_dim, dim)
+
+        # PCS-HCMI: prompt-conditioned text weighting
+        if use_prompt_weight:
+            self.prompt_gate = nn.Sequential(
+                nn.Linear(dim, max(dim // 2, 8)),
+                nn.GELU(),
+                nn.Linear(max(dim // 2, 8), 1),
+            )
+        # PCS-HCMI: alignment-guided attention bias
+        if use_align_bias:
+            self.beta_align = nn.Parameter(torch.tensor(float(beta_init)))
 
         if use_multi_kernel:
             self.msa_t = MSA_T(dim, dim, drop)
@@ -74,11 +95,25 @@ class SHCMI(nn.Module):
         self.beta_c = nn.Parameter(torch.tensor(float(gamma_init)))
 
         self._last_scale_gate = None
+        self._last_prompt_weight = None
+
+    def _align_bias(self, V, T):
+        """Alignment-guided attention bias [B, N_visual, N_text]（余弦相似度）。"""
+        V_norm = F.normalize(V, dim=-1)
+        T_norm = F.normalize(T, dim=-1)
+        return torch.matmul(V_norm, T_norm.transpose(1, 2))   # [B, Nv, Nt]
 
     def forward(self, fine, coarse, text_tokens, text_mask):
         # fine: [B, Nf, D], coarse: [B, Nc, D]
         # text_tokens: [B, L, C_text], text_mask: [B, L]
         T = self.text_proj(text_tokens)          # [B, L, D]
+
+        # PCS-HCMI: prompt-conditioned text weighting
+        if self.use_prompt_weight:
+            score = self.prompt_gate(T)                        # [B, L, 1]
+            weight = torch.softmax(score, dim=1)               # [B, L, 1]
+            self._last_prompt_weight = weight.detach().float()
+            T = T * weight                                     # [B, L, D]
 
         # text multi-kernel enhancement (residual)
         if self.use_multi_kernel:
@@ -87,12 +122,22 @@ class SHCMI(nn.Module):
         else:
             T_e = T
 
+        # PCS-HCMI: alignment-guided attention bias
+        if self.use_align_bias:
+            bias_f = torch.tanh(self.beta_align) * self._align_bias(fine, T_e)
+            bias_c = torch.tanh(self.beta_align) * self._align_bias(coarse, T_e)
+        else:
+            bias_f = None
+            bias_c = None
+
         # fine-level bidirectional interaction
-        V_f = fine + self.alpha_f * self.fine_cross_v(fine, T_e, mask=text_mask)
+        V_f = fine + self.alpha_f * self.fine_cross_v(
+            fine, T_e, mask=text_mask, attn_bias=bias_f)
         T_f = T_e + self.beta_f * self.fine_cross_t(T_e, fine)
 
         # coarse-level bidirectional interaction
-        V_c = coarse + self.alpha_c * self.coarse_cross_v(coarse, T_e, mask=text_mask)
+        V_c = coarse + self.alpha_c * self.coarse_cross_v(
+            coarse, T_e, mask=text_mask, attn_bias=bias_c)
         T_c = T_e + self.beta_c * self.coarse_cross_t(T_e, coarse)
 
         # per-scale cross-modal representations
@@ -110,4 +155,5 @@ class SHCMI(nn.Module):
         delta_c = g_s * C_f + (1.0 - g_s) * C_c   # [B, D]
 
         return delta_c
+
 
