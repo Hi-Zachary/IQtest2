@@ -1,7 +1,7 @@
 # B1_msqr (AGIQA-3K, split3): use_msqr=True use_shcmi=False use_taf=False
 # 改进1.md v2: Frozen CLIP + residual branches, init_lr 1e-4, 无 head_scale
 model:
-  arch: "msqr_shcmi_taf"
+  arch: "msqr_shcmi"
   base_ckpt: data/ckpt/clip/openai/resnet/RN50.pt
   input_resolution: 512
   output_dim: 2
@@ -20,7 +20,8 @@ model:
 
   use_msqr: True
   use_shcmi: False
-  use_taf: False
+  use_qta: False
+  use_ag: False
 
 dataset:
   data_path: "data/aigc_qa_3k/mos_joint.xlsx"

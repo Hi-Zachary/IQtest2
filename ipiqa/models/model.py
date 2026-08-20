@@ -1,23 +1,28 @@
-"""MSQRNet -- Frozen CLIP multimodal baseline + residual MSQR / SHCMI / TAF.
+"""MSQRNet -- Frozen CLIP multimodal baseline + residual MSQR / SHCMI (v3).
 
-v2 架构（改进1.md）：
+v3 架构（改进2.md）：
 
     B0 = Frozen CLIP multimodal baseline
     B1 = B0 + Residual MSQR
     B2 = B0 + Residual SHCMI
     B3 = B0 + MSQR + SHCMI
-    B4 = B3 + Residual TAF
+    Ours = B3 + QTA (MSQR quality-aware token aggregation)
+               + AG (SHCMI alignment-guided gate)
+
+TAF 已删除（源码级）。Ours 的两个小创新分别对应 AGIQA 双任务：
+    - QTA 解决质量感知（局部异常敏感）
+    - AG  解决图文一致性
 
 Nested 性质（严格消融）：
     关闭 MSQR            : B1 -> B0
     关闭 SHCMI           : B2 -> B0
     关闭 MSQR + SHCMI    : B3 -> B0
-    TAF residual gate=0  : B4 -> B3
+    关闭 QTA / AG        : Ours -> B3
 
 Base path（base_visual_proj / base_text_proj / shared_fusion / quality_head /
-align_head）在 B0-B4 中永远存在，任何变体都共享同一套 regression head。
+align_head）在 B0-B3 / Ours 中永远存在，任何变体都共享同一套 regression head。
 
-数据流（方案第 16 节）：
+数据流：
     spatial = CLIP RN50 (frozen)
     global_v = attnpool(spatial)
     global_t = text encoder (frozen)
@@ -29,11 +34,7 @@ align_head）在 B0-B4 中永远存在，任何变体都共享同一套 regressi
     c = t0 + tanh(lambda_shcmi) * delta_c      (use_shcmi)
 
     h = shared_fusion(concat[v, c])
-
-    h_q = h + tanh(lambda_taf_q) * delta_q     (use_taf)
-    h_a = h + tanh(lambda_taf_a) * delta_a
-
-    q = quality_head(h_q); a = align_head(h_a)
+    q = quality_head(h); a = align_head(h)
 """
 
 import os
@@ -44,9 +45,8 @@ import torch.nn.functional as F
 
 from ipiqa.models.base_model import BaseModel
 from ipiqa.models.utils import interpolate_pos_embed, freeze_module
-from ipiqa.models.modules.msqr import MSQR, MSQRVisualSkip
+from ipiqa.models.modules.msqr import MSQR, QualityAwareMSQRSkip
 from ipiqa.models.modules.shcmi import SHCMI
-from ipiqa.models.modules.taf import TAF
 
 from ipiqa.common.registry import registry
 
@@ -54,7 +54,7 @@ CLIP_TEXT_WIDTH = 512   # RN50 text transformer width
 CLIP_VISUAL_WIDTH = 1024  # RN50 attnpool output dim
 
 
-@registry.register_model("msqr_shcmi_taf")
+@registry.register_model("msqr_shcmi")
 class MSQRNet(BaseModel):
     def __init__(
             self,
@@ -67,7 +67,8 @@ class MSQRNet(BaseModel):
             drop=0.1,
             use_msqr=True,
             use_shcmi=True,
-            use_taf=True,
+            use_qta=True,        # MSQR quality-aware token aggregation
+            use_ag=True,         # SHCMI alignment-guided gate
             msqr_use_channel=True,
             msqr_use_spatial=True,
             msqr_use_cross_scale=True,
@@ -84,7 +85,8 @@ class MSQRNet(BaseModel):
         self.dim = dim
         self.use_msqr = use_msqr
         self.use_shcmi = use_shcmi
-        self.use_taf = use_taf
+        self.use_qta = use_qta
+        self.use_ag = use_ag
         self.freeze_visual = freeze_visual
         self.freeze_text = freeze_text
         self.module_lr_scale = module_lr_scale
@@ -137,7 +139,9 @@ class MSQRNet(BaseModel):
                 use_cross_scale=msqr_use_cross_scale,
                 gamma_init=gamma_init,
             )
-            self.visual_skip = MSQRVisualSkip(dim, drop)
+            self.visual_skip = QualityAwareMSQRSkip(
+                dim, drop, use_qta=use_qta,
+            )
             self.lambda_msqr = nn.Parameter(torch.tensor(0.0))
         else:
             # Plain Multi-Scale Adapter：仅为 SHCMI 提供多尺度 token，不含任何
@@ -156,21 +160,12 @@ class MSQRNet(BaseModel):
                 mlp_ratio=mlp_ratio, drop=drop,
                 gamma_init=internal_gate_init,
                 use_multi_kernel=shcmi_use_multi_kernel,
+                use_ag=use_ag,
             )
             self.lambda_shcmi = nn.Parameter(torch.tensor(0.0))
         else:
             self.shcmi = None
             self.lambda_shcmi = None
-
-        # ====================== TAF residual branch ======================
-        if use_taf:
-            self.taf = TAF(dim, drop, gate_zero_init=True)
-            self.lambda_taf_q = nn.Parameter(torch.tensor(0.0))
-            self.lambda_taf_a = nn.Parameter(torch.tensor(0.0))
-        else:
-            self.taf = None
-            self.lambda_taf_q = None
-            self.lambda_taf_a = None
 
         # ====================== freeze ======================
         if freeze_visual:
@@ -260,45 +255,30 @@ class MSQRNet(BaseModel):
         # ===================== 5. Shared representation =====================
         h = self.shared_fusion(torch.cat([v, c], dim=-1))  # [B, D]
 
-        # ===================== 6. TAF residual =====================
-        if self.use_taf:
-            g_q, g_a = self.taf.compute_gates(v, c)
-            mix_q = g_q * v + (1.0 - g_q) * c
-            mix_a = g_a * v + (1.0 - g_a) * c
-            delta_q = self.taf.quality_adapter(mix_q)
-            delta_a = self.taf.align_adapter(mix_a)
-
-            taf_q_scale = torch.tanh(self.lambda_taf_q)
-            taf_a_scale = torch.tanh(self.lambda_taf_a)
-            h_q = h + taf_q_scale * delta_q
-            h_a = h + taf_a_scale * delta_a
-
-            ratios["taf_q_ratio"] = (
-                (taf_q_scale * delta_q).norm(dim=-1).mean() / h.norm(dim=-1).mean()
-            ).item()
-            ratios["taf_a_ratio"] = (
-                (taf_a_scale * delta_a).norm(dim=-1).mean() / h.norm(dim=-1).mean()
-            ).item()
-        else:
-            h_q = h
-            h_a = h
-
-        # ===================== 7. same task heads =====================
-        q = self.quality_head(h_q)
-        a = self.align_head(h_a)
+        # ===================== 6. same task heads =====================
+        q = self.quality_head(h)
+        a = self.align_head(h)
 
         self._last_ratios = ratios
         return torch.cat([q, a], dim=-1)
 
     # ---------------- gate / residual logging ----------------
     def get_gate_log(self):
-        """每 epoch 记录真实 gate 参数值与 residual ratio（方案 23/24 节）。"""
+        """每 epoch 记录真实 gate 参数值与 residual ratio。"""
         out = dict(self._last_ratios)
 
         if self.use_msqr:
             out["lambda_msqr"] = torch.tanh(self.lambda_msqr).item()
             out["gamma_f"] = self.msqr.gamma_f.item()
             out["gamma_c"] = self.msqr.gamma_c.item()
+            if self.use_qta:
+                vw_f = getattr(self.visual_skip, "_last_fine_weight", None)
+                vw_c = getattr(self.visual_skip, "_last_coarse_weight", None)
+                if vw_f is not None:
+                    out["qta_fine_w_mean"] = round(vw_f.mean().item(), 4)
+                    out["qta_fine_w_std"] = round(vw_f.std().item(), 4)
+                    out["qta_coarse_w_mean"] = round(vw_c.mean().item(), 4)
+                    out["qta_coarse_w_std"] = round(vw_c.std().item(), 4)
         if self.use_shcmi:
             out["lambda_shcmi"] = torch.tanh(self.lambda_shcmi).item()
             out["eta"] = self.shcmi.eta.item()
@@ -310,22 +290,20 @@ class MSQRNet(BaseModel):
             if sg is not None:
                 out["scale_gate_mean"] = round(sg.mean().item(), 4)
                 out["scale_gate_std"] = round(sg.std().item(), 4)
-        if self.use_taf:
-            out["lambda_taf_q"] = torch.tanh(self.lambda_taf_q).item()
-            out["lambda_taf_a"] = torch.tanh(self.lambda_taf_a).item()
-            gq, ga = getattr(self.taf, "_last_gates", (None, None))
-            if gq is not None:
-                out["g_q_mean"] = round(gq.mean().item(), 4)
-                out["g_q_std"] = round(gq.std().item(), 4)
-                out["g_a_mean"] = round(ga.mean().item(), 4)
-                out["g_a_std"] = round(ga.std().item(), 4)
+            if self.use_ag:
+                ag = getattr(self.shcmi, "_last_align_gate", None)
+                if ag is not None:
+                    out["ag_fine_mean"] = round(ag["fine"].mean().item(), 4)
+                    out["ag_fine_std"] = round(ag["fine"].std().item(), 4)
+                    out["ag_coarse_mean"] = round(ag["coarse"].mean().item(), 4)
+                    out["ag_coarse_std"] = round(ag["coarse"].std().item(), 4)
         return out
 
     # ------------------------------------------------------------------ #
     def get_optimizer_params(self, weight_decay, lr_scale=1):
         """简单分组：backbone（若可训练）1x，其余新层 module_lr_scale。
 
-        主消融 B0-B4 全冻结 backbone，因此所有可训练参数都是新层，统一
+        主消融 B0-B3 / Ours 全冻结 backbone，因此所有可训练参数都是新层，统一
         lr_scale = module_lr_scale（默认 1，即全 1e-4）。
         FT-CLIP 设 module_lr_scale=10 -> backbone 1x / new 10x。
         """
@@ -364,7 +342,8 @@ class MSQRNet(BaseModel):
         drop = cfg.get("dropout_rate", 0.1)
         use_msqr = cfg.get("use_msqr", True)
         use_shcmi = cfg.get("use_shcmi", True)
-        use_taf = cfg.get("use_taf", True)
+        use_qta = cfg.get("use_qta", True)
+        use_ag = cfg.get("use_ag", True)
         msqr_use_channel = cfg.get("msqr_use_channel", True)
         msqr_use_spatial = cfg.get("msqr_use_spatial", True)
         msqr_use_cross_scale = cfg.get("msqr_use_cross_scale", True)
@@ -386,7 +365,8 @@ class MSQRNet(BaseModel):
             drop=drop,
             use_msqr=use_msqr,
             use_shcmi=use_shcmi,
-            use_taf=use_taf,
+            use_qta=use_qta,
+            use_ag=use_ag,
             msqr_use_channel=msqr_use_channel,
             msqr_use_spatial=msqr_use_spatial,
             msqr_use_cross_scale=msqr_use_cross_scale,

@@ -2,7 +2,7 @@
 # 改进1.md v2: CLIP visual/text 全冻结，只训练 base proj / shared fusion / heads
 # 协议: seed42_split3 / 100 epoch / 512 / batch 48 / init_lr 1e-4 / 无 head_scale
 model:
-  arch: "msqr_shcmi_taf"
+  arch: "msqr_shcmi"
   base_ckpt: data/ckpt/clip/openai/resnet/RN50.pt
   input_resolution: 512
   output_dim: 2
@@ -21,7 +21,8 @@ model:
 
   use_msqr: False
   use_shcmi: False
-  use_taf: False
+  use_qta: False
+  use_ag: False
 
 dataset:
   data_path: "data/aigc_qa_3k/mos_joint.xlsx"

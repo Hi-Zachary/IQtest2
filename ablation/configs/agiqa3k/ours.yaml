@@ -1,5 +1,8 @@
-# B3_msqr_shcmi (AGIQA-3K, split3): use_msqr=True use_shcmi=True use_taf=False
-# 改进1.md v2: Frozen CLIP + residual branches, init_lr 1e-4, 无 head_scale
+# Ours (AGIQA-3K, split3): 最终主模型 = MSQR + SHCMI + QTA + AG
+# 改进2.md: B3 基础上增加
+#   QTA = MSQR quality-aware token aggregation（质量感知）
+#   AG  = SHCMI alignment-guided cross-modal gate（图文一致性）
+# 协议与 B0-B3 完全一致: Frozen / split3 / 512 / batch64 / init_lr 1e-4 / joint / 30ep
 model:
   arch: "msqr_shcmi"
   base_ckpt: data/ckpt/clip/openai/resnet/RN50.pt
@@ -20,8 +23,8 @@ model:
 
   use_msqr: True
   use_shcmi: True
-  use_qta: False
-  use_ag: False
+  use_qta: True
+  use_ag: True
 
 dataset:
   data_path: "data/aigc_qa_3k/mos_joint.xlsx"
@@ -62,7 +65,7 @@ run:
   split_file: "splits/seed42_split3.json"
   output_dir: "run"
   best_criterion: "joint"
-  tag: "B3_msqr_shcmi"
+  tag: "Ours"
 
   evaluate: False
   eval_freq: 1

@@ -1,11 +1,12 @@
-"""Nested / identity regression tests (改进1.md 第 29 节, Step 0).
+"""Nested / identity regression tests (改进1/2.md Step 0).
 
-验证 Frozen B0-B4 的严格嵌套关系。由于每个变体是独立模型实例（base path
-随机初始化不同），正确的验证方式是**在同一实例内**比较：
+验证 Frozen B0-B3 / Ours 的严格嵌套关系。由于每个变体是独立模型实例（base
+path 随机初始化不同），正确的验证方式是**在同一实例内**比较：
 
-    1. 全开模型 B4（lambda 均初始化为 0）的 forward 输出
-       == 手动只走 base path（B0 计算图）的输出
+    1. 各变体 forward 输出 == 手动只走 base path（B0 计算图）的输出
+       （模块外部门控 lambda 均初始化为 0）
     2. 给 lambda 赋值后，输出确实偏离 base path（模块真的能影响结果）
+    3. Ours（QTA/AG 开启，但 lambda=0）仍 == base path；lambda 非 0 时偏离
 
 即证明：lambda=0 时任何模块都严格退化为纯 base path（B0）。
 
@@ -27,14 +28,15 @@ from ipiqa.models.model import MSQRNet
 BASE_CKPT = "data/ckpt/clip/openai/resnet/RN50.pt"
 
 
-def build(use_msqr, use_shcmi, use_taf, freeze_visual=True):
+def build(use_msqr, use_shcmi, use_qta=False, use_ag=False, freeze_visual=True):
     return MSQRNet(
         base_ckpt=BASE_CKPT,
         input_resolution=512,
         output_dim=2,
         use_msqr=use_msqr,
         use_shcmi=use_shcmi,
-        use_taf=use_taf,
+        use_qta=use_qta,
+        use_ag=use_ag,
         freeze_visual=freeze_visual,
         freeze_text=True,
         gamma_init=0.0,
@@ -79,51 +81,50 @@ def main():
     x, text = make_inputs()
 
     # ---- B0: 全关，forward == base path ----
-    b0 = build(False, False, False)
+    b0 = build(False, False)
     with torch.no_grad():
         out_b0 = b0(x, text)
         out_base = base_path_output(b0, x, text)
     check("B0 forward == base path", out_b0, out_base)
 
-    # ---- B1: MSQR on，lambda_msqr=0 -> base path ----
-    b1 = build(True, False, False)
+    # ---- B1: MSQR on (QTA off)，lambda_msqr=0 -> base path ----
+    b1 = build(True, False)
     assert b1.lambda_msqr.item() == 0.0, "lambda_msqr should init to 0"
     with torch.no_grad():
         out_b1 = b1(x, text)
         out_base1 = base_path_output(b1, x, text)
     check("B1 (lambda_msqr=0) == base path", out_b1, out_base1)
 
-    # ---- B2: SHCMI on，lambda_shcmi=0 -> base path ----
-    b2 = build(False, True, False)
+    # ---- B2: SHCMI on (AG off)，lambda_shcmi=0 -> base path ----
+    b2 = build(False, True)
     assert b2.lambda_shcmi.item() == 0.0, "lambda_shcmi should init to 0"
     with torch.no_grad():
         out_b2 = b2(x, text)
         out_base2 = base_path_output(b2, x, text)
     check("B2 (lambda_shcmi=0) == base path", out_b2, out_base2)
 
-    # ---- B3: MSQR+SHCMI on，双 lambda=0 -> base path ----
-    b3 = build(True, True, False)
+    # ---- B3: MSQR+SHCMI on（QTA/AG off），双 lambda=0 -> base path ----
+    b3 = build(True, True)
     with torch.no_grad():
         out_b3 = b3(x, text)
         out_base3 = base_path_output(b3, x, text)
     check("B3 (lambdas=0) == base path", out_b3, out_base3)
 
-    # ---- B4: 全开，TAF lambdas=0 -> base path ----
-    b4 = build(True, True, True)
-    assert b4.lambda_taf_q.item() == 0.0 and b4.lambda_taf_a.item() == 0.0, \
-        "lambda_taf should init to 0"
+    # ---- Ours: MSQR+SHCMI+QTA+AG on，lambda=0 -> base path ----
+    ours = build(True, True, use_qta=True, use_ag=True)
     with torch.no_grad():
-        out_b4 = b4(x, text)
-        out_base4 = base_path_output(b4, x, text)
-    check("B4 (all lambdas=0) == base path", out_b4, out_base4)
+        out_ours = ours(x, text)
+        out_base_ours = base_path_output(ours, x, text)
+    check("Ours (all lambdas=0) == base path", out_ours, out_base_ours)
 
     # ---- 模块确实能影响输出（lambda 非 0 时偏离 base path）----
     with torch.no_grad():
-        b1.lambda_msqr.fill_(0.5)
-        out_b1_on = b1(x, text)
-    diff = max_abs_diff(out_b1_on, out_base1)
-    print(f"  [check] B1 with lambda_msqr=0.5 deviates from base: {diff:.3e}")
-    assert diff > 1e-3, "B1 lambda should change output when turned on"
+        ours.lambda_msqr.fill_(0.5)
+        ours.lambda_shcmi.fill_(0.5)
+        out_ours_on = ours(x, text)
+    diff = max_abs_diff(out_ours_on, out_base_ours)
+    print(f"  [check] Ours with lambdas=0.5 deviates from base: {diff:.3e}")
+    assert diff > 1e-3, "Ours lambdas should change output when turned on"
 
     print("\nAll nested-variant identity tests passed.")
 

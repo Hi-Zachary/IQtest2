@@ -1,4 +1,4 @@
-"""MSQR / SHCMI / TAF modules."""
+"""MSQR / SHCMI modules."""
 from ipiqa.models.modules.attention import (
     Mlp,
     ChannelAttention,
@@ -9,9 +9,8 @@ from ipiqa.models.modules.attention import (
     MSA_T,
     masked_mean_pool,
 )
-from ipiqa.models.modules.msqr import MSQR, MSQRVisualSkip
+from ipiqa.models.modules.msqr import MSQR, QualityAwareMSQRSkip, MSQRVisualSkip
 from ipiqa.models.modules.shcmi import SHCMI
-from ipiqa.models.modules.taf import TAF
 
 __all__ = [
     "Mlp",
@@ -23,7 +22,7 @@ __all__ = [
     "MSA_T",
     "masked_mean_pool",
     "MSQR",
+    "QualityAwareMSQRSkip",
     "MSQRVisualSkip",
     "SHCMI",
-    "TAF",
 ]

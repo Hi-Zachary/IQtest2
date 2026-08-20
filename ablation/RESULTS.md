@@ -1,28 +1,32 @@
 # Ablation Results（消融结果记录）
 
 > 协议：AGIQA-3K / seed42_split3 / Frozen CLIP / 512 / **batch64** / init_lr 1e-4 / best-joint
-> **30 epoch（B0-B4 统一）**
+> **30 epoch（B0-B3 / Ours 统一）**
 > 每个 run 的 log 在 `../run/<jobid>_<tag>/log.txt`
 
-## 一、AGIQA-3K 主消融（v2 Frozen, 30ep）
+## 一、AGIQA-3K 主消融（v3, 30ep）
 
-| Model | Frozen CLIP | MSQR | SHCMI | TAF | Q-SRCC | Q-PLCC | Q-KROCC | A-SRCC | A-PLCC |
+> v3（改进2.md）：TAF 已删除；Ours = MSQR + SHCMI + QTA + AG
+> QTA = MSQR quality-aware token aggregation（质量感知）
+> AG  = SHCMI alignment-guided cross-modal gate（图文一致性）
+
+| Model | MSQR | SHCMI | QTA | AG | Q-SRCC | Q-PLCC | Q-KROCC | A-SRCC | A-PLCC |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| B0 | ✓ | × | × | × | 0.7847 | 0.8656 | 0.5983 | 0.6437 | 0.7698 |
-| B1 | ✓ | ✓ | × | × | 0.8216 | 0.8926 | 0.6343 | 0.6200 | 0.7989 |
-| B2 | ✓ | × | ✓ | × | 0.8066 | 0.8875 | 0.6176 | 0.6564 | 0.8091 |
-| B3 | ✓ | ✓ | ✓ | × | **0.8239** | **0.8957** | **0.6368** | 0.6299 | 0.8034 |
-| B4 | ✓ | ✓ | ✓ | ✓ | 0.8132 | 0.8935 | 0.6263 | 0.6272 | 0.8023 |
+| B0 | × | × | × | × | 0.7847 | 0.8656 | 0.5983 | 0.6437 | 0.7698 |
+| B1 | ✓ | × | × | × | 0.8216 | 0.8926 | 0.6343 | 0.6200 | 0.7989 |
+| B2 | × | ✓ | × | × | 0.8066 | 0.8875 | 0.6176 | 0.6564 | 0.8091 |
+| B3 | ✓ | ✓ | × | × | **0.8239** | **0.8957** | **0.6368** | 0.6299 | 0.8034 |
+| **Ours** | ✓ | ✓ | ✓ | ✓ | 0.8175 | 0.8927 | 0.6284 | 0.6389 | 0.7977 |
 
 ### 增量（同协议）
 
-| 对比 | Q-SRCC Δ | Q-PLCC Δ | A-SRCC Δ |
-|---|---|---|---|
-| B1 − B0（MSQR） | **+0.0369** | +0.0270 | −0.0237 |
-| B2 − B0（SHCMI） | **+0.0219** | +0.0219 | +0.0128 |
-| B3 − B0 | **+0.0392** | +0.0301 | −0.0138 |
-| B4 − B3（TAF） | −0.0107 | −0.0022 | −0.0027 |
-| **B4 − B0（总体）** | +0.0285 | +0.0279 | −0.0164 |
+| 对比 | Q-SRCC Δ | Q-PLCC Δ | A-SRCC Δ | A-PLCC Δ |
+|---|---|---|---|---|
+| B1 − B0（MSQR） | **+0.0369** | +0.0270 | −0.0237 | +0.0291 |
+| B2 − B0（SHCMI） | **+0.0219** | +0.0219 | +0.0128 | +0.0393 |
+| B3 − B0 | **+0.0392** | +0.0301 | −0.0138 | +0.0336 |
+| Ours − B0 | **+0.0328** | +0.0271 | −0.0048 | +0.0279 |
+| **Ours − B3（QTA+AG）** | −0.0064 | −0.0030 | **+0.0090** | −0.0057 |
 
 ## 二、强参考
 
@@ -30,31 +34,31 @@
 |---|---|---|---|---:|---:|---:|---:|
 | B0 | Frozen | None | 0.7847 | 0.8656 | 0.6437 | 0.7698 |
 | FT-CLIP | Fine-tuned | None | （待跑） | | | |
-| B4 | Frozen | MSQR+SHCMI+TAF | 0.8132 | 0.8935 | 0.6272 | 0.8023 |
+| Ours | Frozen | MSQR+SHCMI+QTA+AG | 0.8175 | 0.8927 | 0.6389 | 0.7977 |
 
 ## 三、Gate / Residual 观察（最后 epoch）
 
-| Model | lambda_msqr | lambda_shcmi | lambda_taf_q/a | msqr_ratio | shcmi_ratio | taf_ratio |
+| Model | lambda_msqr | lambda_shcmi | msqr_ratio | shcmi_ratio | QTA fine w | AG fine w |
 |---|---:|---:|---:|---:|---:|---:|
-| B1 | 0.0096 | — | — | 3.38 | — | — |
-| B2 | — | −0.0149 | — | — | 0.48 | — |
-| B3 | 0.0080 | −0.0075 | — | 2.13 | 0.25 | — |
-| B4 | 0.0084 | 0.0068 | −0.0032 / −0.0034 | 1.97 | 0.17 | 0.0011 / 0.0013 |
+| B1 | ~0.01 | — | ~3.4 | — | — | — |
+| B2 | — | ~−0.01 | — | ~0.5 | — | — |
+| B3 | ~0.008 | ~−0.008 | ~2.1 | ~0.25 | — | — |
+| Ours | 见 log | 见 log | 见 log | 见 log | 见 log | 见 log |
 
 **关键观察**：
 - B1/B3 的 `msqr_ratio` 较大（2-3.4）→ MSQR 残差幅值可观，是 Q 提升主力。
-- **B4 的 TAF 残差几乎未激活**（`taf_q_ratio≈0.001`，`lambda_taf_q≈-0.003`，`g_q≈0.49`）：
-  这正是 **B4 < B3** 的直接原因——TAF 在 30 epoch / Frozen 下 gate 没学开，
-  却引入了额外随机初始化参数（gate_q/gate_a + 两个 adapter），小幅拖累。
-  下一步建议：TAF 换成更简单的 residual（或调大内部 gate 初始化、延长 epoch）。
+- **Ours 相对 B3**：Q-SRCC 略降（−0.006）但 **A-SRCC 提升 +0.009**——
+  AG（alignment-guided gate）修复了 MSQR 牺牲图文一致性的问题；
+  QTA 在 30 epoch 下对 quality 无增益（可能需更多 epoch / 调 gate 初始化）。
+- B2 的 A-SRCC 全场最高（0.6564），SHCMI 本身对 alignment 贡献最大。
 
 ## 四、运行记录（run 目录 ↔ 结果）
 
 | 任务 | run 目录 | tag | 状态 |
 |---|---|---|---|
-| B0 | run/2026082016?_B0_frozen | B0_frozen | ✅ 30ep |
-| B1 | run/2026082016?_B1_msqr | B1_msqr | ✅ 30ep |
-| B2 | run/2026082016?_B2_shcmi | B2_shcmi | ✅ 30ep |
-| B3 | run/2026082016?_B3_msqr_shcmi | B3_msqr_shcmi | ✅ 30ep |
-| B4 | run/2026082016?_B4_full | B4_full | ✅ 30ep |
+| B0 | run/20260820173_B0_frozen | B0_frozen | ✅ 30ep |
+| B1 | run/20260820173_B1_msqr | B1_msqr | ✅ 30ep |
+| B2 | run/20260820173_B2_shcmi | B2_shcmi | ✅ 30ep |
+| B3 | run/20260820174_B3_msqr_shcmi | B3_msqr_shcmi | ✅ 30ep |
+| Ours | run/20260820174_Ours | Ours | ✅ 30ep |
 | FT-CLIP | — | FT_CLIP | ⬜ |
