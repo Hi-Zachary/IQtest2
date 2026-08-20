@@ -228,9 +228,14 @@ class Trainer:
         self.output_dir = output_dir
 
     @main_process
-    def _save_checkpoint(self, cur_epoch, is_best=False):
+    def _save_checkpoint(self, cur_epoch, is_best=False, filename=None):
         """
         Save the checkpoint at the current epoch.
+
+        Args:
+            is_best: save to checkpoint_best.pth (back-compat; also used as
+                     best-quality checkpoint).
+            filename: optional explicit filename, e.g. "checkpoint_best_joint.pth".
         """
         model_no_ddp = self.unwrap_dist_model(self.model)
         param_grad_dic = {
@@ -249,10 +254,13 @@ class Trainer:
             "scaler": self.scaler.state_dict() if self.scaler else None,
             "epoch": cur_epoch,
         }
-        save_to = os.path.join(
-            self.output_dir,
-            "checkpoint_best.pth" if is_best else "checkpoint_latest.pth",
-        )
+        if filename is None:
+            save_to = os.path.join(
+                self.output_dir,
+                "checkpoint_best.pth" if is_best else "checkpoint_latest.pth",
+            )
+        else:
+            save_to = os.path.join(self.output_dir, filename)
         logging.info("Saving checkpoint at epoch {} to {}.".format(cur_epoch, save_to))
         torch.save(save_obj, save_to)
 
@@ -310,28 +318,23 @@ class Trainer:
             f.write(json.dumps(OmegaConf.to_container(self.config), indent=4) + "\n")
 
     @main_process
-    def log_local_gates(self, cur_epoch):
-        """每个 epoch 记录 local fusion 外层 gate 与 MSDA refine gate（调整2）。"""
+    def log_gates(self, cur_epoch):
+        """每个 epoch 记录真实 gate 参数值与 residual ratio（改进1.md 23/24 节）。"""
         model = self.unwrap_dist_model(self.model)
-        fusion = getattr(model, "local_fusion", None)
-        if fusion is None:
+        if not hasattr(model, "get_gate_log"):
+            return
+        try:
+            gate_log = model.get_gate_log()
+        except Exception:
+            return
+        if not gate_log:
             return
         out = {"epoch": cur_epoch}
-        if hasattr(fusion, "local_gate_logit"):
-            out["outer_gate"] = round(
-                torch.sigmoid(fusion.local_gate_logit).detach().float().item(), 4
-            )
-        branch = getattr(fusion, "local_branch", None)
-        if branch is not None and hasattr(branch, "refiner"):
-            rg = getattr(branch.refiner, "refine_gate_logit", None)
-            if rg is not None:
-                out["refine_gate"] = round(
-                    torch.sigmoid(rg).detach().float().item(), 4
-                )
-        if len(out) > 1:
-            logging.info("local gates: " + json.dumps(out))
-            with open(os.path.join(self.output_dir, "log.txt"), "a") as f:
-                f.write(json.dumps(out) + "\n")
+        out.update({k: (round(v, 4) if isinstance(v, float) else v)
+                    for k, v in gate_log.items()})
+        logging.info("gates: " + json.dumps(out))
+        with open(os.path.join(self.output_dir, "log.txt"), "a") as f:
+            f.write(json.dumps(out) + "\n")
 
     @torch.no_grad()
     def eval_epoch(self, cur_epoch, skip_reload=False):
@@ -369,11 +372,17 @@ class Trainer:
 
     def train(self):
         start_time = time.time()
+        # best-quality: argmax(qual_SROCC + qual_PLCC)
+        best_quality_score = -1e9
+        best_quality_epoch = 0
+        # best-joint: argmax(qual_SROCC + qual_PLCC + align_SROCC + align_PLCC)
+        best_joint_score = -1e9
+        best_joint_epoch = 0
         best_agg_metric = 0
         best_epoch = 0
         best_metrics = {}
 
-        # 消融方案第 37 节：按 best_quality = argmax(SRCC_qual + PLCC_qual) 选 checkpoint
+        # 改进1.md 第 26 节：默认按 joint 选 checkpoint（正式双任务结果优先报告 joint）
         best_criterion = self.config.run.get("best_criterion", "joint")
 
         self.log_config()
@@ -386,15 +395,9 @@ class Trainer:
             # training phase
             if not self.evaluate_only:
                 logging.info("Start training")
-                # See https://github.com/salesforce/LAVIS/issues/449
-                # if cur_epoch == self.start_epoch:
-                #     self.task.before_training(
-                #         model=self.unwrap_dist_model(self.model),
-                #         dataset=self.datasets["train"],
-                #     )
                 train_stats = self.train_epoch(cur_epoch)
                 self.log_stats(split_name="train", stats=train_stats)
-                self.log_local_gates(cur_epoch)
+                self.log_gates(cur_epoch)
 
             # evaluation phase
             if cur_epoch % self.eval_freq == 0 or cur_epoch == self.max_epoch -1:
@@ -409,21 +412,38 @@ class Trainer:
                             "agg_metrics" in val_log
                         ), "No agg_metrics found in validation log."
 
-                        agg_metrics = val_log["agg_metrics"]
+                        # ---- best-quality ----
+                        qual_score = val_log.get("qual_SROCC", 0.0) + val_log.get("qual_PLCC", 0.0)
+                        if qual_score > best_quality_score:
+                            best_quality_score, best_quality_epoch = qual_score, cur_epoch
+                            self._save_checkpoint(cur_epoch, is_best=True)
+
+                        # ---- best-joint ----
+                        joint_score = (
+                            val_log.get("qual_SROCC", 0.0) + val_log.get("qual_PLCC", 0.0)
+                            + val_log.get("align_SROCC", 0.0) + val_log.get("align_PLCC", 0.0)
+                        )
+                        if joint_score > best_joint_score:
+                            best_joint_score, best_joint_epoch = joint_score, cur_epoch
+                            self._save_checkpoint(cur_epoch, filename="checkpoint_best_joint.pth")
+
+                        # back-compat 的 is_best 语义按配置的 criterion
                         if best_criterion == "quality":
-                            # 只用 perceptual quality 选 best（消融方案第 37/38 节）
-                            score = val_log.get("qual_SROCC", 0.0) + val_log.get("qual_PLCC", 0.0)
+                            score = qual_score
                         else:
-                            score = agg_metrics
+                            score = joint_score
                         if score > best_agg_metric:
                             best_epoch, best_agg_metric = cur_epoch, score
                             best_metrics = deepcopy(val_log)
-
-                            self._save_checkpoint(cur_epoch, is_best=True)
                         else:
                             if cur_epoch % self.save_freq == 0 or cur_epoch == self.max_epoch -1:
                                 self._save_checkpoint(cur_epoch, is_best=False)
-                        val_log.update({"best_epoch": best_epoch})
+
+                        val_log.update({
+                            "best_epoch": best_epoch,
+                            "best_quality_epoch": best_quality_epoch,
+                            "best_joint_epoch": best_joint_epoch,
+                        })
                         self.log_stats(val_log, "val")
                 else:  # 没有定义task的evaluation
                     if cur_epoch % self.save_freq == 0 or cur_epoch == self.max_epoch -1:

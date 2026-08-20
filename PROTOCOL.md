@@ -2,6 +2,12 @@
 
 > 本文件定义本项目**所有正式实验**必须遵守的统一协议。
 > 任何消融/对比都必须在同一协议下进行，否则不可直接比较。
+>
+> **v2（改进1.md）**：正式 B0 改为 **Frozen CLIP Multimodal Baseline**，
+> MSQR/SHCMI/TAF 全部改为 **residual delta 分支**（`v = v0 + tanh(λm)·Δv`、
+> `c = t0 + tanh(λs)·Δc`、`h_q = h + tanh(λq)·Δq`），保证 B0→B1→B2→B3→B4
+> 是严格 Nested 的消融链（lambda=0 时各级精确退化）。
+> 旧版 fine-tuned CLIP baseline 保留为 **FT-CLIP** 强参考，不参与正式消融。
 
 ## 1. 数据划分（唯一入口）
 
@@ -38,29 +44,41 @@ split1 系统性偏低（最难的折）。**正式实验统一采用 split3**�
 | 项 | 值 |
 |---|---|
 | 输入分辨率 | 512×512 |
-| batch size | 48（`batch_size_val` 同 48；batch 32→48 为冒烟测试选定，显存 14.1GB/24GB，速度更优） |
-| epoch | 100 |
+| batch size | 48（`batch_size_val` 同 48） |
+| epoch | B0/B1/B2/B3 = **50**；B4 = **100**；FT-CLIP = 100 |
 | 优化器 | AdamW, betas=(0.9, 0.999), weight_decay=0 |
-| LR 调度 | linear_warmup_cosine_lr，warmup_steps=75（≈1 epoch），min_lr=1e-6 |
-| init_lr | 1e-5 |
-| 分组 LR | CLIP backbone 1×，新模块(msqr/shcmi/taf/heads/gates) 10× |
+| LR 调度 | linear_warmup_cosine_lr，warmup_steps=50，min_lr=1e-6 |
+| init_lr | **1e-4**（Frozen B0-B4 所有可训练层统一；FT-CLIP 为 1e-5） |
+| 分组 LR | Frozen B0-B4：全部 1×（1e-4）；FT-CLIP：backbone 1× / new 10× |
+| CLIP backbone | **Frozen**（visual + text，`freeze_visual=True`/`freeze_text=True`） |
+| head_scale | **null**（已移除叠乘） |
 | AMP | 开启 |
-| 文本编码器 | 冻结（freeze_text=True） |
-| 训练阶段 | 单阶段（从 CLIP RN50 初始化，无两阶段 warm-start） |
-| checkpoint 选择 | `best_criterion: quality` → argmax(SRCC_qual + PLCC_qual) |
+| 训练阶段 | 单阶段 |
+| checkpoint 选择 | **best-joint**（Q_SRCC+Q_PLCC+A_SRCC+A_PLCC），同时保存 best-quality |
 | 评估 | 每 epoch 全量 val；指标 SRCC/PLCC/KROCC（quality + alignment） |
 
-## 3. 消融矩阵（同一协议）
+## 3. 消融矩阵（同一协议，v2）
 
-| 实验 | MSQR | SHCMI | TAF | 配置 |
-|---|---|---|---|---|
-| B0 | × | × | × | `projects/agiqa3k/b0_baseline.yaml` |
-| B1 | ✓ | × | × | `projects/agiqa3k/b1_msqr.yaml` |
-| B2 | × | ✓ | × | `projects/agiqa3k/b2_shcmi.yaml` |
-| B3 | ✓ | ✓ | × | `projects/agiqa3k/b3_msqr_shcmi.yaml` |
-| B4 | ✓ | ✓ | ✓ | `projects/agiqa3k/b4_full.yaml` |
+| 实验 | Frozen CLIP | MSQR | SHCMI | TAF | 配置 | epoch |
+|---|---|---:|---:|---:|---|---:|
+| B0 | ✓ | × | × | × | `projects/agiqa3k/b0_baseline.yaml` | 50 |
+| B1 | ✓ | ✓ | × | × | `projects/agiqa3k/b1_msqr.yaml` | 50 |
+| B2 | ✓ | × | ✓ | × | `projects/agiqa3k/b2_shcmi.yaml` | 50 |
+| B3 | ✓ | ✓ | ✓ | × | `projects/agiqa3k/b3_msqr_shcmi.yaml` | 50 |
+| B4 | ✓ | ✓ | ✓ | ✓ | `projects/agiqa3k/b4_full.yaml` | 100 |
+| FT-CLIP（强参考） | 仅 text | × | × | × | `projects/agiqa3k/ft_clip_reference.yaml` | 100 |
 
 所有配置仅由 `use_msqr / use_shcmi / use_taf` 区分，其余字段完全一致。
+每个变体共享同一套 base path（base_visual_proj / base_text_proj /
+shared_fusion / quality_head / align_head）。
+
+Nested 性质（已通过 `tests/test_nested_variants.py` 验证）：
+```
+关闭 MSQR            : B1 → B0
+关闭 SHCMI           : B2 → B0
+关闭 MSQR + SHCMI    : B3 → B0
+TAF residual gate=0  : B4 → B3
+```
 
 ## 4. 运行方式
 

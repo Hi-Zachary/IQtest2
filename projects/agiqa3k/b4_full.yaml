@@ -1,17 +1,22 @@
-# B4_full (AGIQA-3K): use_msqr=True use_shcmi=True use_taf=True
+# B4_full (AGIQA-3K, split3): use_msqr=True use_shcmi=True use_taf=True
+# 改进1.md v2: Frozen CLIP + residual branches, init_lr 1e-4, 无 head_scale
 model:
   arch: "msqr_shcmi_taf"
   base_ckpt: data/ckpt/clip/openai/resnet/RN50.pt
   input_resolution: 512
   output_dim: 2
-  freeze_text: True
-  head_scale: 10.
-  dropout_rate: 0.1
 
+  freeze_visual: True
+  freeze_text: True
+  module_lr_scale: 1.0
+  head_scale: null
+
+  dropout_rate: 0.1
   dim: 256
   num_heads: 4
   mlp_ratio: 2.0
   gamma_init: 0.0
+  internal_gate_init: 0.01
 
   use_msqr: True
   use_shcmi: True
@@ -36,10 +41,10 @@ run:
   lr_sched: "linear_warmup_cosine_lr"
   lr_decay_rate: null
   warmup_lr: 0
-  warmup_steps: 75
+  warmup_steps: 50
   min_lr: 1e-6
 
-  init_lr: 1e-5
+  init_lr: 1e-4
   lr_layer_decay: 1
   weight_decay: 0
   beta2: 0.999
@@ -55,7 +60,7 @@ run:
 
   split_file: "splits/seed42_split3.json"
   output_dir: "run"
-  best_criterion: "quality"
+  best_criterion: "joint"
   tag: "B4_full"
 
   evaluate: False

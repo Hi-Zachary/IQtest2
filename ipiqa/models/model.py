@@ -1,22 +1,39 @@
-"""MSQRNet -- MSQR + SHCMI + TAF stitched onto a neutral CLIP baseline.
+"""MSQRNet -- Frozen CLIP multimodal baseline + residual MSQR / SHCMI / TAF.
 
-Ablation switches (all share this code, one model per variant):
-    use_msqr / use_shcmi / use_taf
+v2 架构（改进1.md）：
 
-Data flow (design doc, one CLIP image forward only):
+    B0 = Frozen CLIP multimodal baseline
+    B1 = B0 + Residual MSQR
+    B2 = B0 + Residual SHCMI
+    B3 = B0 + MSQR + SHCMI
+    B4 = B3 + Residual TAF
 
-    Image --CLIP RN50--> spatial [B,2048,16,16]
-      |--(use_msqr)--> MSQR --> F_fine [B,Nf,D], F_coarse [B,Nc,D]
-      |                    `-> MSQRVisualSkip -> F_visual [B,D]
-      `--(else)--> plain Conv1x1 + AvgPool -> fine/coarse tokens
-    Prompt --CLIP text--> token-level T0 [B,L,512] (+ mask)
-      `--(use_shcmi)--> SHCMI(fine, coarse, T0) -> F_cross [B,D]
-    F_visual + F_cross
-      |--(use_taf)--> TAF -> F_q -> Quality Head ; F_a -> Alignment Head
-      `--(else)-----> concat -> shared MLP -> [quality, alignment]
+Nested 性质（严格消融）：
+    关闭 MSQR            : B1 -> B0
+    关闭 SHCMI           : B2 -> B0
+    关闭 MSQR + SHCMI    : B3 -> B0
+    TAF residual gate=0  : B4 -> B3
 
-When a module is off its stream falls back to the projected CLIP global
-feature, so every B0-B4 variant remains a complete, trainable model.
+Base path（base_visual_proj / base_text_proj / shared_fusion / quality_head /
+align_head）在 B0-B4 中永远存在，任何变体都共享同一套 regression head。
+
+数据流（方案第 16 节）：
+    spatial = CLIP RN50 (frozen)
+    global_v = attnpool(spatial)
+    global_t = text encoder (frozen)
+
+    v0 = base_visual_proj(global_v)
+    t0 = base_text_proj(global_t)
+
+    v = v0 + tanh(lambda_msqr)  * delta_v      (use_msqr)
+    c = t0 + tanh(lambda_shcmi) * delta_c      (use_shcmi)
+
+    h = shared_fusion(concat[v, c])
+
+    h_q = h + tanh(lambda_taf_q) * delta_q     (use_taf)
+    h_a = h + tanh(lambda_taf_a) * delta_a
+
+    q = quality_head(h_q); a = align_head(h_a)
 """
 
 import os
@@ -37,19 +54,6 @@ CLIP_TEXT_WIDTH = 512   # RN50 text transformer width
 CLIP_VISUAL_WIDTH = 1024  # RN50 attnpool output dim
 
 
-def build_mlp(in_dim, out_dim, hidden_dim=None, drop=0.1, tanh=False):
-    hidden_dim = hidden_dim or in_dim
-    layers = [
-        nn.Linear(in_dim, hidden_dim),
-        nn.GELU(),
-        nn.Dropout(drop),
-        nn.Linear(hidden_dim, out_dim),
-    ]
-    if tanh:
-        layers.insert(1, nn.Tanh())
-    return nn.Sequential(*layers)
-
-
 @registry.register_model("msqr_shcmi_taf")
 class MSQRNet(BaseModel):
     def __init__(
@@ -68,9 +72,12 @@ class MSQRNet(BaseModel):
             msqr_use_spatial=True,
             msqr_use_cross_scale=True,
             shcmi_use_multi_kernel=True,
-            gamma_init=0.0,
+            gamma_init=0.0,          # MSQR 内部 cross-scale gamma
+            internal_gate_init=0.01,  # SHCMI 内部 eta/alpha/beta 初始值
+            freeze_visual=True,
             freeze_text=True,
-            head_scale=None,
+            module_lr_scale=1.0,     # 新模块 lr 倍数（FT-CLIP 用 10）
+            head_scale=None,         # 主消融不用；保留兼容
     ):
         super().__init__()
         self.input_resolution = input_resolution
@@ -78,6 +85,10 @@ class MSQRNet(BaseModel):
         self.use_msqr = use_msqr
         self.use_shcmi = use_shcmi
         self.use_taf = use_taf
+        self.freeze_visual = freeze_visual
+        self.freeze_text = freeze_text
+        self.module_lr_scale = module_lr_scale
+        self.head_scale = head_scale
 
         clip_ckpt = clip.load(base_ckpt, device="cpu")[0]
         self.resnet50 = clip_ckpt.visual
@@ -99,7 +110,24 @@ class MSQRNet(BaseModel):
         self.attnpool = self.resnet50.attnpool
         self.resnet50.attnpool = nn.Identity()
 
-        # ---------- visual stream ----------
+        # ====================== B0 base path (永远存在) ======================
+        self.base_visual_proj = nn.Sequential(
+            nn.Linear(CLIP_VISUAL_WIDTH, dim),
+            nn.GELU(),
+        )
+        self.base_text_proj = nn.Sequential(
+            nn.Linear(CLIP_VISUAL_WIDTH, dim),
+            nn.GELU(),
+        )
+        self.shared_fusion = nn.Sequential(
+            nn.Linear(dim * 2, dim),
+            nn.GELU(),
+            nn.Dropout(drop),
+        )
+        self.quality_head = nn.Linear(dim, 1)
+        self.align_head = nn.Linear(dim, 1)
+
+        # ====================== MSQR residual branch ======================
         if use_msqr:
             self.msqr = MSQR(
                 in_channels=2048, dim=dim, num_heads=num_heads,
@@ -110,48 +138,64 @@ class MSQRNet(BaseModel):
                 gamma_init=gamma_init,
             )
             self.visual_skip = MSQRVisualSkip(dim, drop)
-            self.f_visual_proj = None
+            self.lambda_msqr = nn.Parameter(torch.tensor(0.0))
         else:
-            # plain fine/coarse tokens for SHCMI (design section 20)
-            self.plain_proj = nn.Sequential(
+            # Plain Multi-Scale Adapter：仅为 SHCMI 提供多尺度 token，不含任何
+            # attention（B2 不能偷偷包含 MSQR）。
+            self.plain_multiscale_adapter = nn.Sequential(
                 nn.Conv2d(2048, dim, kernel_size=1),
                 nn.GELU(),
             )
             self.visual_skip = None
-            self.f_visual_proj = nn.Linear(CLIP_VISUAL_WIDTH, dim)
+            self.lambda_msqr = None
 
-        # ---------- cross-modal stream ----------
+        # ====================== SHCMI residual branch ======================
         if use_shcmi:
             self.shcmi = SHCMI(
                 text_dim=CLIP_TEXT_WIDTH, dim=dim, num_heads=num_heads,
-                mlp_ratio=mlp_ratio, drop=drop, gamma_init=gamma_init,
+                mlp_ratio=mlp_ratio, drop=drop,
+                gamma_init=internal_gate_init,
                 use_multi_kernel=shcmi_use_multi_kernel,
             )
-            self.f_cross_proj = None
+            self.lambda_shcmi = nn.Parameter(torch.tensor(0.0))
         else:
             self.shcmi = None
-            self.f_cross_proj = nn.Linear(CLIP_VISUAL_WIDTH, dim)
+            self.lambda_shcmi = None
 
-        # ---------- fusion + heads ----------
+        # ====================== TAF residual branch ======================
         if use_taf:
             self.taf = TAF(dim, drop, gate_zero_init=True)
-            self.quality_head = build_mlp(dim, 1, dim, drop)
-            self.align_head = build_mlp(dim, 1, dim, drop)
-            self.shared_head = None
+            self.lambda_taf_q = nn.Parameter(torch.tensor(0.0))
+            self.lambda_taf_a = nn.Parameter(torch.tensor(0.0))
         else:
             self.taf = None
-            self.quality_head = None
-            self.align_head = None
-            self.shared_head = build_mlp(dim * 2, output_dim, dim * 2, drop)
+            self.lambda_taf_q = None
+            self.lambda_taf_a = None
 
-        self.head_scale = head_scale
-
+        # ====================== freeze ======================
+        if freeze_visual:
+            for p in self.resnet50.parameters():
+                p.requires_grad = False
+            for p in self.attnpool.parameters():
+                p.requires_grad = False
         if freeze_text:
             freeze_module(self.txt_model)
             freeze_module(self.wte)
             freeze_module(self.ln_final)
             freeze_module(self.txt_pos)
             freeze_module(self.text_projection)
+
+        self._last_ratios = {}
+
+    # ---------------- train/eval override (冻结 BN 统计) ----------------
+    def train(self, mode=True):
+        super().train(mode)
+        if self.freeze_visual:
+            self.resnet50.eval()
+            self.attnpool.eval()
+        if self.freeze_text:
+            self.txt_model.eval()
+        return self
 
     # ------------------------------------------------------------------ #
     def encode_text(self, text):
@@ -171,94 +215,143 @@ class MSQRNet(BaseModel):
         return x, mask, global_t
 
     def build_plain_tokens(self, spatial):
-        """fine/coarse tokens without any attention (used when MSQR is off)."""
-        f0 = self.plain_proj(spatial)                     # [B, D, H, W]
+        """fine/coarse tokens without any attention (Plain Multi-Scale Adapter)."""
+        f0 = self.plain_multiscale_adapter(spatial)       # [B, D, H, W]
         B, C, H, W = f0.shape
         fine = f0.flatten(2).transpose(1, 2)              # [B, H*W, D]
         coarse = F.avg_pool2d(f0, kernel_size=2).flatten(2).transpose(1, 2)
         return fine, coarse
 
     def forward(self, x, text):
-        token_feat, text_mask, global_t = self.encode_text(text)
-
+        # ===================== 1. Frozen CLIP backbone =====================
         spatial = self.resnet50(x)                        # [B,2048,16,16]
         global_v = self.attnpool(spatial)                 # [B,1024]
+        text_tokens, text_mask, global_t = self.encode_text(text)
 
-        # ----- visual stream -----
+        # ===================== 2. B0 anchors =====================
+        v0 = self.base_visual_proj(global_v)              # [B, D]
+        t0 = self.base_text_proj(global_t)                # [B, D]
+        v = v0
+        c = t0
+
+        ratios = {}
+
+        # ===================== 3. visual tokens =====================
         if self.use_msqr:
             fine, coarse = self.msqr(spatial)
-            f_visual = self.visual_skip(fine, coarse)     # [B, D]
+            delta_v = self.visual_skip(fine, coarse)      # [B, D]
+            msqr_scale = torch.tanh(self.lambda_msqr)
+            v = v0 + msqr_scale * delta_v
+            ratios["msqr_ratio"] = (
+                (msqr_scale * delta_v).norm(dim=-1).mean() / v0.norm(dim=-1).mean()
+            ).item()
         else:
             fine, coarse = self.build_plain_tokens(spatial)
-            f_visual = self.f_visual_proj(global_v)       # [B, D]
 
-        # ----- cross-modal stream -----
+        # ===================== 4. SHCMI residual =====================
         if self.use_shcmi:
-            f_cross = self.shcmi(fine, coarse, token_feat, text_mask)
-        else:
-            f_cross = self.f_cross_proj(global_t)         # [B, D]
+            delta_c = self.shcmi(fine, coarse, text_tokens, text_mask)  # [B, D]
+            shcmi_scale = torch.tanh(self.lambda_shcmi)
+            c = t0 + shcmi_scale * delta_c
+            ratios["shcmi_ratio"] = (
+                (shcmi_scale * delta_c).norm(dim=-1).mean() / t0.norm(dim=-1).mean()
+            ).item()
 
-        # ----- fusion + heads -----
+        # ===================== 5. Shared representation =====================
+        h = self.shared_fusion(torch.cat([v, c], dim=-1))  # [B, D]
+
+        # ===================== 6. TAF residual =====================
         if self.use_taf:
-            f_q, f_a = self.taf(f_visual, f_cross)
-            q = self.quality_head(f_q)
-            a = self.align_head(f_a)
-            return torch.cat([q, a], dim=-1)
+            g_q, g_a = self.taf.compute_gates(v, c)
+            mix_q = g_q * v + (1.0 - g_q) * c
+            mix_a = g_a * v + (1.0 - g_a) * c
+            delta_q = self.taf.quality_adapter(mix_q)
+            delta_a = self.taf.align_adapter(mix_a)
+
+            taf_q_scale = torch.tanh(self.lambda_taf_q)
+            taf_a_scale = torch.tanh(self.lambda_taf_a)
+            h_q = h + taf_q_scale * delta_q
+            h_a = h + taf_a_scale * delta_a
+
+            ratios["taf_q_ratio"] = (
+                (taf_q_scale * delta_q).norm(dim=-1).mean() / h.norm(dim=-1).mean()
+            ).item()
+            ratios["taf_a_ratio"] = (
+                (taf_a_scale * delta_a).norm(dim=-1).mean() / h.norm(dim=-1).mean()
+            ).item()
         else:
-            feat = torch.cat([f_visual, f_cross], dim=-1)
-            return self.shared_head(feat)
+            h_q = h
+            h_a = h
+
+        # ===================== 7. same task heads =====================
+        q = self.quality_head(h_q)
+        a = self.align_head(h_a)
+
+        self._last_ratios = ratios
+        return torch.cat([q, a], dim=-1)
+
+    # ---------------- gate / residual logging ----------------
+    def get_gate_log(self):
+        """每 epoch 记录真实 gate 参数值与 residual ratio（方案 23/24 节）。"""
+        out = dict(self._last_ratios)
+
+        if self.use_msqr:
+            out["lambda_msqr"] = torch.tanh(self.lambda_msqr).item()
+            out["gamma_f"] = self.msqr.gamma_f.item()
+            out["gamma_c"] = self.msqr.gamma_c.item()
+        if self.use_shcmi:
+            out["lambda_shcmi"] = torch.tanh(self.lambda_shcmi).item()
+            out["eta"] = self.shcmi.eta.item()
+            out["alpha_f"] = self.shcmi.alpha_f.item()
+            out["beta_f"] = self.shcmi.beta_f.item()
+            out["alpha_c"] = self.shcmi.alpha_c.item()
+            out["beta_c"] = self.shcmi.beta_c.item()
+            sg = getattr(self.shcmi, "_last_scale_gate", None)
+            if sg is not None:
+                out["scale_gate_mean"] = round(sg.mean().item(), 4)
+                out["scale_gate_std"] = round(sg.std().item(), 4)
+        if self.use_taf:
+            out["lambda_taf_q"] = torch.tanh(self.lambda_taf_q).item()
+            out["lambda_taf_a"] = torch.tanh(self.lambda_taf_a).item()
+            gq, ga = getattr(self.taf, "_last_gates", (None, None))
+            if gq is not None:
+                out["g_q_mean"] = round(gq.mean().item(), 4)
+                out["g_q_std"] = round(gq.std().item(), 4)
+                out["g_a_mean"] = round(ga.mean().item(), 4)
+                out["g_a_std"] = round(ga.std().item(), 4)
+        return out
 
     # ------------------------------------------------------------------ #
     def get_optimizer_params(self, weight_decay, lr_scale=1):
-        """Grouped LR: CLIP backbone 1x, new modules 10x, heads/gates high."""
-        base_wd, base_nowd = [], []
-        module_wd, module_nowd = [], []
-        head_wd, head_nowd = [], []
-        gate_params = []
+        """简单分组：backbone（若可训练）1x，其余新层 module_lr_scale。
 
-        module_prefixes = ("msqr.", "shcmi.", "visual_skip.", "plain_proj.",
-                           "f_visual_proj.", "f_cross_proj.", "taf.")
+        主消融 B0-B4 全冻结 backbone，因此所有可训练参数都是新层，统一
+        lr_scale = module_lr_scale（默认 1，即全 1e-4）。
+        FT-CLIP 设 module_lr_scale=10 -> backbone 1x / new 10x。
+        """
+        backbone_prefixes = (
+            "resnet50.", "attnpool.", "txt_model.", "wte.",
+            "ln_final.", "txt_pos.", "text_projection.",
+        )
+        backbone_wd, backbone_nowd = [], []
+        new_wd, new_nowd = [], []
+
         for n, p in self.named_parameters():
             if not p.requires_grad:
                 continue
-            is_head = n.startswith("quality_head") or n.startswith("align_head") \
-                or n.startswith("shared_head")
             is_nowd = p.ndim < 2 or "bias" in n or "ln" in n or "bn" in n
-            if is_head:
-                (head_nowd if is_nowd else head_wd).append(p)
-            elif n.startswith("taf."):
-                gate_params.append(p)  # gates, zero-init, no wd
-            elif any(n.startswith(pfx) for pfx in module_prefixes):
-                (module_nowd if is_nowd else module_wd).append(p)
+            if any(n.startswith(pfx) for pfx in backbone_prefixes):
+                (backbone_nowd if is_nowd else backbone_wd).append(p)
             else:
-                (base_nowd if is_nowd else base_wd).append(p)
+                (new_nowd if is_nowd else new_wd).append(p)
 
         optim_params = [
-            {"params": base_wd, "weight_decay": weight_decay, "lr_scale": lr_scale},
-            {"params": base_nowd, "weight_decay": 0, "lr_scale": lr_scale},
-            {"params": module_wd, "weight_decay": weight_decay, "lr_scale": 10.0 * lr_scale},
-            {"params": module_nowd, "weight_decay": 0, "lr_scale": 10.0 * lr_scale},
-            {"params": head_wd, "weight_decay": weight_decay, "lr_scale": 10.0 * lr_scale},
-            {"params": head_nowd, "weight_decay": 0, "lr_scale": 10.0 * lr_scale},
-            {"params": gate_params, "weight_decay": 0, "lr_scale": 10.0 * lr_scale},
+            {"params": backbone_wd, "weight_decay": weight_decay, "lr_scale": lr_scale},
+            {"params": backbone_nowd, "weight_decay": 0, "lr_scale": lr_scale},
+            {"params": new_wd, "weight_decay": weight_decay, "lr_scale": self.module_lr_scale * lr_scale},
+            {"params": new_nowd, "weight_decay": 0, "lr_scale": self.module_lr_scale * lr_scale},
         ]
-        if self.head_scale:
-            for g in optim_params:
-                if g["params"] is gate_params:
-                    pass
-            # scale head group further if head_scale is set
-            optim_params = [
-                {
-                    "params": g["params"],
-                    "weight_decay": g["weight_decay"],
-                    "lr_scale": g["lr_scale"] * (self.head_scale if (
-                        g["params"] is head_wd or g["params"] is head_nowd
-                    ) else 1.0),
-                }
-                for g in optim_params
-            ]
-        optim_params = [g for g in optim_params if len(g["params"]) > 0]
-        return optim_params
+        return [g for g in optim_params if len(g["params"]) > 0]
 
     @classmethod
     def from_config(cls, cfg):
@@ -277,7 +370,10 @@ class MSQRNet(BaseModel):
         msqr_use_cross_scale = cfg.get("msqr_use_cross_scale", True)
         shcmi_use_multi_kernel = cfg.get("shcmi_use_multi_kernel", True)
         gamma_init = cfg.get("gamma_init", 0.0)
+        internal_gate_init = cfg.get("internal_gate_init", 0.01)
+        freeze_visual = cfg.get("freeze_visual", True)
         freeze_text = cfg.get("freeze_text", True)
+        module_lr_scale = cfg.get("module_lr_scale", 1.0)
         head_scale = cfg.get("head_scale", None)
 
         model = cls(
@@ -296,7 +392,10 @@ class MSQRNet(BaseModel):
             msqr_use_cross_scale=msqr_use_cross_scale,
             shcmi_use_multi_kernel=shcmi_use_multi_kernel,
             gamma_init=gamma_init,
+            internal_gate_init=internal_gate_init,
+            freeze_visual=freeze_visual,
             freeze_text=freeze_text,
+            module_lr_scale=module_lr_scale,
             head_scale=head_scale,
         )
         return model

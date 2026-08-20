@@ -2,10 +2,14 @@
 
 Adapted from CHPNet (IEEE TBC 2026, github.com/NUIST-Videocoding/CHPNet)
 ``MSA_T`` + ``DualAttn`` logic, but:
-  - visual backbone kept as MSQR outputs (no second backbone),
+  - visual backbone kept as MSQR/plain fine-coarse tokens (no second backbone),
   - prompt comes from CLIP text tokens (token-level hidden states + mask),
   - fine/coarse level each do bidirectional visual<->prompt interaction,
   - adaptive scale gate fuses the two cross-modal representations.
+
+Output semantics (v2, 改进1.md): SHCMI outputs a **cross-modal residual**
+``delta_c``; the caller combines it as ``c = t0 + tanh(lambda_shcmi) * delta_c``
+where ``t0`` is the base CLIP global text projection.
 
 Data flow (design sections 8-13):
     T0 [B, L, C_text] --Linear--> T [B, L, D]
@@ -15,7 +19,7 @@ Data flow (design sections 8-13):
     C_f = MLP([MeanPool(V_f'); MaskedMeanPool(T_f')])
     C_c = MLP([MeanPool(V_c'); MaskedMeanPool(T_c')])
     g_s = Sigmoid(MLP([C_f; C_c]))
-    F_cross = g_s * C_f + (1 - g_s) * C_c
+    F_cross = g_s * C_f + (1 - g_s) * C_c   == delta_c
 """
 
 import torch
@@ -32,7 +36,7 @@ from ipiqa.models.modules.attention import (
 
 class SHCMI(nn.Module):
     def __init__(self, text_dim=512, dim=256, num_heads=4, mlp_ratio=2.0,
-                 drop=0.1, gamma_init=0.0, use_multi_kernel=True):
+                 drop=0.1, gamma_init=0.01, use_multi_kernel=True):
         super().__init__()
         self.dim = dim
         self.use_multi_kernel = use_multi_kernel
@@ -66,6 +70,8 @@ class SHCMI(nn.Module):
         self.alpha_c = nn.Parameter(torch.tensor(float(gamma_init)))
         self.beta_c = nn.Parameter(torch.tensor(float(gamma_init)))
 
+        self._last_scale_gate = None
+
     def forward(self, fine, coarse, text_tokens, text_mask):
         # fine: [B, Nf, D], coarse: [B, Nc, D]
         # text_tokens: [B, L, C_text], text_mask: [B, L]
@@ -97,6 +103,8 @@ class SHCMI(nn.Module):
 
         # adaptive scale fusion
         g_s = torch.sigmoid(self.scale_gate(torch.cat([C_f, C_c], dim=-1)))
-        F_cross = g_s * C_f + (1.0 - g_s) * C_c   # [B, D]
+        self._last_scale_gate = g_s.detach().float()
+        delta_c = g_s * C_f + (1.0 - g_s) * C_c   # [B, D]
 
-        return F_cross
+        return delta_c
+

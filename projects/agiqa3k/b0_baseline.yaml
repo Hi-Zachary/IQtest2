@@ -1,19 +1,23 @@
-# B0 (AGIQA-3K): 真正中性的 CLIP 图文基线
-# concat [global_v; global_t] -> MLP -> [quality, alignment]
-# 协议与 B1-B4 完全一致: seed42 固定划分 / batch 32 / 512 / 100 epoch / warmup+cosine
+# B0 (AGIQA-3K, split3): Frozen CLIP multimodal baseline
+# 改进1.md v2: CLIP visual/text 全冻结，只训练 base proj / shared fusion / heads
+# 协议: seed42_split3 / 100 epoch / 512 / batch 48 / init_lr 1e-4 / 无 head_scale
 model:
   arch: "msqr_shcmi_taf"
   base_ckpt: data/ckpt/clip/openai/resnet/RN50.pt
   input_resolution: 512
   output_dim: 2
-  freeze_text: True
-  head_scale: 10.
-  dropout_rate: 0.1
 
+  freeze_visual: True
+  freeze_text: True
+  module_lr_scale: 1.0
+  head_scale: null
+
+  dropout_rate: 0.1
   dim: 256
   num_heads: 4
   mlp_ratio: 2.0
   gamma_init: 0.0
+  internal_gate_init: 0.01
 
   use_msqr: False
   use_shcmi: False
@@ -38,10 +42,10 @@ run:
   lr_sched: "linear_warmup_cosine_lr"
   lr_decay_rate: null
   warmup_lr: 0
-  warmup_steps: 75
+  warmup_steps: 50
   min_lr: 1e-6
 
-  init_lr: 1e-5
+  init_lr: 1e-4
   lr_layer_decay: 1
   weight_decay: 0
   beta2: 0.999
@@ -50,15 +54,15 @@ run:
   batch_size_val: 48
   num_worker: 12
 
-  max_epoch: 100
+  max_epoch: 50
   log_freq: 20
   accum_grad_iters: 1
   grad_norm_clip: null
 
   split_file: "splits/seed42_split3.json"
   output_dir: "run"
-  best_criterion: "quality"
-  tag: "B0_baseline"
+  best_criterion: "joint"
+  tag: "B0_frozen"
 
   evaluate: False
   eval_freq: 1
