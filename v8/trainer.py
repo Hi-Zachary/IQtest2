@@ -391,6 +391,17 @@ class Trainer:
         if not self.evaluate_only and self.resume_ckpt_path is not None:
             self._load_checkpoint(self.resume_ckpt_path)
 
+        # init_ckpt: 只加载模型初始化权重（matched-initialization 控制，8.md V11.1）
+        init_ckpt = self.config.run.get("init_ckpt_path", None)
+        if not self.evaluate_only and init_ckpt is not None:
+            if os.path.isfile(init_ckpt):
+                ckpt = torch.load(init_ckpt, map_location=self.device)
+                sd = ckpt["model"] if isinstance(ckpt, dict) and "model" in ckpt else ckpt
+                self.unwrap_dist_model(self.model).load_state_dict(sd, strict=False)
+                logging.info("Loaded init weights from {}".format(init_ckpt))
+            else:
+                raise RuntimeError("init_ckpt_path is invalid: {}".format(init_ckpt))
+
         for cur_epoch in range(self.start_epoch, self.max_epoch):
             # training phase
             if not self.evaluate_only:

@@ -50,6 +50,7 @@ class MSQRNetV11(BaseModel):
             lora_dropout=0.0,
             use_dg_mpq=True,
             use_mscm=True,
+            matched_init=False,
             freeze_visual=True,
             freeze_text=True,
             outer_gate_init=0.01,
@@ -62,6 +63,7 @@ class MSQRNetV11(BaseModel):
         self.use_dual_lora = use_dual_lora
         self.use_dg_mpq = use_dg_mpq
         self.use_mscm = use_mscm
+        self.matched_init = matched_init
         self.freeze_visual = freeze_visual
         self.freeze_text = freeze_text
         self.lora_lr_scale = lora_lr_scale
@@ -89,7 +91,7 @@ class MSQRNetV11(BaseModel):
             nn.Linear(dim * 2, dim), nn.GELU(), nn.Dropout(drop),
         )
         self.quality_head = nn.Linear(dim, 1)
-        if use_dg_mpq:
+        if use_dg_mpq or matched_init:   # V11.1: matched_init 时始终实例化
             self.dg_mpq = DgMpq(width=self.backbone.visual_width, dim=dim)
             self.lambda_q = nn.Parameter(torch.tensor(self.outer_gate_init))
         else:
@@ -103,12 +105,12 @@ class MSQRNetV11(BaseModel):
         self.alignment_text_proj = nn.Sequential(
             nn.Linear(self.backbone.projection_dim, dim), nn.GELU(),
         )
-        align_in = dim * 3 if use_mscm else dim * 2
+        align_in = dim * 3 if (use_mscm or matched_init) else dim * 2
         self.alignment_fusion = nn.Sequential(
             nn.Linear(align_in, dim), nn.GELU(), nn.Dropout(drop),
         )
         self.align_head = nn.Linear(dim, 1)
-        if use_mscm:
+        if use_mscm or matched_init:   # V11.1: matched_init 时始终实例化
             self.mscm = MSCM(
                 visual_width=self.backbone.visual_width,
                 dim=dim,
@@ -178,9 +180,15 @@ class MSQRNetV11(BaseModel):
                 global_v_a,
                 global_t,
             )
-            h_a = self.alignment_fusion(torch.cat([v_a, t_a, a_corr], dim=-1))
+        elif self.matched_init:
+            a_corr = torch.zeros_like(t_a)          # V11.1: 保持 fusion 3D 布局
         else:
+            a_corr = None
+
+        if a_corr is None:
             h_a = self.alignment_fusion(torch.cat([v_a, t_a], dim=-1))
+        else:
+            h_a = self.alignment_fusion(torch.cat([v_a, t_a, a_corr], dim=-1))
         a = self.align_head(h_a)
 
         self._last_ratios = ratios
@@ -282,6 +290,7 @@ class MSQRNetV11(BaseModel):
             lora_dropout=cfg.get('lora_dropout', 0.0),
             use_dg_mpq=cfg.get('use_dg_mpq', True),
             use_mscm=cfg.get('use_mscm', True),
+            matched_init=cfg.get('matched_init', False),
             freeze_visual=cfg.get('freeze_visual', True),
             freeze_text=cfg.get('freeze_text', True),
             outer_gate_init=cfg.get('outer_gate_init', 0.01),
