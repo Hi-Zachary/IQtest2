@@ -1,0 +1,594 @@
+2026-08-21 22:42:23,939 [INFO] Loaded init weights from init_ckpt/v17_init_seed42.pth
+2026-08-21 22:42:23,939 [INFO] Start training
+2026-08-21 22:42:23,958 [INFO] number of trainable parameters: 2886534
+Not using distributed mode
+['msqr_dgmpq_daps_v16', 'msqr_dgmpq_hcmi_v8', 'msqr_dgmpq_mscm_v10', 'msqr_dgmpq_mscm_v11', 'msqr_dgmpq_mscm_v12', 'msqr_dgmpq_msrc_v14', 'msqr_dgmpq_ptlc_v15', 'msqr_dgmpq_qard_v17', 'msqr_dgmpq_tcap_v9']
+2026-08-21 22:42:26,253 [INFO] Start training epoch 0, 30 iters per inner epoch.
+2026-08-21 22:42:50,367 [INFO] Averaged stats: lr: 0.000029  loss: 0.201092
+2026-08-21 22:42:50,487 [INFO] gates: {"epoch": 0, "raw_quality_ratio": 6.628, "quality_ratio": 0.0725, "decoder_ratio": 0.0697, "lambda_q": 0.011, "deviation_mean": 1.0323, "deviation_std": 0.0562, "patch_w_mean": 0.5179, "patch_w_std": 0.0097, "lambda_d": 0.0107, "qard_attn_entropy": 0.9886, "qard_attn_max": 0.0106, "qard_decoder_norm": 16.0143, "qard_memory_norm": 5.8949}
+2026-08-21 22:42:50,488 [INFO] Evaluating on val.
+Train: data epoch: [0]  [ 0/30]  eta: 0:04:29  lr: 0.000000  loss: 0.2729  time: 8.9943  data: 0.0001  max mem: 5167
+Train: data epoch: [0]  [20/30]  eta: 0:00:09  lr: 0.000040  loss: 0.1817  time: 0.5624  data: 0.0000  max mem: 5189
+Train: data epoch: [0]  [29/30]  eta: 0:00:00  lr: 0.000058  loss: 0.0925  time: 0.5024  data: 0.0000  max mem: 5189
+Train: data epoch: [0] Total time: 0:00:24 (0.8038 s / it)
+2026-08-21 22:42:56,595 [INFO] Qual: EPOCH[0] -> PLCC: -0.132604, SROCC: -0.147353, KROCC: -0.097843, LOSS: 0.122057
+2026-08-21 22:42:56,595 [INFO] Align: EPOCH[0] -> PLCC: 0.042164, SROCC: 0.047422, KROCC: 0.029871, LOSS: 0.053813
+2026-08-21 22:42:56,614 [INFO] Saving checkpoint at epoch 0 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:42:56,728 [INFO] Saving checkpoint at epoch 0 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:42:56,864 [INFO] Start training
+2026-08-21 22:42:57,480 [INFO] Start training epoch 1, 30 iters per inner epoch.
+2026-08-21 22:43:16,740 [INFO] Averaged stats: lr: 0.000100  loss: 0.024279
+2026-08-21 22:43:16,838 [INFO] gates: {"epoch": 1, "raw_quality_ratio": 5.9004, "quality_ratio": 0.0729, "decoder_ratio": 0.0689, "lambda_q": 0.0123, "deviation_mean": 1.0429, "deviation_std": 0.0572, "patch_w_mean": 0.5342, "patch_w_std": 0.0154, "lambda_d": 0.012, "qard_attn_entropy": 0.9863, "qard_attn_max": 0.0103, "qard_decoder_norm": 16.0274, "qard_memory_norm": 7.2899}
+2026-08-21 22:43:16,838 [INFO] Evaluating on val.
+Train: data epoch: [1]  [ 0/30]  eta: 0:02:08  lr: 0.000100  loss: 0.0988  time: 4.2762  data: 0.0001  max mem: 5189
+Train: data epoch: [1]  [20/30]  eta: 0:00:07  lr: 0.000100  loss: 0.0189  time: 0.5755  data: 0.0000  max mem: 5189
+Train: data epoch: [1]  [29/30]  eta: 0:00:00  lr: 0.000100  loss: 0.0080  time: 0.4860  data: 0.0000  max mem: 5189
+Train: data epoch: [1] Total time: 0:00:19 (0.6420 s / it)
+2026-08-21 22:43:21,586 [INFO] Qual: EPOCH[1] -> PLCC: 0.166199, SROCC: 0.171370, KROCC: 0.111517, LOSS: 0.010640
+2026-08-21 22:43:21,586 [INFO] Align: EPOCH[1] -> PLCC: 0.216314, SROCC: 0.223367, KROCC: 0.148434, LOSS: 0.008216
+2026-08-21 22:43:21,601 [INFO] Saving checkpoint at epoch 1 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:43:21,786 [INFO] Saving checkpoint at epoch 1 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:43:21,951 [INFO] Start training
+2026-08-21 22:43:22,457 [INFO] Start training epoch 2, 30 iters per inner epoch.
+2026-08-21 22:43:39,902 [INFO] Averaged stats: lr: 0.000100  loss: 0.006523
+2026-08-21 22:43:40,012 [INFO] gates: {"epoch": 2, "raw_quality_ratio": 5.9709, "quality_ratio": 0.0741, "decoder_ratio": 0.0696, "lambda_q": 0.0124, "deviation_mean": 1.0561, "deviation_std": 0.0521, "patch_w_mean": 0.5343, "patch_w_std": 0.0157, "lambda_d": 0.0121, "qard_attn_entropy": 0.9862, "qard_attn_max": 0.0102, "qard_decoder_norm": 16.0299, "qard_memory_norm": 7.3758}
+2026-08-21 22:43:40,013 [INFO] Evaluating on val.
+Train: data epoch: [2]  [ 0/30]  eta: 0:01:44  lr: 0.000100  loss: 0.0057  time: 3.4989  data: 0.0001  max mem: 5189
+Train: data epoch: [2]  [20/30]  eta: 0:00:06  lr: 0.000100  loss: 0.0049  time: 0.5261  data: 0.0000  max mem: 5189
+Train: data epoch: [2]  [29/30]  eta: 0:00:00  lr: 0.000100  loss: 0.0061  time: 0.4417  data: 0.0000  max mem: 5189
+Train: data epoch: [2] Total time: 0:00:17 (0.5815 s / it)
+2026-08-21 22:43:45,721 [INFO] Qual: EPOCH[2] -> PLCC: 0.453165, SROCC: 0.444337, KROCC: 0.301148, LOSS: 0.007442
+2026-08-21 22:43:45,722 [INFO] Align: EPOCH[2] -> PLCC: 0.388849, SROCC: 0.378559, KROCC: 0.255915, LOSS: 0.006326
+2026-08-21 22:43:45,737 [INFO] Saving checkpoint at epoch 2 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:43:45,826 [INFO] Saving checkpoint at epoch 2 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:43:45,899 [INFO] Start training
+2026-08-21 22:43:46,191 [INFO] Start training epoch 3, 30 iters per inner epoch.
+2026-08-21 22:44:01,679 [INFO] Averaged stats: lr: 0.000099  loss: 0.004246
+2026-08-21 22:44:01,816 [INFO] gates: {"epoch": 3, "raw_quality_ratio": 6.1756, "quality_ratio": 0.0771, "decoder_ratio": 0.0723, "lambda_q": 0.0125, "deviation_mean": 1.0475, "deviation_std": 0.0498, "patch_w_mean": 0.5316, "patch_w_std": 0.0156, "lambda_d": 0.0121, "qard_attn_entropy": 0.9863, "qard_attn_max": 0.0104, "qard_decoder_norm": 16.0306, "qard_memory_norm": 7.4276}
+2026-08-21 22:44:01,817 [INFO] Evaluating on val.
+Train: data epoch: [3]  [ 0/30]  eta: 0:00:51  lr: 0.000099  loss: 0.0044  time: 1.7167  data: 0.0001  max mem: 5189
+Train: data epoch: [3]  [20/30]  eta: 0:00:05  lr: 0.000099  loss: 0.0051  time: 0.5397  data: 0.0000  max mem: 5189
+Train: data epoch: [3]  [29/30]  eta: 0:00:00  lr: 0.000099  loss: 0.0034  time: 0.4315  data: 0.0000  max mem: 5189
+Train: data epoch: [3] Total time: 0:00:15 (0.5162 s / it)
+2026-08-21 22:44:07,447 [INFO] Qual: EPOCH[3] -> PLCC: 0.632175, SROCC: 0.640439, KROCC: 0.448278, LOSS: 0.005907
+2026-08-21 22:44:07,447 [INFO] Align: EPOCH[3] -> PLCC: 0.496276, SROCC: 0.484178, KROCC: 0.332376, LOSS: 0.005427
+2026-08-21 22:44:07,467 [INFO] Saving checkpoint at epoch 3 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:44:07,570 [INFO] Saving checkpoint at epoch 3 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:44:07,643 [INFO] Start training
+2026-08-21 22:44:07,934 [INFO] Start training epoch 4, 30 iters per inner epoch.
+2026-08-21 22:44:23,002 [INFO] Averaged stats: lr: 0.000098  loss: 0.003463
+2026-08-21 22:44:23,151 [INFO] gates: {"epoch": 4, "raw_quality_ratio": 6.2152, "quality_ratio": 0.078, "decoder_ratio": 0.0731, "lambda_q": 0.0126, "deviation_mean": 1.0462, "deviation_std": 0.0526, "patch_w_mean": 0.5306, "patch_w_std": 0.0153, "lambda_d": 0.0122, "qard_attn_entropy": 0.986, "qard_attn_max": 0.0102, "qard_decoder_norm": 16.0322, "qard_memory_norm": 7.3527}
+2026-08-21 22:44:23,151 [INFO] Evaluating on val.
+Train: data epoch: [4]  [ 0/30]  eta: 0:00:51  lr: 0.000098  loss: 0.0039  time: 1.7260  data: 0.0001  max mem: 5189
+Train: data epoch: [4]  [20/30]  eta: 0:00:05  lr: 0.000098  loss: 0.0032  time: 0.5330  data: 0.0000  max mem: 5189
+Train: data epoch: [4]  [29/30]  eta: 0:00:00  lr: 0.000098  loss: 0.0029  time: 0.4098  data: 0.0000  max mem: 5189
+Train: data epoch: [4] Total time: 0:00:15 (0.5022 s / it)
+2026-08-21 22:44:28,673 [INFO] Qual: EPOCH[4] -> PLCC: 0.678757, SROCC: 0.690020, KROCC: 0.487891, LOSS: 0.005213
+2026-08-21 22:44:28,673 [INFO] Align: EPOCH[4] -> PLCC: 0.525461, SROCC: 0.515086, KROCC: 0.354523, LOSS: 0.005115
+2026-08-21 22:44:28,687 [INFO] Saving checkpoint at epoch 4 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:44:28,787 [INFO] Saving checkpoint at epoch 4 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:44:28,873 [INFO] Start training
+2026-08-21 22:44:29,176 [INFO] Start training epoch 5, 30 iters per inner epoch.
+2026-08-21 22:44:43,959 [INFO] Averaged stats: lr: 0.000098  loss: 0.003098
+2026-08-21 22:44:44,107 [INFO] gates: {"epoch": 5, "raw_quality_ratio": 6.2087, "quality_ratio": 0.0783, "decoder_ratio": 0.0733, "lambda_q": 0.0126, "deviation_mean": 1.0425, "deviation_std": 0.0554, "patch_w_mean": 0.5308, "patch_w_std": 0.0144, "lambda_d": 0.0122, "qard_attn_entropy": 0.9856, "qard_attn_max": 0.0105, "qard_decoder_norm": 16.0335, "qard_memory_norm": 7.3574}
+2026-08-21 22:44:44,108 [INFO] Evaluating on val.
+Train: data epoch: [5]  [ 0/30]  eta: 0:00:53  lr: 0.000098  loss: 0.0032  time: 1.7927  data: 0.0001  max mem: 5189
+Train: data epoch: [5]  [20/30]  eta: 0:00:05  lr: 0.000098  loss: 0.0030  time: 0.5317  data: 0.0000  max mem: 5189
+Train: data epoch: [5]  [29/30]  eta: 0:00:00  lr: 0.000098  loss: 0.0034  time: 0.4006  data: 0.0000  max mem: 5189
+Train: data epoch: [5] Total time: 0:00:14 (0.4928 s / it)
+2026-08-21 22:44:50,095 [INFO] Qual: EPOCH[5] -> PLCC: 0.702907, SROCC: 0.713550, KROCC: 0.507829, LOSS: 0.004741
+2026-08-21 22:44:50,096 [INFO] Align: EPOCH[5] -> PLCC: 0.541202, SROCC: 0.533064, KROCC: 0.366719, LOSS: 0.004878
+2026-08-21 22:44:50,113 [INFO] Saving checkpoint at epoch 5 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:44:50,215 [INFO] Saving checkpoint at epoch 5 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:44:50,301 [INFO] Start training
+2026-08-21 22:44:50,625 [INFO] Start training epoch 6, 30 iters per inner epoch.
+2026-08-21 22:45:06,260 [INFO] Averaged stats: lr: 0.000097  loss: 0.002825
+2026-08-21 22:45:06,408 [INFO] gates: {"epoch": 6, "raw_quality_ratio": 6.0746, "quality_ratio": 0.077, "decoder_ratio": 0.072, "lambda_q": 0.0127, "deviation_mean": 1.0442, "deviation_std": 0.0522, "patch_w_mean": 0.5285, "patch_w_std": 0.0135, "lambda_d": 0.0123, "qard_attn_entropy": 0.9861, "qard_attn_max": 0.0103, "qard_decoder_norm": 16.0353, "qard_memory_norm": 7.3026}
+2026-08-21 22:45:06,409 [INFO] Evaluating on val.
+Train: data epoch: [6]  [ 0/30]  eta: 0:00:55  lr: 0.000097  loss: 0.0025  time: 1.8520  data: 0.0001  max mem: 5189
+Train: data epoch: [6]  [20/30]  eta: 0:00:05  lr: 0.000097  loss: 0.0029  time: 0.5271  data: 0.0000  max mem: 5189
+Train: data epoch: [6]  [29/30]  eta: 0:00:00  lr: 0.000097  loss: 0.0024  time: 0.4320  data: 0.0000  max mem: 5189
+Train: data epoch: [6] Total time: 0:00:15 (0.5211 s / it)
+2026-08-21 22:45:11,669 [INFO] Qual: EPOCH[6] -> PLCC: 0.717345, SROCC: 0.727524, KROCC: 0.520529, LOSS: 0.004446
+2026-08-21 22:45:11,669 [INFO] Align: EPOCH[6] -> PLCC: 0.555559, SROCC: 0.547834, KROCC: 0.378793, LOSS: 0.004776
+2026-08-21 22:45:11,683 [INFO] Saving checkpoint at epoch 6 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:45:11,766 [INFO] Saving checkpoint at epoch 6 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:45:11,839 [INFO] Start training
+2026-08-21 22:45:12,137 [INFO] Start training epoch 7, 30 iters per inner epoch.
+2026-08-21 22:45:27,938 [INFO] Averaged stats: lr: 0.000095  loss: 0.002647
+2026-08-21 22:45:28,064 [INFO] gates: {"epoch": 7, "raw_quality_ratio": 6.0919, "quality_ratio": 0.0774, "decoder_ratio": 0.0723, "lambda_q": 0.0127, "deviation_mean": 1.0392, "deviation_std": 0.0557, "patch_w_mean": 0.5268, "patch_w_std": 0.0128, "lambda_d": 0.0123, "qard_attn_entropy": 0.9863, "qard_attn_max": 0.0103, "qard_decoder_norm": 16.0356, "qard_memory_norm": 7.3366}
+2026-08-21 22:45:28,064 [INFO] Evaluating on val.
+Train: data epoch: [7]  [ 0/30]  eta: 0:00:53  lr: 0.000095  loss: 0.0023  time: 1.7719  data: 0.0001  max mem: 5189
+Train: data epoch: [7]  [20/30]  eta: 0:00:05  lr: 0.000095  loss: 0.0024  time: 0.5227  data: 0.0000  max mem: 5189
+Train: data epoch: [7]  [29/30]  eta: 0:00:00  lr: 0.000095  loss: 0.0026  time: 0.4445  data: 0.0000  max mem: 5189
+Train: data epoch: [7] Total time: 0:00:15 (0.5267 s / it)
+2026-08-21 22:45:33,571 [INFO] Qual: EPOCH[7] -> PLCC: 0.731026, SROCC: 0.740642, KROCC: 0.531750, LOSS: 0.004389
+2026-08-21 22:45:33,571 [INFO] Align: EPOCH[7] -> PLCC: 0.571808, SROCC: 0.567284, KROCC: 0.393807, LOSS: 0.004751
+2026-08-21 22:45:33,589 [INFO] Saving checkpoint at epoch 7 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:45:33,695 [INFO] Saving checkpoint at epoch 7 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:45:33,781 [INFO] Start training
+2026-08-21 22:45:34,089 [INFO] Start training epoch 8, 30 iters per inner epoch.
+2026-08-21 22:45:47,856 [INFO] Averaged stats: lr: 0.000094  loss: 0.002499
+2026-08-21 22:45:48,069 [INFO] gates: {"epoch": 8, "raw_quality_ratio": 6.2179, "quality_ratio": 0.0793, "decoder_ratio": 0.074, "lambda_q": 0.0128, "deviation_mean": 1.0439, "deviation_std": 0.0545, "patch_w_mean": 0.527, "patch_w_std": 0.0126, "lambda_d": 0.0123, "qard_attn_entropy": 0.9861, "qard_attn_max": 0.0103, "qard_decoder_norm": 16.0358, "qard_memory_norm": 7.3278}
+2026-08-21 22:45:48,070 [INFO] Evaluating on val.
+Train: data epoch: [8]  [ 0/30]  eta: 0:00:49  lr: 0.000094  loss: 0.0027  time: 1.6649  data: 0.0001  max mem: 5189
+Train: data epoch: [8]  [20/30]  eta: 0:00:05  lr: 0.000094  loss: 0.0030  time: 0.5123  data: 0.0000  max mem: 5189
+Train: data epoch: [8]  [29/30]  eta: 0:00:00  lr: 0.000094  loss: 0.0030  time: 0.3673  data: 0.0000  max mem: 5189
+Train: data epoch: [8] Total time: 0:00:13 (0.4589 s / it)
+2026-08-21 22:45:54,087 [INFO] Qual: EPOCH[8] -> PLCC: 0.735778, SROCC: 0.745130, KROCC: 0.535752, LOSS: 0.004258
+2026-08-21 22:45:54,087 [INFO] Align: EPOCH[8] -> PLCC: 0.577086, SROCC: 0.571669, KROCC: 0.397651, LOSS: 0.004668
+2026-08-21 22:45:54,109 [INFO] Saving checkpoint at epoch 8 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:45:54,215 [INFO] Saving checkpoint at epoch 8 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:45:54,303 [INFO] Start training
+2026-08-21 22:45:54,630 [INFO] Start training epoch 9, 30 iters per inner epoch.
+2026-08-21 22:46:10,065 [INFO] Averaged stats: lr: 0.000092  loss: 0.002407
+2026-08-21 22:46:10,227 [INFO] gates: {"epoch": 9, "raw_quality_ratio": 6.1778, "quality_ratio": 0.0791, "decoder_ratio": 0.0738, "lambda_q": 0.0128, "deviation_mean": 1.0383, "deviation_std": 0.0539, "patch_w_mean": 0.5255, "patch_w_std": 0.0118, "lambda_d": 0.0123, "qard_attn_entropy": 0.9861, "qard_attn_max": 0.0102, "qard_decoder_norm": 16.0366, "qard_memory_norm": 7.3617}
+2026-08-21 22:46:10,227 [INFO] Evaluating on val.
+Train: data epoch: [9]  [ 0/30]  eta: 0:01:12  lr: 0.000092  loss: 0.0019  time: 2.4112  data: 0.0001  max mem: 5189
+Train: data epoch: [9]  [20/30]  eta: 0:00:06  lr: 0.000092  loss: 0.0023  time: 0.5250  data: 0.0000  max mem: 5189
+Train: data epoch: [9]  [29/30]  eta: 0:00:00  lr: 0.000092  loss: 0.0032  time: 0.4104  data: 0.0000  max mem: 5189
+Train: data epoch: [9] Total time: 0:00:15 (0.5145 s / it)
+2026-08-21 22:46:15,994 [INFO] Qual: EPOCH[9] -> PLCC: 0.744163, SROCC: 0.752574, KROCC: 0.542223, LOSS: 0.004128
+2026-08-21 22:46:15,994 [INFO] Align: EPOCH[9] -> PLCC: 0.581602, SROCC: 0.578589, KROCC: 0.403166, LOSS: 0.004632
+2026-08-21 22:46:16,012 [INFO] Saving checkpoint at epoch 9 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:46:16,121 [INFO] Saving checkpoint at epoch 9 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:46:16,194 [INFO] Start training
+2026-08-21 22:46:16,510 [INFO] Start training epoch 10, 30 iters per inner epoch.
+2026-08-21 22:46:30,957 [INFO] Averaged stats: lr: 0.000091  loss: 0.002295
+2026-08-21 22:46:31,151 [INFO] gates: {"epoch": 10, "raw_quality_ratio": 6.0934, "quality_ratio": 0.0782, "decoder_ratio": 0.0727, "lambda_q": 0.0128, "deviation_mean": 1.0406, "deviation_std": 0.0524, "patch_w_mean": 0.5244, "patch_w_std": 0.0112, "lambda_d": 0.0123, "qard_attn_entropy": 0.9864, "qard_attn_max": 0.0102, "qard_decoder_norm": 16.037, "qard_memory_norm": 7.3158}
+2026-08-21 22:46:31,151 [INFO] Evaluating on val.
+Train: data epoch: [10]  [ 0/30]  eta: 0:01:01  lr: 0.000091  loss: 0.0015  time: 2.0421  data: 0.0001  max mem: 5189
+Train: data epoch: [10]  [20/30]  eta: 0:00:05  lr: 0.000091  loss: 0.0019  time: 0.5271  data: 0.0000  max mem: 5189
+Train: data epoch: [10]  [29/30]  eta: 0:00:00  lr: 0.000091  loss: 0.0025  time: 0.3808  data: 0.0000  max mem: 5189
+Train: data epoch: [10] Total time: 0:00:14 (0.4815 s / it)
+2026-08-21 22:46:36,977 [INFO] Qual: EPOCH[10] -> PLCC: 0.747404, SROCC: 0.756736, KROCC: 0.545807, LOSS: 0.004062
+2026-08-21 22:46:36,977 [INFO] Align: EPOCH[10] -> PLCC: 0.587396, SROCC: 0.585794, KROCC: 0.408838, LOSS: 0.004524
+2026-08-21 22:46:36,994 [INFO] Saving checkpoint at epoch 10 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:46:37,118 [INFO] Saving checkpoint at epoch 10 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:46:37,202 [INFO] Start training
+2026-08-21 22:46:37,555 [INFO] Start training epoch 11, 30 iters per inner epoch.
+2026-08-21 22:46:52,755 [INFO] Averaged stats: lr: 0.000089  loss: 0.002229
+2026-08-21 22:46:52,958 [INFO] gates: {"epoch": 11, "raw_quality_ratio": 6.316, "quality_ratio": 0.0814, "decoder_ratio": 0.0757, "lambda_q": 0.0129, "deviation_mean": 1.0452, "deviation_std": 0.0522, "patch_w_mean": 0.5234, "patch_w_std": 0.011, "lambda_d": 0.0124, "qard_attn_entropy": 0.987, "qard_attn_max": 0.0103, "qard_decoder_norm": 16.0374, "qard_memory_norm": 7.3361}
+2026-08-21 22:46:52,958 [INFO] Evaluating on val.
+Train: data epoch: [11]  [ 0/30]  eta: 0:01:06  lr: 0.000089  loss: 0.0021  time: 2.2051  data: 0.0001  max mem: 5189
+Train: data epoch: [11]  [20/30]  eta: 0:00:06  lr: 0.000089  loss: 0.0021  time: 0.5303  data: 0.0000  max mem: 5189
+Train: data epoch: [11]  [29/30]  eta: 0:00:00  lr: 0.000089  loss: 0.0021  time: 0.4004  data: 0.0000  max mem: 5189
+Train: data epoch: [11] Total time: 0:00:15 (0.5067 s / it)
+2026-08-21 22:46:59,290 [INFO] Qual: EPOCH[11] -> PLCC: 0.750898, SROCC: 0.759226, KROCC: 0.547251, LOSS: 0.003906
+2026-08-21 22:46:59,291 [INFO] Align: EPOCH[11] -> PLCC: 0.585958, SROCC: 0.584296, KROCC: 0.408264, LOSS: 0.004474
+2026-08-21 22:46:59,306 [INFO] Saving checkpoint at epoch 11 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:46:59,416 [INFO] Saving checkpoint at epoch 11 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:46:59,511 [INFO] Start training
+2026-08-21 22:46:59,854 [INFO] Start training epoch 12, 30 iters per inner epoch.
+2026-08-21 22:47:17,013 [INFO] Averaged stats: lr: 0.000087  loss: 0.002157
+2026-08-21 22:47:17,123 [INFO] gates: {"epoch": 12, "raw_quality_ratio": 6.502, "quality_ratio": 0.0839, "decoder_ratio": 0.078, "lambda_q": 0.0129, "deviation_mean": 1.0327, "deviation_std": 0.0525, "patch_w_mean": 0.5217, "patch_w_std": 0.0102, "lambda_d": 0.0124, "qard_attn_entropy": 0.9852, "qard_attn_max": 0.0103, "qard_decoder_norm": 16.0366, "qard_memory_norm": 7.3574}
+2026-08-21 22:47:17,123 [INFO] Evaluating on val.
+Train: data epoch: [12]  [ 0/30]  eta: 0:01:18  lr: 0.000087  loss: 0.0017  time: 2.6017  data: 0.0001  max mem: 5189
+Train: data epoch: [12]  [20/30]  eta: 0:00:06  lr: 0.000087  loss: 0.0021  time: 0.5000  data: 0.0000  max mem: 5189
+Train: data epoch: [12]  [29/30]  eta: 0:00:00  lr: 0.000087  loss: 0.0022  time: 0.5044  data: 0.0000  max mem: 5189
+Train: data epoch: [12] Total time: 0:00:17 (0.5720 s / it)
+2026-08-21 22:47:22,262 [INFO] Qual: EPOCH[12] -> PLCC: 0.756294, SROCC: 0.763647, KROCC: 0.551722, LOSS: 0.003993
+2026-08-21 22:47:22,262 [INFO] Align: EPOCH[12] -> PLCC: 0.594978, SROCC: 0.595586, KROCC: 0.417102, LOSS: 0.004555
+2026-08-21 22:47:22,276 [INFO] Saving checkpoint at epoch 12 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:47:22,366 [INFO] Saving checkpoint at epoch 12 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:47:22,437 [INFO] Start training
+2026-08-21 22:47:22,730 [INFO] Start training epoch 13, 30 iters per inner epoch.
+2026-08-21 22:47:39,465 [INFO] Averaged stats: lr: 0.000084  loss: 0.002103
+2026-08-21 22:47:39,577 [INFO] gates: {"epoch": 13, "raw_quality_ratio": 6.2317, "quality_ratio": 0.0807, "decoder_ratio": 0.0749, "lambda_q": 0.0129, "deviation_mean": 1.0313, "deviation_std": 0.0532, "patch_w_mean": 0.5194, "patch_w_std": 0.0102, "lambda_d": 0.0124, "qard_attn_entropy": 0.9854, "qard_attn_max": 0.0105, "qard_decoder_norm": 16.0372, "qard_memory_norm": 7.316}
+2026-08-21 22:47:39,577 [INFO] Evaluating on val.
+Train: data epoch: [13]  [ 0/30]  eta: 0:01:00  lr: 0.000084  loss: 0.0024  time: 2.0109  data: 0.0001  max mem: 5189
+Train: data epoch: [13]  [20/30]  eta: 0:00:05  lr: 0.000084  loss: 0.0028  time: 0.5043  data: 0.0000  max mem: 5189
+Train: data epoch: [13]  [29/30]  eta: 0:00:00  lr: 0.000084  loss: 0.0019  time: 0.5081  data: 0.0000  max mem: 5189
+Train: data epoch: [13] Total time: 0:00:16 (0.5578 s / it)
+2026-08-21 22:47:45,517 [INFO] Qual: EPOCH[13] -> PLCC: 0.755433, SROCC: 0.762840, KROCC: 0.551583, LOSS: 0.003912
+2026-08-21 22:47:45,518 [INFO] Align: EPOCH[13] -> PLCC: 0.593569, SROCC: 0.594096, KROCC: 0.416910, LOSS: 0.004475
+2026-08-21 22:47:45,518 [INFO] Start training
+2026-08-21 22:47:45,811 [INFO] Start training epoch 14, 30 iters per inner epoch.
+2026-08-21 22:48:02,061 [INFO] Averaged stats: lr: 0.000082  loss: 0.002047
+2026-08-21 22:48:02,251 [INFO] gates: {"epoch": 14, "raw_quality_ratio": 6.2793, "quality_ratio": 0.0814, "decoder_ratio": 0.0755, "lambda_q": 0.013, "deviation_mean": 1.0299, "deviation_std": 0.05, "patch_w_mean": 0.5178, "patch_w_std": 0.0098, "lambda_d": 0.0124, "qard_attn_entropy": 0.9861, "qard_attn_max": 0.0106, "qard_decoder_norm": 16.0372, "qard_memory_norm": 7.3205}
+2026-08-21 22:48:02,251 [INFO] Evaluating on val.
+Train: data epoch: [14]  [ 0/30]  eta: 0:00:52  lr: 0.000082  loss: 0.0023  time: 1.7430  data: 0.0002  max mem: 5189
+Train: data epoch: [14]  [20/30]  eta: 0:00:05  lr: 0.000082  loss: 0.0020  time: 0.4870  data: 0.0000  max mem: 5189
+Train: data epoch: [14]  [29/30]  eta: 0:00:00  lr: 0.000082  loss: 0.0019  time: 0.4735  data: 0.0000  max mem: 5189
+Train: data epoch: [14] Total time: 0:00:16 (0.5416 s / it)
+2026-08-21 22:48:08,375 [INFO] Qual: EPOCH[14] -> PLCC: 0.757837, SROCC: 0.765288, KROCC: 0.553636, LOSS: 0.003923
+2026-08-21 22:48:08,375 [INFO] Align: EPOCH[14] -> PLCC: 0.591036, SROCC: 0.589843, KROCC: 0.414422, LOSS: 0.004451
+2026-08-21 22:48:08,389 [INFO] Saving checkpoint at epoch 14 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:48:08,459 [INFO] Start training
+2026-08-21 22:48:08,755 [INFO] Start training epoch 15, 30 iters per inner epoch.
+2026-08-21 22:48:24,450 [INFO] Averaged stats: lr: 0.000080  loss: 0.001989
+2026-08-21 22:48:24,614 [INFO] gates: {"epoch": 15, "raw_quality_ratio": 6.5168, "quality_ratio": 0.0848, "decoder_ratio": 0.0785, "lambda_q": 0.013, "deviation_mean": 1.0309, "deviation_std": 0.0493, "patch_w_mean": 0.5155, "patch_w_std": 0.0099, "lambda_d": 0.0124, "qard_attn_entropy": 0.9853, "qard_attn_max": 0.0106, "qard_decoder_norm": 16.037, "qard_memory_norm": 7.3935}
+2026-08-21 22:48:24,615 [INFO] Evaluating on val.
+Train: data epoch: [15]  [ 0/30]  eta: 0:00:48  lr: 0.000080  loss: 0.0016  time: 1.6098  data: 0.0001  max mem: 5189
+Train: data epoch: [15]  [20/30]  eta: 0:00:05  lr: 0.000080  loss: 0.0020  time: 0.4907  data: 0.0000  max mem: 5189
+Train: data epoch: [15]  [29/30]  eta: 0:00:00  lr: 0.000080  loss: 0.0020  time: 0.4937  data: 0.0000  max mem: 5189
+Train: data epoch: [15] Total time: 0:00:15 (0.5226 s / it)
+2026-08-21 22:48:30,224 [INFO] Qual: EPOCH[15] -> PLCC: 0.759762, SROCC: 0.766980, KROCC: 0.554541, LOSS: 0.003772
+2026-08-21 22:48:30,224 [INFO] Align: EPOCH[15] -> PLCC: 0.594069, SROCC: 0.593929, KROCC: 0.416997, LOSS: 0.004412
+2026-08-21 22:48:30,241 [INFO] Saving checkpoint at epoch 15 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:48:30,345 [INFO] Saving checkpoint at epoch 15 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:48:30,432 [INFO] Start training
+2026-08-21 22:48:30,754 [INFO] Start training epoch 16, 30 iters per inner epoch.
+2026-08-21 22:48:46,864 [INFO] Averaged stats: lr: 0.000077  loss: 0.001917
+2026-08-21 22:48:46,957 [INFO] gates: {"epoch": 16, "raw_quality_ratio": 6.3496, "quality_ratio": 0.0828, "decoder_ratio": 0.0764, "lambda_q": 0.013, "deviation_mean": 1.0251, "deviation_std": 0.0532, "patch_w_mean": 0.5137, "patch_w_std": 0.0095, "lambda_d": 0.0124, "qard_attn_entropy": 0.9859, "qard_attn_max": 0.0107, "qard_decoder_norm": 16.0374, "qard_memory_norm": 7.382}
+2026-08-21 22:48:46,957 [INFO] Evaluating on val.
+Train: data epoch: [16]  [ 0/30]  eta: 0:00:51  lr: 0.000077  loss: 0.0022  time: 1.7243  data: 0.0001  max mem: 5189
+Train: data epoch: [16]  [20/30]  eta: 0:00:05  lr: 0.000077  loss: 0.0020  time: 0.4992  data: 0.0000  max mem: 5189
+Train: data epoch: [16]  [29/30]  eta: 0:00:00  lr: 0.000077  loss: 0.0019  time: 0.5069  data: 0.0000  max mem: 5189
+Train: data epoch: [16] Total time: 0:00:16 (0.5370 s / it)
+2026-08-21 22:48:52,354 [INFO] Qual: EPOCH[16] -> PLCC: 0.757255, SROCC: 0.764407, KROCC: 0.552140, LOSS: 0.003837
+2026-08-21 22:48:52,354 [INFO] Align: EPOCH[16] -> PLCC: 0.589816, SROCC: 0.588183, KROCC: 0.413389, LOSS: 0.004469
+2026-08-21 22:48:52,355 [INFO] Start training
+2026-08-21 22:48:52,678 [INFO] Start training epoch 17, 30 iters per inner epoch.
+2026-08-21 22:49:09,134 [INFO] Averaged stats: lr: 0.000074  loss: 0.001887
+2026-08-21 22:49:09,235 [INFO] gates: {"epoch": 17, "raw_quality_ratio": 6.3312, "quality_ratio": 0.0828, "decoder_ratio": 0.0764, "lambda_q": 0.0131, "deviation_mean": 1.0255, "deviation_std": 0.0539, "patch_w_mean": 0.5123, "patch_w_std": 0.0099, "lambda_d": 0.0124, "qard_attn_entropy": 0.9852, "qard_attn_max": 0.0106, "qard_decoder_norm": 16.0374, "qard_memory_norm": 7.3498}
+2026-08-21 22:49:09,235 [INFO] Evaluating on val.
+Train: data epoch: [17]  [ 0/30]  eta: 0:00:58  lr: 0.000074  loss: 0.0017  time: 1.9628  data: 0.0001  max mem: 5189
+Train: data epoch: [17]  [20/30]  eta: 0:00:05  lr: 0.000074  loss: 0.0020  time: 0.5050  data: 0.0000  max mem: 5189
+Train: data epoch: [17]  [29/30]  eta: 0:00:00  lr: 0.000074  loss: 0.0022  time: 0.5114  data: 0.0000  max mem: 5189
+Train: data epoch: [17] Total time: 0:00:16 (0.5485 s / it)
+2026-08-21 22:49:14,857 [INFO] Qual: EPOCH[17] -> PLCC: 0.757617, SROCC: 0.764900, KROCC: 0.552749, LOSS: 0.003899
+2026-08-21 22:49:14,857 [INFO] Align: EPOCH[17] -> PLCC: 0.589012, SROCC: 0.587912, KROCC: 0.412874, LOSS: 0.004537
+2026-08-21 22:49:14,858 [INFO] Start training
+2026-08-21 22:49:15,145 [INFO] Start training epoch 18, 30 iters per inner epoch.
+2026-08-21 22:49:30,504 [INFO] Averaged stats: lr: 0.000072  loss: 0.001843
+2026-08-21 22:49:30,609 [INFO] gates: {"epoch": 18, "raw_quality_ratio": 6.5186, "quality_ratio": 0.0855, "decoder_ratio": 0.0788, "lambda_q": 0.0131, "deviation_mean": 1.0155, "deviation_std": 0.0544, "patch_w_mean": 0.5088, "patch_w_std": 0.0097, "lambda_d": 0.0124, "qard_attn_entropy": 0.9861, "qard_attn_max": 0.0106, "qard_decoder_norm": 16.037, "qard_memory_norm": 7.3747}
+2026-08-21 22:49:30,609 [INFO] Evaluating on val.
+Train: data epoch: [18]  [ 0/30]  eta: 0:00:48  lr: 0.000072  loss: 0.0020  time: 1.6068  data: 0.0001  max mem: 5189
+Train: data epoch: [18]  [20/30]  eta: 0:00:05  lr: 0.000072  loss: 0.0019  time: 0.4667  data: 0.0000  max mem: 5189
+Train: data epoch: [18]  [29/30]  eta: 0:00:00  lr: 0.000072  loss: 0.0021  time: 0.5124  data: 0.0000  max mem: 5189
+Train: data epoch: [18] Total time: 0:00:15 (0.5119 s / it)
+2026-08-21 22:49:35,983 [INFO] Qual: EPOCH[18] -> PLCC: 0.762624, SROCC: 0.768553, KROCC: 0.555932, LOSS: 0.003779
+2026-08-21 22:49:35,983 [INFO] Align: EPOCH[18] -> PLCC: 0.597092, SROCC: 0.596375, KROCC: 0.419276, LOSS: 0.004490
+2026-08-21 22:49:36,000 [INFO] Saving checkpoint at epoch 18 to run/20260821224_Full_V17_2023/checkpoint_best.pth.
+2026-08-21 22:49:36,101 [INFO] Saving checkpoint at epoch 18 to run/20260821224_Full_V17_2023/checkpoint_best_joint.pth.
+2026-08-21 22:49:36,186 [INFO] Start training
+2026-08-21 22:49:36,503 [INFO] Start training epoch 19, 30 iters per inner epoch.
+2026-08-21 22:49:52,995 [INFO] Averaged stats: lr: 0.000069  loss: 0.001807
+2026-08-21 22:49:53,091 [INFO] gates: {"epoch": 19, "raw_quality_ratio": 6.5248, "quality_ratio": 0.0858, "decoder_ratio": 0.0789, "lambda_q": 0.0131, "deviation_mean": 1.0145, "deviation_std": 0.0527, "patch_w_mean": 0.508, "patch_w_std": 0.0098, "lambda_d": 0.0124, "qard_attn_entropy": 0.9855, "qard_attn_max": 0.0106, "qard_decoder_norm": 16.0369, "qard_memory_norm": 7.3601}
+2026-08-21 22:49:53,091 [INFO] Evaluating on val.
+Train: data epoch: [19]  [ 0/30]  eta: 0:00:55  lr: 0.000069  loss: 0.0018  time: 1.8517  data: 0.0001  max mem: 5189
+Train: data epoch: [19]  [20/30]  eta: 0:00:05  lr: 0.000069  loss: 0.0019  time: 0.4885  data: 0.0000  max mem: 5189
+Train: data epoch: [19]  [29/30]  eta: 0:00:00  lr: 0.000069  loss: 0.0018  time: 0.5343  data: 0.0000  max mem: 5189
+Train: data epoch: [19] Total time: 0:00:16 (0.5497 s / it)
+2026-08-21 22:49:58,839 [INFO] Qual: EPOCH[19] -> PLCC: 0.758251, SROCC: 0.765035, KROCC: 0.552488, LOSS: 0.003915
+2026-08-21 22:49:58,839 [INFO] Align: EPOCH[19] -> PLCC: 0.586641, SROCC: 0.585707, KROCC: 0.411500, LOSS: 0.004554
+2026-08-21 22:49:58,840 [INFO] Start training
+2026-08-21 22:49:59,158 [INFO] Start training epoch 20, 30 iters per inner epoch.
+2026-08-21 22:50:12,758 [INFO] Averaged stats: lr: 0.000066  loss: 0.001763
+2026-08-21 22:50:12,864 [INFO] gates: {"epoch": 20, "raw_quality_ratio": 6.2252, "quality_ratio": 0.0821, "decoder_ratio": 0.0753, "lambda_q": 0.0132, "deviation_mean": 1.0122, "deviation_std": 0.0541, "patch_w_mean": 0.5064, "patch_w_std": 0.0104, "lambda_d": 0.0124, "qard_attn_entropy": 0.986, "qard_attn_max": 0.0105, "qard_decoder_norm": 16.038, "qard_memory_norm": 7.3669}
+2026-08-21 22:50:12,865 [INFO] Evaluating on val.
+Train: data epoch: [20]  [ 0/30]  eta: 0:00:50  lr: 0.000066  loss: 0.0017  time: 1.6981  data: 0.0001  max mem: 5189
+Train: data epoch: [20]  [20/30]  eta: 0:00:04  lr: 0.000066  loss: 0.0017  time: 0.3790  data: 0.0000  max mem: 5189
+Train: data epoch: [20]  [29/30]  eta: 0:00:00  lr: 0.000066  loss: 0.0017  time: 0.4901  data: 0.0000  max mem: 5189
+Train: data epoch: [20] Total time: 0:00:13 (0.4533 s / it)
+2026-08-21 22:50:18,519 [INFO] Qual: EPOCH[20] -> PLCC: 0.760735, SROCC: 0.766917, KROCC: 0.554175, LOSS: 0.003851
+2026-08-21 22:50:18,519 [INFO] Align: EPOCH[20] -> PLCC: 0.593569, SROCC: 0.593340, KROCC: 0.416910, LOSS: 0.004535
+2026-08-21 22:50:18,532 [INFO] Saving checkpoint at epoch 20 to run/20260821224_Full_V17_2023/checkpoint_latest.pth.
+2026-08-21 22:50:18,593 [INFO] Start training
+2026-08-21 22:50:18,876 [INFO] Start training epoch 21, 30 iters per inner epoch.
+2026-08-21 22:50:34,042 [INFO] Averaged stats: lr: 0.000063  loss: 0.001717
+2026-08-21 22:50:34,152 [INFO] gates: {"epoch": 21, "raw_quality_ratio": 6.4017, "quality_ratio": 0.0846, "decoder_ratio": 0.0776, "lambda_q": 0.0132, "deviation_mean": 1.0116, "deviation_std": 0.0511, "patch_w_mean": 0.5042, "patch_w_std": 0.0101, "lambda_d": 0.0124, "qard_attn_entropy": 0.9855, "qard_attn_max": 0.0106, "qard_decoder_norm": 16.0373, "qard_memory_norm": 7.3325}
+2026-08-21 22:50:34,152 [INFO] Evaluating on val.
+Train: data epoch: [21]  [ 0/30]  eta: 0:00:58  lr: 0.000063  loss: 0.0021  time: 1.9542  data: 0.0001  max mem: 5189
+Train: data epoch: [21]  [20/30]  eta: 0:00:05  lr: 0.000063  loss: 0.0019  time: 0.4454  data: 0.0000  max mem: 5189
+Train: data epoch: [21]  [29/30]  eta: 0:00:00  lr: 0.000063  loss: 0.0017  time: 0.4791  data: 0.0000  max mem: 5189
+Train: data epoch: [21] Total time: 0:00:15 (0.5055 s / it)
+2026-08-21 22:50:39,870 [INFO] Qual: EPOCH[21] -> PLCC: 0.758366, SROCC: 0.764720, KROCC: 0.551983, LOSS: 0.003905
+2026-08-21 22:50:39,870 [INFO] Align: EPOCH[21] -> PLCC: 0.587781, SROCC: 0.585421, KROCC: 0.411500, LOSS: 0.004533
+2026-08-21 22:50:39,871 [INFO] Start training
+2026-08-21 22:50:40,156 [INFO] Start training epoch 22, 30 iters per inner epoch.
+2026-08-21 22:50:55,022 [INFO] Averaged stats: lr: 0.000060  loss: 0.001690
+2026-08-21 22:50:55,137 [INFO] gates: {"epoch": 22, "raw_quality_ratio": 6.2131, "quality_ratio": 0.0824, "decoder_ratio": 0.0753, "lambda_q": 0.0133, "deviation_mean": 1.0148, "deviation_std": 0.0523, "patch_w_mean": 0.5028, "patch_w_std": 0.0107, "lambda_d": 0.0124, "qard_attn_entropy": 0.9862, "qard_attn_max": 0.0106, "qard_decoder_norm": 16.0376, "qard_memory_norm": 7.3365}
+2026-08-21 22:50:55,137 [INFO] Evaluating on val.
+Train: data epoch: [22]  [ 0/30]  eta: 0:00:54  lr: 0.000060  loss: 0.0015  time: 1.8280  data: 0.0001  max mem: 5189
+Train: data epoch: [22]  [20/30]  eta: 0:00:04  lr: 0.000060  loss: 0.0012  time: 0.4277  data: 0.0000  max mem: 5189
+Train: data epoch: [22]  [29/30]  eta: 0:00:00  lr: 0.000060  loss: 0.0014  time: 0.4515  data: 0.0000  max mem: 5189
+Train: data epoch: [22] Total time: 0:00:14 (0.4955 s / it)
+2026-08-21 22:51:01,198 [INFO] Qual: EPOCH[22] -> PLCC: 0.758365, SROCC: 0.765305, KROCC: 0.552349, LOSS: 0.003909
+2026-08-21 22:51:01,198 [INFO] Align: EPOCH[22] -> PLCC: 0.588877, SROCC: 0.586294, KROCC: 0.412039, LOSS: 0.004586
+2026-08-21 22:51:01,199 [INFO] Start training
+2026-08-21 22:51:01,485 [INFO] Start training epoch 23, 30 iters per inner epoch.
+2026-08-21 22:51:17,619 [INFO] Averaged stats: lr: 0.000057  loss: 0.001656
+2026-08-21 22:51:17,731 [INFO] gates: {"epoch": 23, "raw_quality_ratio": 6.3657, "quality_ratio": 0.0847, "decoder_ratio": 0.0772, "lambda_q": 0.0133, "deviation_mean": 1.0118, "deviation_std": 0.0543, "patch_w_mean": 0.5015, "patch_w_std": 0.0113, "lambda_d": 0.0124, "qard_attn_entropy": 0.9858, "qard_attn_max": 0.0105, "qard_decoder_norm": 16.0374, "qard_memory_norm": 7.3137}
+2026-08-21 22:51:17,731 [INFO] Evaluating on val.
+Train: data epoch: [23]  [ 0/30]  eta: 0:01:02  lr: 0.000057  loss: 0.0016  time: 2.0704  data: 0.0001  max mem: 5189
+Train: data epoch: [23]  [20/30]  eta: 0:00:05  lr: 0.000057  loss: 0.0014  time: 0.4499  data: 0.0000  max mem: 5189
+Train: data epoch: [23]  [29/30]  eta: 0:00:00  lr: 0.000057  loss: 0.0019  time: 0.4901  data: 0.0000  max mem: 5189
+Train: data epoch: [23] Total time: 0:00:16 (0.5378 s / it)
+2026-08-21 22:51:23,724 [INFO] Qual: EPOCH[23] -> PLCC: 0.755412, SROCC: 0.762175, KROCC: 0.550017, LOSS: 0.003933
+2026-08-21 22:51:23,724 [INFO] Align: EPOCH[23] -> PLCC: 0.587383, SROCC: 0.584280, KROCC: 0.410421, LOSS: 0.004604
+2026-08-21 22:51:23,725 [INFO] Start training
+2026-08-21 22:51:24,010 [INFO] Start training epoch 24, 30 iters per inner epoch.
+2026-08-21 22:51:38,912 [INFO] Averaged stats: lr: 0.000054  loss: 0.001627
+2026-08-21 22:51:39,017 [INFO] gates: {"epoch": 24, "raw_quality_ratio": 6.3141, "quality_ratio": 0.0842, "decoder_ratio": 0.0767, "lambda_q": 0.0133, "deviation_mean": 1.009, "deviation_std": 0.055, "patch_w_mean": 0.4998, "patch_w_std": 0.0117, "lambda_d": 0.0124, "qard_attn_entropy": 0.9862, "qard_attn_max": 0.0105, "qard_decoder_norm": 16.0372, "qard_memory_norm": 7.3638}
+2026-08-21 22:51:39,017 [INFO] Evaluating on val.
+Train: data epoch: [24]  [ 0/30]  eta: 0:01:01  lr: 0.000054  loss: 0.0016  time: 2.0545  data: 0.0001  max mem: 5189
+Train: data epoch: [24]  [20/30]  eta: 0:00:04  lr: 0.000054  loss: 0.0014  time: 0.4044  data: 0.0000  max mem: 5189
+Train: data epoch: [24]  [29/30]  eta: 0:00:00  lr: 0.000054  loss: 0.0017  time: 0.4780  data: 0.0000  max mem: 5189
+Train: data epoch: [24] Total time: 0:00:14 (0.4967 s / it)
+2026-08-21 22:51:45,042 [INFO] Qual: EPOCH[24] -> PLCC: 0.757864, SROCC: 0.764425, KROCC: 0.551809, LOSS: 0.003896
+2026-08-21 22:51:45,042 [INFO] Align: EPOCH[24] -> PLCC: 0.584083, SROCC: 0.580595, KROCC: 0.407637, LOSS: 0.004637
+2026-08-21 22:51:45,042 [INFO] Start training
+2026-08-21 22:51:45,328 [INFO] Start training epoch 25, 30 iters per inner epoch.
+2026-08-21 22:52:00,547 [INFO] Averaged stats: lr: 0.000050  loss: 0.001584
+2026-08-21 22:52:00,652 [INFO] gates: {"epoch": 25, "raw_quality_ratio": 6.5151, "quality_ratio": 0.0872, "decoder_ratio": 0.0793, "lambda_q": 0.0134, "deviation_mean": 1.0034, "deviation_std": 0.0548, "patch_w_mean": 0.4979, "patch_w_std": 0.0121, "lambda_d": 0.0125, "qard_attn_entropy": 0.9854, "qard_attn_max": 0.0108, "qard_decoder_norm": 16.0366, "qard_memory_norm": 7.3685}
+2026-08-21 22:52:00,652 [INFO] Evaluating on val.
+Train: data epoch: [25]  [ 0/30]  eta: 0:00:45  lr: 0.000051  loss: 0.0017  time: 1.5283  data: 0.0001  max mem: 5189
+Train: data epoch: [25]  [20/30]  eta: 0:00:04  lr: 0.000051  loss: 0.0018  time: 0.4448  data: 0.0000  max mem: 5189
+Train: data epoch: [25]  [29/30]  eta: 0:00:00  lr: 0.000051  loss: 0.0015  time: 0.4875  data: 0.0000  max mem: 5189
+Train: data epoch: [25] Total time: 0:00:15 (0.5073 s / it)
+2026-08-21 22:52:06,986 [INFO] Qual: EPOCH[25] -> PLCC: 0.756771, SROCC: 0.763795, KROCC: 0.551305, LOSS: 0.003897
+2026-08-21 22:52:06,986 [INFO] Align: EPOCH[25] -> PLCC: 0.584429, SROCC: 0.578965, KROCC: 0.406141, LOSS: 0.004643
+2026-08-21 22:52:07,004 [INFO] Saving checkpoint at epoch 25 to run/20260821224_Full_V17_2023/checkpoint_latest.pth.
+2026-08-21 22:52:07,090 [INFO] Start training
+2026-08-21 22:52:07,411 [INFO] Start training epoch 26, 30 iters per inner epoch.
+2026-08-21 22:52:21,896 [INFO] Averaged stats: lr: 0.000047  loss: 0.001582
+2026-08-21 22:52:22,008 [INFO] gates: {"epoch": 26, "raw_quality_ratio": 6.2757, "quality_ratio": 0.0842, "decoder_ratio": 0.0764, "lambda_q": 0.0134, "deviation_mean": 1.0057, "deviation_std": 0.0535, "patch_w_mean": 0.4978, "patch_w_std": 0.0125, "lambda_d": 0.0125, "qard_attn_entropy": 0.986, "qard_attn_max": 0.0105, "qard_decoder_norm": 16.0371, "qard_memory_norm": 7.3075}
+2026-08-21 22:52:22,008 [INFO] Evaluating on val.
+Train: data epoch: [26]  [ 0/30]  eta: 0:00:58  lr: 0.000047  loss: 0.0012  time: 1.9477  data: 0.0001  max mem: 5189
+Train: data epoch: [26]  [20/30]  eta: 0:00:04  lr: 0.000047  loss: 0.0013  time: 0.3897  data: 0.0000  max mem: 5189
+Train: data epoch: [26]  [29/30]  eta: 0:00:00  lr: 0.000047  loss: 0.0017  time: 0.4827  data: 0.0000  max mem: 5189
+Train: data epoch: [26] Total time: 0:00:14 (0.4828 s / it)
+2026-08-21 22:52:28,183 [INFO] Qual: EPOCH[26] -> PLCC: 0.754294, SROCC: 0.761061, KROCC: 0.548747, LOSS: 0.004020
+2026-08-21 22:52:28,184 [INFO] Align: EPOCH[26] -> PLCC: 0.581485, SROCC: 0.575308, KROCC: 0.403114, LOSS: 0.004687
+2026-08-21 22:52:28,184 [INFO] Start training
+2026-08-21 22:52:28,482 [INFO] Start training epoch 27, 30 iters per inner epoch.
+2026-08-21 22:52:44,063 [INFO] Averaged stats: lr: 0.000044  loss: 0.001556
+2026-08-21 22:52:44,158 [INFO] gates: {"epoch": 27, "raw_quality_ratio": 6.3154, "quality_ratio": 0.0849, "decoder_ratio": 0.0768, "lambda_q": 0.0134, "deviation_mean": 1.0035, "deviation_std": 0.053, "patch_w_mean": 0.4961, "patch_w_std": 0.0132, "lambda_d": 0.0124, "qard_attn_entropy": 0.9854, "qard_attn_max": 0.0108, "qard_decoder_norm": 16.0366, "qard_memory_norm": 7.3524}
+2026-08-21 22:52:44,159 [INFO] Evaluating on val.
+Train: data epoch: [27]  [ 0/30]  eta: 0:00:50  lr: 0.000044  loss: 0.0014  time: 1.6734  data: 0.0002  max mem: 5189
+Train: data epoch: [27]  [20/30]  eta: 0:00:05  lr: 0.000044  loss: 0.0018  time: 0.4450  data: 0.0000  max mem: 5189
+Train: data epoch: [27]  [29/30]  eta: 0:00:00  lr: 0.000044  loss: 0.0014  time: 0.5035  data: 0.0000  max mem: 5189
+Train: data epoch: [27] Total time: 0:00:15 (0.5193 s / it)
+2026-08-21 22:52:50,086 [INFO] Qual: EPOCH[27] -> PLCC: 0.755017, SROCC: 0.762373, KROCC: 0.550400, LOSS: 0.004076
+2026-08-21 22:52:50,086 [INFO] Align: EPOCH[27] -> PLCC: 0.583896, SROCC: 0.579097, KROCC: 0.405776, LOSS: 0.004677
+2026-08-21 22:52:50,086 [INFO] Start training
+2026-08-21 22:52:50,348 [INFO] Start training epoch 28, 30 iters per inner epoch.
+2026-08-21 22:53:05,789 [INFO] Averaged stats: lr: 0.000041  loss: 0.001517
+2026-08-21 22:53:05,896 [INFO] gates: {"epoch": 28, "raw_quality_ratio": 6.2232, "quality_ratio": 0.0839, "decoder_ratio": 0.0757, "lambda_q": 0.0135, "deviation_mean": 1.0074, "deviation_std": 0.0532, "patch_w_mean": 0.4956, "patch_w_std": 0.0136, "lambda_d": 0.0125, "qard_attn_entropy": 0.9864, "qard_attn_max": 0.0108, "qard_decoder_norm": 16.037, "qard_memory_norm": 7.3128}
+2026-08-21 22:53:05,896 [INFO] Evaluating on val.
+Train: data epoch: [28]  [ 0/30]  eta: 0:00:51  lr: 0.000041  loss: 0.0013  time: 1.7129  data: 0.0001  max mem: 5189
+Train: data epoch: [28]  [20/30]  eta: 0:00:04  lr: 0.000041  loss: 0.0017  time: 0.4347  data: 0.0000  max mem: 5189
+Train: data epoch: [28]  [29/30]  eta: 0:00:00  lr: 0.000041  loss: 0.0019  time: 0.4883  data: 0.0000  max mem: 5189
+Train: data epoch: [28] Total time: 0:00:15 (0.5147 s / it)
+2026-08-21 22:53:12,177 [INFO] Qual: EPOCH[28] -> PLCC: 0.752779, SROCC: 0.760157, KROCC: 0.547738, LOSS: 0.004049
+2026-08-21 22:53:12,178 [INFO] Align: EPOCH[28] -> PLCC: 0.579478, SROCC: 0.573734, KROCC: 0.402418, LOSS: 0.004706
+2026-08-21 22:53:12,178 [INFO] Start training
+2026-08-21 22:53:12,453 [INFO] Start training epoch 29, 30 iters per inner epoch.
+2026-08-21 22:53:26,220 [INFO] Averaged stats: lr: 0.000038  loss: 0.001486
+2026-08-21 22:53:26,329 [INFO] gates: {"epoch": 29, "raw_quality_ratio": 6.4804, "quality_ratio": 0.0876, "decoder_ratio": 0.079, "lambda_q": 0.0135, "deviation_mean": 1.0049, "deviation_std": 0.0541, "patch_w_mean": 0.4934, "patch_w_std": 0.0143, "lambda_d": 0.0125, "qard_attn_entropy": 0.9849, "qard_attn_max": 0.0109, "qard_decoder_norm": 16.036, "qard_memory_norm": 7.3588}
+2026-08-21 22:53:26,330 [INFO] Evaluating on val.
+Train: data epoch: [29]  [ 0/30]  eta: 0:00:54  lr: 0.000038  loss: 0.0015  time: 1.8013  data: 0.0001  max mem: 5189
+Train: data epoch: [29]  [20/30]  eta: 0:00:04  lr: 0.000038  loss: 0.0017  time: 0.3751  data: 0.0000  max mem: 5189
+Train: data epoch: [29]  [29/30]  eta: 0:00:00  lr: 0.000038  loss: 0.0016  time: 0.4323  data: 0.0000  max mem: 5189
+Train: data epoch: [29] Total time: 0:00:13 (0.4589 s / it)
+2026-08-21 22:53:32,677 [INFO] Qual: EPOCH[29] -> PLCC: 0.755336, SROCC: 0.762189, KROCC: 0.549704, LOSS: 0.004004
+2026-08-21 22:53:32,677 [INFO] Align: EPOCH[29] -> PLCC: 0.580637, SROCC: 0.574850, KROCC: 0.402679, LOSS: 0.004710
+2026-08-21 22:53:32,678 [INFO] Start training
+2026-08-21 22:53:32,936 [INFO] Start training epoch 30, 30 iters per inner epoch.
+2026-08-21 22:53:48,223 [INFO] Averaged stats: lr: 0.000035  loss: 0.001467
+2026-08-21 22:53:48,341 [INFO] gates: {"epoch": 30, "raw_quality_ratio": 6.3596, "quality_ratio": 0.0863, "decoder_ratio": 0.0776, "lambda_q": 0.0136, "deviation_mean": 1.0022, "deviation_std": 0.055, "patch_w_mean": 0.4929, "patch_w_std": 0.0149, "lambda_d": 0.0125, "qard_attn_entropy": 0.9851, "qard_attn_max": 0.0108, "qard_decoder_norm": 16.0363, "qard_memory_norm": 7.3102}
+2026-08-21 22:53:48,341 [INFO] Evaluating on val.
+Train: data epoch: [30]  [ 0/30]  eta: 0:00:54  lr: 0.000035  loss: 0.0013  time: 1.8329  data: 0.0001  max mem: 5189
+Train: data epoch: [30]  [20/30]  eta: 0:00:05  lr: 0.000035  loss: 0.0017  time: 0.4443  data: 0.0000  max mem: 5189
+Train: data epoch: [30]  [29/30]  eta: 0:00:00  lr: 0.000035  loss: 0.0011  time: 0.4820  data: 0.0000  max mem: 5189
+Train: data epoch: [30] Total time: 0:00:15 (0.5095 s / it)
+2026-08-21 22:53:54,626 [INFO] Qual: EPOCH[30] -> PLCC: 0.751612, SROCC: 0.758964, KROCC: 0.547112, LOSS: 0.004037
+2026-08-21 22:53:54,626 [INFO] Align: EPOCH[30] -> PLCC: 0.577548, SROCC: 0.571054, KROCC: 0.399965, LOSS: 0.004703
+2026-08-21 22:53:54,643 [INFO] Saving checkpoint at epoch 30 to run/20260821224_Full_V17_2023/checkpoint_latest.pth.
+2026-08-21 22:53:54,727 [INFO] Start training
+2026-08-21 22:53:55,038 [INFO] Start training epoch 31, 30 iters per inner epoch.
+2026-08-21 22:54:10,294 [INFO] Averaged stats: lr: 0.000032  loss: 0.001448
+2026-08-21 22:54:10,407 [INFO] gates: {"epoch": 31, "raw_quality_ratio": 6.4299, "quality_ratio": 0.0874, "decoder_ratio": 0.0785, "lambda_q": 0.0136, "deviation_mean": 0.9987, "deviation_std": 0.052, "patch_w_mean": 0.493, "patch_w_std": 0.0151, "lambda_d": 0.0125, "qard_attn_entropy": 0.9852, "qard_attn_max": 0.0106, "qard_decoder_norm": 16.036, "qard_memory_norm": 7.3199}
+2026-08-21 22:54:10,407 [INFO] Evaluating on val.
+Train: data epoch: [31]  [ 0/30]  eta: 0:00:51  lr: 0.000032  loss: 0.0013  time: 1.7165  data: 0.0001  max mem: 5189
+Train: data epoch: [31]  [20/30]  eta: 0:00:05  lr: 0.000032  loss: 0.0015  time: 0.4399  data: 0.0000  max mem: 5189
+Train: data epoch: [31]  [29/30]  eta: 0:00:00  lr: 0.000032  loss: 0.0016  time: 0.4757  data: 0.0000  max mem: 5189
+Train: data epoch: [31] Total time: 0:00:15 (0.5085 s / it)
+2026-08-21 22:54:16,396 [INFO] Qual: EPOCH[31] -> PLCC: 0.750372, SROCC: 0.758257, KROCC: 0.546347, LOSS: 0.004150
+2026-08-21 22:54:16,396 [INFO] Align: EPOCH[31] -> PLCC: 0.576242, SROCC: 0.569418, KROCC: 0.398312, LOSS: 0.004775
+2026-08-21 22:54:16,397 [INFO] Start training
+2026-08-21 22:54:16,658 [INFO] Start training epoch 32, 30 iters per inner epoch.
+2026-08-21 22:54:31,618 [INFO] Averaged stats: lr: 0.000029  loss: 0.001428
+2026-08-21 22:54:31,717 [INFO] gates: {"epoch": 32, "raw_quality_ratio": 6.4563, "quality_ratio": 0.088, "decoder_ratio": 0.0787, "lambda_q": 0.0136, "deviation_mean": 0.9987, "deviation_std": 0.0557, "patch_w_mean": 0.4903, "patch_w_std": 0.0154, "lambda_d": 0.0125, "qard_attn_entropy": 0.9851, "qard_attn_max": 0.0109, "qard_decoder_norm": 16.0364, "qard_memory_norm": 7.3268}
+2026-08-21 22:54:31,717 [INFO] Evaluating on val.
+Train: data epoch: [32]  [ 0/30]  eta: 0:00:41  lr: 0.000029  loss: 0.0012  time: 1.3976  data: 0.0001  max mem: 5189
+Train: data epoch: [32]  [20/30]  eta: 0:00:04  lr: 0.000029  loss: 0.0016  time: 0.4401  data: 0.0000  max mem: 5189
+Train: data epoch: [32]  [29/30]  eta: 0:00:00  lr: 0.000029  loss: 0.0016  time: 0.4905  data: 0.0000  max mem: 5189
+Train: data epoch: [32] Total time: 0:00:14 (0.4986 s / it)
+2026-08-21 22:54:37,662 [INFO] Qual: EPOCH[32] -> PLCC: 0.749453, SROCC: 0.757239, KROCC: 0.545720, LOSS: 0.004122
+2026-08-21 22:54:37,663 [INFO] Align: EPOCH[32] -> PLCC: 0.574272, SROCC: 0.567909, KROCC: 0.397356, LOSS: 0.004757
+2026-08-21 22:54:37,663 [INFO] Start training
+2026-08-21 22:54:37,961 [INFO] Start training epoch 33, 30 iters per inner epoch.
+2026-08-21 22:54:53,187 [INFO] Averaged stats: lr: 0.000027  loss: 0.001410
+2026-08-21 22:54:53,284 [INFO] gates: {"epoch": 33, "raw_quality_ratio": 6.389, "quality_ratio": 0.0873, "decoder_ratio": 0.078, "lambda_q": 0.0137, "deviation_mean": 1.0025, "deviation_std": 0.0532, "patch_w_mean": 0.4894, "patch_w_std": 0.0156, "lambda_d": 0.0125, "qard_attn_entropy": 0.9846, "qard_attn_max": 0.0109, "qard_decoder_norm": 16.0361, "qard_memory_norm": 7.3263}
+2026-08-21 22:54:53,285 [INFO] Evaluating on val.
+Train: data epoch: [33]  [ 0/30]  eta: 0:00:51  lr: 0.000027  loss: 0.0014  time: 1.7219  data: 0.0001  max mem: 5189
+Train: data epoch: [33]  [20/30]  eta: 0:00:04  lr: 0.000027  loss: 0.0013  time: 0.4336  data: 0.0000  max mem: 5189
+Train: data epoch: [33]  [29/30]  eta: 0:00:00  lr: 0.000027  loss: 0.0012  time: 0.4889  data: 0.0000  max mem: 5189
+Train: data epoch: [33] Total time: 0:00:15 (0.5075 s / it)
+2026-08-21 22:54:59,572 [INFO] Qual: EPOCH[33] -> PLCC: 0.747638, SROCC: 0.755668, KROCC: 0.544381, LOSS: 0.004108
+2026-08-21 22:54:59,572 [INFO] Align: EPOCH[33] -> PLCC: 0.571725, SROCC: 0.564443, KROCC: 0.394607, LOSS: 0.004786
+2026-08-21 22:54:59,573 [INFO] Start training
+2026-08-21 22:54:59,866 [INFO] Start training epoch 34, 30 iters per inner epoch.
+2026-08-21 22:55:14,026 [INFO] Averaged stats: lr: 0.000024  loss: 0.001399
+2026-08-21 22:55:14,124 [INFO] gates: {"epoch": 34, "raw_quality_ratio": 6.4208, "quality_ratio": 0.0879, "decoder_ratio": 0.0784, "lambda_q": 0.0137, "deviation_mean": 0.9987, "deviation_std": 0.0539, "patch_w_mean": 0.4901, "patch_w_std": 0.0166, "lambda_d": 0.0125, "qard_attn_entropy": 0.9851, "qard_attn_max": 0.0109, "qard_decoder_norm": 16.0362, "qard_memory_norm": 7.3165}
+2026-08-21 22:55:14,124 [INFO] Evaluating on val.
+Train: data epoch: [34]  [ 0/30]  eta: 0:00:48  lr: 0.000024  loss: 0.0016  time: 1.6004  data: 0.0001  max mem: 5189
+Train: data epoch: [34]  [20/30]  eta: 0:00:04  lr: 0.000024  loss: 0.0014  time: 0.3994  data: 0.0000  max mem: 5189
+Train: data epoch: [34]  [29/30]  eta: 0:00:00  lr: 0.000024  loss: 0.0015  time: 0.4493  data: 0.0000  max mem: 5189
+Train: data epoch: [34] Total time: 0:00:14 (0.4720 s / it)
+2026-08-21 22:55:20,111 [INFO] Qual: EPOCH[34] -> PLCC: 0.747429, SROCC: 0.754924, KROCC: 0.543511, LOSS: 0.004106
+2026-08-21 22:55:20,111 [INFO] Align: EPOCH[34] -> PLCC: 0.573284, SROCC: 0.566371, KROCC: 0.395981, LOSS: 0.004766
+2026-08-21 22:55:20,112 [INFO] Start training
+2026-08-21 22:55:20,365 [INFO] Start training epoch 35, 30 iters per inner epoch.
+2026-08-21 22:55:35,926 [INFO] Averaged stats: lr: 0.000021  loss: 0.001378
+2026-08-21 22:55:36,030 [INFO] gates: {"epoch": 35, "raw_quality_ratio": 6.3548, "quality_ratio": 0.0872, "decoder_ratio": 0.0775, "lambda_q": 0.0137, "deviation_mean": 0.9974, "deviation_std": 0.0553, "patch_w_mean": 0.4884, "patch_w_std": 0.0165, "lambda_d": 0.0125, "qard_attn_entropy": 0.9858, "qard_attn_max": 0.0108, "qard_decoder_norm": 16.0363, "qard_memory_norm": 7.3363}
+2026-08-21 22:55:36,031 [INFO] Evaluating on val.
+Train: data epoch: [35]  [ 0/30]  eta: 0:00:56  lr: 0.000021  loss: 0.0013  time: 1.8733  data: 0.0001  max mem: 5189
+Train: data epoch: [35]  [20/30]  eta: 0:00:05  lr: 0.000021  loss: 0.0013  time: 0.4610  data: 0.0000  max mem: 5189
+Train: data epoch: [35]  [29/30]  eta: 0:00:00  lr: 0.000021  loss: 0.0015  time: 0.4879  data: 0.0000  max mem: 5189
+Train: data epoch: [35] Total time: 0:00:15 (0.5187 s / it)
+2026-08-21 22:55:42,380 [INFO] Qual: EPOCH[35] -> PLCC: 0.746700, SROCC: 0.754708, KROCC: 0.543476, LOSS: 0.004135
+2026-08-21 22:55:42,380 [INFO] Align: EPOCH[35] -> PLCC: 0.571935, SROCC: 0.564605, KROCC: 0.394433, LOSS: 0.004838
+2026-08-21 22:55:42,398 [INFO] Saving checkpoint at epoch 35 to run/20260821224_Full_V17_2023/checkpoint_latest.pth.
+2026-08-21 22:55:42,495 [INFO] Start training
+2026-08-21 22:55:42,800 [INFO] Start training epoch 36, 30 iters per inner epoch.
+2026-08-21 22:55:57,992 [INFO] Averaged stats: lr: 0.000019  loss: 0.001378
+2026-08-21 22:55:58,110 [INFO] gates: {"epoch": 36, "raw_quality_ratio": 6.3027, "quality_ratio": 0.0866, "decoder_ratio": 0.0769, "lambda_q": 0.0137, "deviation_mean": 0.9956, "deviation_std": 0.0545, "patch_w_mean": 0.4875, "patch_w_std": 0.0167, "lambda_d": 0.0125, "qard_attn_entropy": 0.9857, "qard_attn_max": 0.0108, "qard_decoder_norm": 16.0361, "qard_memory_norm": 7.3151}
+2026-08-21 22:55:58,110 [INFO] Evaluating on val.
+Train: data epoch: [36]  [ 0/30]  eta: 0:00:52  lr: 0.000019  loss: 0.0015  time: 1.7568  data: 0.0001  max mem: 5189
+Train: data epoch: [36]  [20/30]  eta: 0:00:04  lr: 0.000019  loss: 0.0014  time: 0.4349  data: 0.0000  max mem: 5189
+Train: data epoch: [36]  [29/30]  eta: 0:00:00  lr: 0.000019  loss: 0.0015  time: 0.4766  data: 0.0000  max mem: 5189
+Train: data epoch: [36] Total time: 0:00:15 (0.5064 s / it)
+2026-08-21 22:56:04,088 [INFO] Qual: EPOCH[36] -> PLCC: 0.747350, SROCC: 0.754981, KROCC: 0.543319, LOSS: 0.004176
+2026-08-21 22:56:04,088 [INFO] Align: EPOCH[36] -> PLCC: 0.570522, SROCC: 0.562647, KROCC: 0.393267, LOSS: 0.004834
+2026-08-21 22:56:04,088 [INFO] Start training
+2026-08-21 22:56:04,355 [INFO] Start training epoch 37, 30 iters per inner epoch.
+2026-08-21 22:56:19,248 [INFO] Averaged stats: lr: 0.000017  loss: 0.001345
+2026-08-21 22:56:19,362 [INFO] gates: {"epoch": 37, "raw_quality_ratio": 6.1671, "quality_ratio": 0.0849, "decoder_ratio": 0.0752, "lambda_q": 0.0138, "deviation_mean": 1.001, "deviation_std": 0.0537, "patch_w_mean": 0.4886, "patch_w_std": 0.0173, "lambda_d": 0.0125, "qard_attn_entropy": 0.9849, "qard_attn_max": 0.0112, "qard_decoder_norm": 16.0364, "qard_memory_norm": 7.2851}
+2026-08-21 22:56:19,363 [INFO] Evaluating on val.
+Train: data epoch: [37]  [ 0/30]  eta: 0:00:54  lr: 0.000017  loss: 0.0011  time: 1.8025  data: 0.0001  max mem: 5189
+Train: data epoch: [37]  [20/30]  eta: 0:00:04  lr: 0.000017  loss: 0.0015  time: 0.4151  data: 0.0000  max mem: 5189
+Train: data epoch: [37]  [29/30]  eta: 0:00:00  lr: 0.000017  loss: 0.0010  time: 0.4638  data: 0.0000  max mem: 5189
+Train: data epoch: [37] Total time: 0:00:14 (0.4964 s / it)
+2026-08-21 22:56:25,467 [INFO] Qual: EPOCH[37] -> PLCC: 0.745766, SROCC: 0.754341, KROCC: 0.542832, LOSS: 0.004201
+2026-08-21 22:56:25,467 [INFO] Align: EPOCH[37] -> PLCC: 0.571537, SROCC: 0.564019, KROCC: 0.394137, LOSS: 0.004819
+2026-08-21 22:56:25,468 [INFO] Start training
+2026-08-21 22:56:25,733 [INFO] Start training epoch 38, 30 iters per inner epoch.
+2026-08-21 22:56:40,452 [INFO] Averaged stats: lr: 0.000014  loss: 0.001343
+2026-08-21 22:56:40,546 [INFO] gates: {"epoch": 38, "raw_quality_ratio": 6.4188, "quality_ratio": 0.0885, "decoder_ratio": 0.0784, "lambda_q": 0.0138, "deviation_mean": 1.0023, "deviation_std": 0.0549, "patch_w_mean": 0.4862, "patch_w_std": 0.0172, "lambda_d": 0.0125, "qard_attn_entropy": 0.9855, "qard_attn_max": 0.011, "qard_decoder_norm": 16.0363, "qard_memory_norm": 7.3297}
+2026-08-21 22:56:40,546 [INFO] Evaluating on val.
+Train: data epoch: [38]  [ 0/30]  eta: 0:00:54  lr: 0.000014  loss: 0.0011  time: 1.8297  data: 0.0001  max mem: 5189
+Train: data epoch: [38]  [20/30]  eta: 0:00:04  lr: 0.000014  loss: 0.0012  time: 0.4197  data: 0.0000  max mem: 5189
+Train: data epoch: [38]  [29/30]  eta: 0:00:00  lr: 0.000014  loss: 0.0013  time: 0.4507  data: 0.0000  max mem: 5189
+Train: data epoch: [38] Total time: 0:00:14 (0.4906 s / it)
+2026-08-21 22:56:46,836 [INFO] Qual: EPOCH[38] -> PLCC: 0.744703, SROCC: 0.753019, KROCC: 0.541823, LOSS: 0.004148
+2026-08-21 22:56:46,837 [INFO] Align: EPOCH[38] -> PLCC: 0.568331, SROCC: 0.560470, KROCC: 0.391736, LOSS: 0.004839
+2026-08-21 22:56:46,837 [INFO] Start training
+2026-08-21 22:56:47,136 [INFO] Start training epoch 39, 30 iters per inner epoch.
+2026-08-21 22:57:02,566 [INFO] Averaged stats: lr: 0.000012  loss: 0.001337
+2026-08-21 22:57:02,647 [INFO] gates: {"epoch": 39, "raw_quality_ratio": 6.3174, "quality_ratio": 0.0872, "decoder_ratio": 0.0772, "lambda_q": 0.0138, "deviation_mean": 0.9933, "deviation_std": 0.0556, "patch_w_mean": 0.487, "patch_w_std": 0.0181, "lambda_d": 0.0125, "qard_attn_entropy": 0.9846, "qard_attn_max": 0.0111, "qard_decoder_norm": 16.0357, "qard_memory_norm": 7.3438}
+2026-08-21 22:57:02,647 [INFO] Evaluating on val.
+Train: data epoch: [39]  [ 0/30]  eta: 0:00:55  lr: 0.000012  loss: 0.0015  time: 1.8392  data: 0.0001  max mem: 5189
+Train: data epoch: [39]  [20/30]  eta: 0:00:05  lr: 0.000012  loss: 0.0011  time: 0.4439  data: 0.0000  max mem: 5189
+Train: data epoch: [39]  [29/30]  eta: 0:00:00  lr: 0.000012  loss: 0.0014  time: 0.4942  data: 0.0000  max mem: 5189
+Train: data epoch: [39] Total time: 0:00:15 (0.5143 s / it)
+2026-08-21 22:57:08,710 [INFO] Qual: EPOCH[39] -> PLCC: 0.745024, SROCC: 0.753050, KROCC: 0.541719, LOSS: 0.004216
+2026-08-21 22:57:08,710 [INFO] Align: EPOCH[39] -> PLCC: 0.568036, SROCC: 0.559996, KROCC: 0.391249, LOSS: 0.004854
+2026-08-21 22:57:08,711 [INFO] Start training
+2026-08-21 22:57:08,952 [INFO] Start training epoch 40, 30 iters per inner epoch.
+2026-08-21 22:57:24,428 [INFO] Averaged stats: lr: 0.000010  loss: 0.001318
+2026-08-21 22:57:24,532 [INFO] gates: {"epoch": 40, "raw_quality_ratio": 6.4266, "quality_ratio": 0.0889, "decoder_ratio": 0.0785, "lambda_q": 0.0138, "deviation_mean": 0.9928, "deviation_std": 0.0535, "patch_w_mean": 0.4871, "patch_w_std": 0.0182, "lambda_d": 0.0125, "qard_attn_entropy": 0.9851, "qard_attn_max": 0.011, "qard_decoder_norm": 16.0357, "qard_memory_norm": 7.3626}
+2026-08-21 22:57:24,532 [INFO] Evaluating on val.
+Train: data epoch: [40]  [ 0/30]  eta: 0:00:48  lr: 0.000010  loss: 0.0015  time: 1.6005  data: 0.0001  max mem: 5189
+Train: data epoch: [40]  [20/30]  eta: 0:00:05  lr: 0.000010  loss: 0.0012  time: 0.4551  data: 0.0000  max mem: 5189
+Train: data epoch: [40]  [29/30]  eta: 0:00:00  lr: 0.000010  loss: 0.0010  time: 0.4971  data: 0.0000  max mem: 5189
+Train: data epoch: [40] Total time: 0:00:15 (0.5159 s / it)
+2026-08-21 22:57:30,645 [INFO] Qual: EPOCH[40] -> PLCC: 0.744939, SROCC: 0.753187, KROCC: 0.541980, LOSS: 0.004194
+2026-08-21 22:57:30,645 [INFO] Align: EPOCH[40] -> PLCC: 0.568712, SROCC: 0.561122, KROCC: 0.391945, LOSS: 0.004860
+2026-08-21 22:57:30,662 [INFO] Saving checkpoint at epoch 40 to run/20260821224_Full_V17_2023/checkpoint_latest.pth.
+2026-08-21 22:57:30,744 [INFO] Start training
+2026-08-21 22:57:31,063 [INFO] Start training epoch 41, 30 iters per inner epoch.
+2026-08-21 22:57:45,734 [INFO] Averaged stats: lr: 0.000009  loss: 0.001319
+2026-08-21 22:57:45,837 [INFO] gates: {"epoch": 41, "raw_quality_ratio": 6.3857, "quality_ratio": 0.0884, "decoder_ratio": 0.0781, "lambda_q": 0.0138, "deviation_mean": 1.0018, "deviation_std": 0.0526, "patch_w_mean": 0.4857, "patch_w_std": 0.0188, "lambda_d": 0.0125, "qard_attn_entropy": 0.9854, "qard_attn_max": 0.011, "qard_decoder_norm": 16.0352, "qard_memory_norm": 7.3272}
+2026-08-21 22:57:45,837 [INFO] Evaluating on val.
+Train: data epoch: [41]  [ 0/30]  eta: 0:01:02  lr: 0.000009  loss: 0.0013  time: 2.0919  data: 0.0001  max mem: 5189
+Train: data epoch: [41]  [20/30]  eta: 0:00:04  lr: 0.000009  loss: 0.0014  time: 0.3899  data: 0.0000  max mem: 5189
+Train: data epoch: [41]  [29/30]  eta: 0:00:00  lr: 0.000009  loss: 0.0014  time: 0.4894  data: 0.0000  max mem: 5189
+Train: data epoch: [41] Total time: 0:00:14 (0.4890 s / it)
+2026-08-21 22:57:51,884 [INFO] Qual: EPOCH[41] -> PLCC: 0.744347, SROCC: 0.752365, KROCC: 0.541127, LOSS: 0.004248
+2026-08-21 22:57:51,884 [INFO] Align: EPOCH[41] -> PLCC: 0.568479, SROCC: 0.561123, KROCC: 0.391910, LOSS: 0.004868
+2026-08-21 22:57:51,885 [INFO] Start training
+2026-08-21 22:57:52,180 [INFO] Start training epoch 42, 30 iters per inner epoch.
+2026-08-21 22:58:07,411 [INFO] Averaged stats: lr: 0.000007  loss: 0.001306
+2026-08-21 22:58:07,508 [INFO] gates: {"epoch": 42, "raw_quality_ratio": 6.3699, "quality_ratio": 0.0882, "decoder_ratio": 0.0778, "lambda_q": 0.0139, "deviation_mean": 0.9976, "deviation_std": 0.0523, "patch_w_mean": 0.4871, "patch_w_std": 0.019, "lambda_d": 0.0125, "qard_attn_entropy": 0.985, "qard_attn_max": 0.011, "qard_decoder_norm": 16.0355, "qard_memory_norm": 7.3326}
+2026-08-21 22:58:07,508 [INFO] Evaluating on val.
+Train: data epoch: [42]  [ 0/30]  eta: 0:00:56  lr: 0.000007  loss: 0.0015  time: 1.8766  data: 0.0001  max mem: 5189
+Train: data epoch: [42]  [20/30]  eta: 0:00:05  lr: 0.000007  loss: 0.0013  time: 0.4349  data: 0.0000  max mem: 5189
+Train: data epoch: [42]  [29/30]  eta: 0:00:00  lr: 0.000007  loss: 0.0015  time: 0.4771  data: 0.0000  max mem: 5189
+Train: data epoch: [42] Total time: 0:00:15 (0.5077 s / it)
+2026-08-21 22:58:13,524 [INFO] Qual: EPOCH[42] -> PLCC: 0.744256, SROCC: 0.752370, KROCC: 0.541127, LOSS: 0.004228
+2026-08-21 22:58:13,524 [INFO] Align: EPOCH[42] -> PLCC: 0.567897, SROCC: 0.559853, KROCC: 0.391058, LOSS: 0.004879
+2026-08-21 22:58:13,525 [INFO] Start training
+2026-08-21 22:58:13,783 [INFO] Start training epoch 43, 30 iters per inner epoch.
+2026-08-21 22:58:29,201 [INFO] Averaged stats: lr: 0.000006  loss: 0.001310
+2026-08-21 22:58:29,303 [INFO] gates: {"epoch": 43, "raw_quality_ratio": 6.4067, "quality_ratio": 0.0888, "decoder_ratio": 0.0784, "lambda_q": 0.0139, "deviation_mean": 0.997, "deviation_std": 0.0542, "patch_w_mean": 0.4855, "patch_w_std": 0.0184, "lambda_d": 0.0125, "qard_attn_entropy": 0.9848, "qard_attn_max": 0.011, "qard_decoder_norm": 16.0358, "qard_memory_norm": 7.3428}
+2026-08-21 22:58:29,304 [INFO] Evaluating on val.
+Train: data epoch: [43]  [ 0/30]  eta: 0:00:47  lr: 0.000006  loss: 0.0012  time: 1.5689  data: 0.0001  max mem: 5189
+Train: data epoch: [43]  [20/30]  eta: 0:00:05  lr: 0.000006  loss: 0.0014  time: 0.4556  data: 0.0000  max mem: 5189
+Train: data epoch: [43]  [29/30]  eta: 0:00:00  lr: 0.000006  loss: 0.0016  time: 0.5003  data: 0.0000  max mem: 5189
+Train: data epoch: [43] Total time: 0:00:15 (0.5139 s / it)
+2026-08-21 22:58:35,395 [INFO] Qual: EPOCH[43] -> PLCC: 0.743410, SROCC: 0.751442, KROCC: 0.540397, LOSS: 0.004220
+2026-08-21 22:58:35,395 [INFO] Align: EPOCH[43] -> PLCC: 0.567487, SROCC: 0.559516, KROCC: 0.390605, LOSS: 0.004866
+2026-08-21 22:58:35,396 [INFO] Start training
+2026-08-21 22:58:35,684 [INFO] Start training epoch 44, 30 iters per inner epoch.
+2026-08-21 22:58:50,640 [INFO] Averaged stats: lr: 0.000004  loss: 0.001303
+2026-08-21 22:58:50,747 [INFO] gates: {"epoch": 44, "raw_quality_ratio": 6.2313, "quality_ratio": 0.0864, "decoder_ratio": 0.0761, "lambda_q": 0.0139, "deviation_mean": 0.9963, "deviation_std": 0.0557, "patch_w_mean": 0.4852, "patch_w_std": 0.0186, "lambda_d": 0.0125, "qard_attn_entropy": 0.9848, "qard_attn_max": 0.0112, "qard_decoder_norm": 16.0355, "qard_memory_norm": 7.2953}
+2026-08-21 22:58:50,748 [INFO] Evaluating on val.
+Train: data epoch: [44]  [ 0/30]  eta: 0:00:44  lr: 0.000004  loss: 0.0013  time: 1.4794  data: 0.0001  max mem: 5189
+Train: data epoch: [44]  [20/30]  eta: 0:00:04  lr: 0.000004  loss: 0.0015  time: 0.4445  data: 0.0000  max mem: 5189
+Train: data epoch: [44]  [29/30]  eta: 0:00:00  lr: 0.000004  loss: 0.0012  time: 0.4863  data: 0.0000  max mem: 5189
+Train: data epoch: [44] Total time: 0:00:14 (0.4985 s / it)
+2026-08-21 22:58:57,164 [INFO] Qual: EPOCH[44] -> PLCC: 0.742989, SROCC: 0.751031, KROCC: 0.539962, LOSS: 0.004247
+2026-08-21 22:58:57,164 [INFO] Align: EPOCH[44] -> PLCC: 0.566882, SROCC: 0.558699, KROCC: 0.390066, LOSS: 0.004873
+2026-08-21 22:58:57,164 [INFO] Start training
+2026-08-21 22:58:57,431 [INFO] Start training epoch 45, 30 iters per inner epoch.
+2026-08-21 22:59:12,132 [INFO] Averaged stats: lr: 0.000003  loss: 0.001295
+2026-08-21 22:59:12,256 [INFO] gates: {"epoch": 45, "raw_quality_ratio": 6.1851, "quality_ratio": 0.0858, "decoder_ratio": 0.0755, "lambda_q": 0.0139, "deviation_mean": 1.0087, "deviation_std": 0.0536, "patch_w_mean": 0.4868, "patch_w_std": 0.0194, "lambda_d": 0.0125, "qard_attn_entropy": 0.9855, "qard_attn_max": 0.0109, "qard_decoder_norm": 16.0363, "qard_memory_norm": 7.3005}
+2026-08-21 22:59:12,257 [INFO] Evaluating on val.
+Train: data epoch: [45]  [ 0/30]  eta: 0:00:41  lr: 0.000003  loss: 0.0014  time: 1.3911  data: 0.0001  max mem: 5189
+Train: data epoch: [45]  [20/30]  eta: 0:00:04  lr: 0.000003  loss: 0.0010  time: 0.4365  data: 0.0000  max mem: 5189
+Train: data epoch: [45]  [29/30]  eta: 0:00:00  lr: 0.000003  loss: 0.0013  time: 0.4729  data: 0.0000  max mem: 5189
+Train: data epoch: [45] Total time: 0:00:14 (0.4900 s / it)
+2026-08-21 22:59:18,580 [INFO] Qual: EPOCH[45] -> PLCC: 0.743022, SROCC: 0.751306, KROCC: 0.540275, LOSS: 0.004262
+2026-08-21 22:59:18,581 [INFO] Align: EPOCH[45] -> PLCC: 0.567148, SROCC: 0.558856, KROCC: 0.390101, LOSS: 0.004885
+2026-08-21 22:59:18,594 [INFO] Saving checkpoint at epoch 45 to run/20260821224_Full_V17_2023/checkpoint_latest.pth.
+2026-08-21 22:59:18,675 [INFO] Start training
+2026-08-21 22:59:18,934 [INFO] Start training epoch 46, 30 iters per inner epoch.
+2026-08-21 22:59:34,548 [INFO] Averaged stats: lr: 0.000003  loss: 0.001290
+2026-08-21 22:59:34,651 [INFO] gates: {"epoch": 46, "raw_quality_ratio": 6.4615, "quality_ratio": 0.0897, "decoder_ratio": 0.0789, "lambda_q": 0.0139, "deviation_mean": 0.9988, "deviation_std": 0.0524, "patch_w_mean": 0.4861, "patch_w_std": 0.0188, "lambda_d": 0.0125, "qard_attn_entropy": 0.9854, "qard_attn_max": 0.0111, "qard_decoder_norm": 16.0355, "qard_memory_norm": 7.3285}
+2026-08-21 22:59:34,651 [INFO] Evaluating on val.
+Train: data epoch: [46]  [ 0/30]  eta: 0:00:51  lr: 0.000003  loss: 0.0015  time: 1.7245  data: 0.0001  max mem: 5189
+Train: data epoch: [46]  [20/30]  eta: 0:00:05  lr: 0.000003  loss: 0.0012  time: 0.4449  data: 0.0000  max mem: 5189
+Train: data epoch: [46]  [29/30]  eta: 0:00:00  lr: 0.000003  loss: 0.0013  time: 0.4880  data: 0.0000  max mem: 5189
+Train: data epoch: [46] Total time: 0:00:15 (0.5204 s / it)
+2026-08-21 22:59:40,689 [INFO] Qual: EPOCH[46] -> PLCC: 0.743234, SROCC: 0.751387, KROCC: 0.540344, LOSS: 0.004254
+2026-08-21 22:59:40,689 [INFO] Align: EPOCH[46] -> PLCC: 0.566762, SROCC: 0.558710, KROCC: 0.390031, LOSS: 0.004881
+2026-08-21 22:59:40,689 [INFO] Start training
+2026-08-21 22:59:40,947 [INFO] Start training epoch 47, 30 iters per inner epoch.
+2026-08-21 22:59:54,086 [INFO] Averaged stats: lr: 0.000002  loss: 0.001297
+2026-08-21 22:59:54,198 [INFO] gates: {"epoch": 47, "raw_quality_ratio": 6.4909, "quality_ratio": 0.0901, "decoder_ratio": 0.0794, "lambda_q": 0.0139, "deviation_mean": 0.9977, "deviation_std": 0.0554, "patch_w_mean": 0.4857, "patch_w_std": 0.0191, "lambda_d": 0.0125, "qard_attn_entropy": 0.9848, "qard_attn_max": 0.0112, "qard_decoder_norm": 16.0351, "qard_memory_norm": 7.3271}
+2026-08-21 22:59:54,198 [INFO] Evaluating on val.
+Train: data epoch: [47]  [ 0/30]  eta: 0:00:54  lr: 0.000002  loss: 0.0015  time: 1.8279  data: 0.0001  max mem: 5189
+Train: data epoch: [47]  [20/30]  eta: 0:00:04  lr: 0.000002  loss: 0.0014  time: 0.3690  data: 0.0000  max mem: 5189
+Train: data epoch: [47]  [29/30]  eta: 0:00:00  lr: 0.000002  loss: 0.0012  time: 0.4160  data: 0.0000  max mem: 5189
+Train: data epoch: [47] Total time: 0:00:13 (0.4379 s / it)
+2026-08-21 23:00:00,209 [INFO] Qual: EPOCH[47] -> PLCC: 0.742943, SROCC: 0.750994, KROCC: 0.539997, LOSS: 0.004247
+2026-08-21 23:00:00,210 [INFO] Align: EPOCH[47] -> PLCC: 0.566647, SROCC: 0.558476, KROCC: 0.389944, LOSS: 0.004883
+2026-08-21 23:00:00,210 [INFO] Start training
+2026-08-21 23:00:00,474 [INFO] Start training epoch 48, 30 iters per inner epoch.
+2026-08-21 23:00:13,958 [INFO] Averaged stats: lr: 0.000001  loss: 0.001299
+2026-08-21 23:00:14,177 [INFO] gates: {"epoch": 48, "raw_quality_ratio": 6.3224, "quality_ratio": 0.0878, "decoder_ratio": 0.0772, "lambda_q": 0.0139, "deviation_mean": 1.008, "deviation_std": 0.0551, "patch_w_mean": 0.4864, "patch_w_std": 0.0191, "lambda_d": 0.0125, "qard_attn_entropy": 0.9856, "qard_attn_max": 0.0107, "qard_decoder_norm": 16.0353, "qard_memory_norm": 7.327}
+2026-08-21 23:00:14,178 [INFO] Evaluating on val.
+Train: data epoch: [48]  [ 0/30]  eta: 0:00:45  lr: 0.000001  loss: 0.0015  time: 1.5224  data: 0.0001  max mem: 5189
+Train: data epoch: [48]  [20/30]  eta: 0:00:05  lr: 0.000001  loss: 0.0014  time: 0.4834  data: 0.0000  max mem: 5189
+Train: data epoch: [48]  [29/30]  eta: 0:00:00  lr: 0.000001  loss: 0.0011  time: 0.3761  data: 0.0000  max mem: 5189
+Train: data epoch: [48] Total time: 0:00:13 (0.4494 s / it)
+2026-08-21 23:00:21,623 [INFO] Qual: EPOCH[48] -> PLCC: 0.743002, SROCC: 0.751069, KROCC: 0.540014, LOSS: 0.004254
+2026-08-21 23:00:21,623 [INFO] Align: EPOCH[48] -> PLCC: 0.566492, SROCC: 0.558267, KROCC: 0.389753, LOSS: 0.004886
+2026-08-21 23:00:21,624 [INFO] Start training
+2026-08-21 23:00:21,979 [INFO] Start training epoch 49, 30 iters per inner epoch.
+2026-08-21 23:00:35,273 [INFO] Averaged stats: lr: 0.000001  loss: 0.001302
+2026-08-21 23:00:35,361 [INFO] gates: {"epoch": 49, "raw_quality_ratio": 6.3746, "quality_ratio": 0.0885, "decoder_ratio": 0.0779, "lambda_q": 0.0139, "deviation_mean": 1.0007, "deviation_std": 0.0532, "patch_w_mean": 0.4863, "patch_w_std": 0.0186, "lambda_d": 0.0125, "qard_attn_entropy": 0.9857, "qard_attn_max": 0.0108, "qard_decoder_norm": 16.0353, "qard_memory_norm": 7.2818}
+2026-08-21 23:00:35,362 [INFO] Evaluating on val.
+Train: data epoch: [49]  [ 0/30]  eta: 0:00:58  lr: 0.000001  loss: 0.0011  time: 1.9564  data: 0.0001  max mem: 5189
+Train: data epoch: [49]  [20/30]  eta: 0:00:05  lr: 0.000001  loss: 0.0012  time: 0.4796  data: 0.0000  max mem: 5189
+Train: data epoch: [49]  [29/30]  eta: 0:00:00  lr: 0.000001  loss: 0.0012  time: 0.3432  data: 0.0000  max mem: 5189
+Train: data epoch: [49] Total time: 0:00:13 (0.4431 s / it)
+2026-08-21 23:00:38,357 [INFO] Qual: EPOCH[49] -> PLCC: 0.742995, SROCC: 0.751131, KROCC: 0.540101, LOSS: 0.004258
+2026-08-21 23:00:38,357 [INFO] Align: EPOCH[49] -> PLCC: 0.566451, SROCC: 0.558294, KROCC: 0.389770, LOSS: 0.004885
+2026-08-21 23:00:38,375 [INFO] Saving checkpoint at epoch 49 to run/20260821224_Full_V17_2023/checkpoint_latest.pth.
+[{'agg_metrics': np.float64(3.6998527732740416), 'qual_agg': np.float64(2.0871095326705307), 'qual_PLCC': np.float64(0.7626236769738193), 'qual_SROCC': np.float64(0.7685533574364471), 'qual_KROCC': np.float64(0.5559324982602644), 'align_agg': np.float64(1.612743240603511), 'align_PLCC': np.float64(0.597092420359789), 'align_SROCC': np.float64(0.5963745502367631), 'align_KROCC': np.float64(0.4192762700069589)}]
+{'agg_metrics': np.float64(3.6998527732740416), 'qual_agg': np.float64(2.0871095326705307), 'qual_PLCC': np.float64(0.7626236769738193), 'qual_SROCC': np.float64(0.7685533574364471), 'qual_KROCC': np.float64(0.5559324982602644), 'align_agg': np.float64(1.612743240603511), 'align_PLCC': np.float64(0.597092420359789), 'align_SROCC': np.float64(0.5963745502367631), 'align_KROCC': np.float64(0.4192762700069589)}
