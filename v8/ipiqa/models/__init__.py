@@ -15,6 +15,7 @@ from ipiqa.models.base_model import BaseModel
 from ipiqa.models.model_v8 import MSQRNetV8
 from ipiqa.models.model_v9 import MSQRNetV9
 from ipiqa.models.model_v10 import MSQRNetV10
+from ipiqa.models.model_v11 import MSQRNetV11
 
 
 __all__ = [
@@ -23,6 +24,7 @@ __all__ = [
     "MSQRNetV8",
     "MSQRNetV9",
     "MSQRNetV10",
+    "MSQRNetV11",
 ]
 
 
