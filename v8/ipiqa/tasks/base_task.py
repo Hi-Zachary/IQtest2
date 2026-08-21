@@ -78,6 +78,7 @@ class BaseTask:
         log_freq=50,
         accum_grad_iters=1,
         grad_norm_clip=None,
+        v13_mode=None,
     ):
         return self._train_inner_loop(
             epoch=epoch,
@@ -91,6 +92,7 @@ class BaseTask:
             cuda_enabled=cuda_enabled,
             accum_grad_iters=accum_grad_iters,
             grad_norm_clip=grad_norm_clip,
+            v13_mode=v13_mode,
         )
 
     def train_iters(
@@ -135,6 +137,7 @@ class BaseTask:
         cuda_enabled=False,
         accum_grad_iters=1,
         grad_norm_clip=None,
+        v13_mode=None,
     ):
         """
         An inner training loop compatible with both epoch-based and iter-based training.
@@ -184,33 +187,90 @@ class BaseTask:
             )
 
             lr_scheduler.step(cur_epoch=inner_epoch, cur_step=i)
-            with torch.cuda.amp.autocast(enabled=use_amp):
-                loss, loss_dict = self.train_step(model=model, samples=samples)
-                loss /= accum_grad_iters # not affect loss_dict values for logging
-            # if not (torch.isnan(loss) or torch.isinf(loss)):
-            #     print(f"Valid loss in process {torch.distributed.get_rank()}: {loss.item()}")
-            # else:
-            #     print(f"Invalid loss in process {torch.distributed.get_rank()}: {loss.item()}")
 
-            # after_train_step()
-            if use_amp:
-                scaler.scale(loss).backward()
+            # ===================== V13: 共享 LoRA 梯度诊断 / selective PCGrad =====================
+            if v13_mode is not None and i == 0 and hasattr(model, "reset_grad_diag"):
+                model.reset_grad_diag()
+
+            if v13_mode is not None and hasattr(model, "get_shared_params"):
+                with torch.cuda.amp.autocast(enabled=use_amp):
+                    output = model(samples["images"], samples["text"])
+                    y = samples["score"].float()
+                    loss_q = torch.nn.functional.mse_loss(output[:, 0], y[:, 0])
+                    loss_a = torch.nn.functional.mse_loss(output[:, 1], y[:, 1])
+                    loss = (loss_q + loss_a) / accum_grad_iters
+
+                shared = model.get_shared_params()
+                gq = torch.autograd.grad(loss_q, shared, retain_graph=True, allow_unused=True)
+                ga = torch.autograd.grad(loss_a, shared, retain_graph=True, allow_unused=True)
+
+                # ---- 诊断统计（grad cosine / norm / conflict） ----
+                if hasattr(model, "_grad_diag") and model._grad_diag is not None:
+                    gq_v = torch.cat([g.detach().flatten() for g in gq if g is not None])
+                    ga_v = torch.cat([g.detach().flatten() for g in ga if g is not None])
+                    cos = (gq_v * ga_v).sum() / (gq_v.norm() * ga_v.norm() + 1e-8)
+                    d = model._grad_diag
+                    d["cos_sum"] += cos.item()
+                    d["q_norm"] += gq_v.norm().item()
+                    d["a_norm"] += ga_v.norm().item()
+                    d["conflict"] += int(cos.item() < 0)
+                    d["n"] += 1
+
+                if v13_mode == "diag":
+                    loss.backward()
+                elif v13_mode == "pcgrad":
+                    q_params = model.get_quality_params()
+                    a_params = model.get_alignment_params()
+                    gq_task = torch.autograd.grad(loss_q, q_params, retain_graph=True, allow_unused=True)
+                    ga_task = torch.autograd.grad(loss_a, a_params, retain_graph=False, allow_unused=True)
+                    # PCGrad only on shared LoRA
+                    for p, gq_i, ga_i in zip(shared, gq, ga):
+                        if gq_i is None or ga_i is None:
+                            g = (gq_i if gq_i is not None else 0) + (ga_i if ga_i is not None else 0)
+                        else:
+                            dot = torch.sum(gq_i * ga_i)
+                            if dot < 0:
+                                gq_p = gq_i - (dot / (ga_i.norm() ** 2 + 1e-8)) * ga_i
+                                ga_p = ga_i - (dot / (gq_i.norm() ** 2 + 1e-8)) * gq_i
+                                g = gq_p + ga_p
+                            else:
+                                g = gq_i + ga_i
+                        p.grad = g
+                    for p, g in zip(q_params, gq_task):
+                        if g is not None:
+                            p.grad = g
+                    for p, g in zip(a_params, ga_task):
+                        if g is not None:
+                            p.grad = g
             else:
-                loss.backward()
+                # ===================== 标准训练 =====================
+                with torch.cuda.amp.autocast(enabled=use_amp):
+                    loss, loss_dict = self.train_step(model=model, samples=samples)
+                    loss /= accum_grad_iters # not affect loss_dict values for logging
+
+                if use_amp:
+                    scaler.scale(loss).backward()
+                else:
+                    loss.backward()
 
             # update gradients every accum_grad_iters iterations
             if (i + 1) % accum_grad_iters == 0:
                 if grad_norm_clip is not None:
                     parameters_with_grads = [param for pg in optimizer.param_groups for param in pg['params']]
                     clip_grad_norm_(parameters_with_grads,max_norm=grad_norm_clip)
-                    # print(f"grad:{grad_norm_clip}")
-                if use_amp:
+                if v13_mode is not None:
+                    # V13 已手动赋值梯度，直接 step（不用 scaler）
+                    optimizer.step()
+                    optimizer.zero_grad()
+                elif use_amp:
                     scaler.step(optimizer)
                     scaler.update()
                 else:
                     optimizer.step()
                 optimizer.zero_grad()
 
+            if v13_mode is not None:
+                loss_dict = {"loss": loss.detach()}
             metric_logger.update(**loss_dict)
             metric_logger.update(lr=optimizer.param_groups[0]["lr"])
 

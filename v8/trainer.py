@@ -488,4 +488,5 @@ class Trainer:
             log_freq=self.log_freq,
             accum_grad_iters=self.accum_grad_iters,
             grad_norm_clip=self.grad_norm_clip,
+            v13_mode=self.config.run.get("v13_mode", None),
         )

@@ -111,6 +111,24 @@ class MSQRNetV12(BaseModel):
         )
 
         self._last_ratios = {}
+        self._grad_diag = None   # V13: 每 epoch 累计的共享 LoRA 梯度诊断统计
+
+    # ---------------- V13 参数分组（供梯度诊断 / selective PCGrad） ----------------
+    def get_shared_params(self):
+        return [p for n, p in self.named_parameters()
+                if p.requires_grad and n.startswith("backbone.clip.vision_model.")]
+
+    def get_quality_params(self):
+        return [p for n, p in self.named_parameters()
+                if p.requires_grad and (n.startswith("quality_")
+                                        or n.startswith("dg_mpq") or n == "lambda_q")]
+
+    def get_alignment_params(self):
+        return [p for n, p in self.named_parameters()
+                if p.requires_grad and (n.startswith("alignment_") or n.startswith("mscm"))]
+
+    def reset_grad_diag(self):
+        self._grad_diag = {"cos_sum": 0.0, "conflict": 0, "q_norm": 0.0, "a_norm": 0.0, "n": 0}
 
     # ---------------- train/eval override ----------------
     def train(self, mode=True):
@@ -190,6 +208,12 @@ class MSQRNetV12(BaseModel):
             st = getattr(self.mscm, "_last_stats", None)
             if st is not None:
                 out.update({f"corr_{k}": v for k, v in st.items()})
+        if self._grad_diag is not None and self._grad_diag["n"] > 0:
+            d = self._grad_diag
+            out["grad_cos"] = round(d["cos_sum"] / d["n"], 4)
+            out["grad_q_norm"] = round(d["q_norm"] / d["n"], 4)
+            out["grad_a_norm"] = round(d["a_norm"] / d["n"], 4)
+            out["conflict_rate"] = round(d["conflict"] / d["n"], 4)
         return out
 
     # ------------------------------------------------------------------ #
