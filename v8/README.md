@@ -1,12 +1,17 @@
-# IQtest v8：CLIP ViT-B/16 + Visual LoRA + DG-MPQ + HCMI-ViT
+# IQtest v8 (V8-Slim Final)：CLIP ViT-B/16 + Visual LoRA + DG-MPQ + HCMI-ViT
 
-缝合方案落地（`../调整/改进1.md`）。在 Frozen CLIP ViT-B/16 主干上：
-Visual Q/K LoRA 做 backbone adaptation，两个主创新模块并行：
+缝合方案落地（`../调整/改进1.md` + `改进2.md` + `改进3.md`）。在 Frozen CLIP ViT-B/16
+主干上：Visual Q/K LoRA 做 backbone adaptation，两个主创新模块并行：
 - **DG-MPQ**（Module 1，Quality）：multi-level ViT patch（L3/6/9/12）+ local-global
   semantic deviation 引导的 patch weighting → normalized quality residual
 - **HCMI-ViT**（Module 2，Alignment）：detail-level（L6）/ semantic-level（L12）
-  与真实 generation prompt 的双向跨模态交互 + discrepancy-guided attention bias
+  与真实 generation prompt 的双向跨模态交互 + prompt token weighting
   + adaptive hierarchy fusion → normalized cross-modal residual
+
+已删除（V8-Slim Final）：
+- discrepancy-guided attention bias（beta_align≈0.002 无贡献）
+- MSA-T multi-kernel text enhancement（省 ~1.18M 参数，S2 显示删除后 A-SRCC 不降反升）
+- HCMI MLP 收窄 mlp_ratio 2→1；LoRA dropout 0.05→0（与 train() 强制 eval 一致）
 
 两模块从 backbone hidden states 并行出发（互不串行），以 `tanh(lambda)` gated
 residual 注入 anchor：`v = v0 + tanh(λq)·Δq`，`c = t0 + tanh(λa)·Δa`。
@@ -68,11 +73,11 @@ bash serial_train.sh
 python tests/smoke_test_v8.py
 ```
 
-## 协议要点（第 11 节 + 改进2.md V8-Slim）
+## 协议要点（第 11 节 + 改进2/3.md V8-Slim Final）
 
 - 224×224 / 30ep / batch 64 / AdamW / init_lr 1e-4（LoRA 与主模块同 1e-4，沿用 v7 batch64 协议）
 - LoRA r=4 α=8 **dropout=0**（train() 强制 vision_model.eval()，LoRA dropout 实际从未生效，故配置对齐为 0），target q_proj/k_proj；text 全冻结、visual base 冻结
-- **V8-Slim**：已删除 discrepancy-guided attention bias（beta_align≈0.002 无贡献）；HCMI-ViT mlp_ratio=1
+- **V8-Slim Final**：无 discrepancy bias、无 MSA-T、HCMI mlp_ratio=1；Full trainable ≈ 4.16M（原 6.13M，-32%）
 - 纯 MSE(Q)+MSE(A)，无额外 loss
 - split3 seed42，best_criterion=joint
 - 每 epoch 记录 lambda_q/lambda_a/hier_gate/deviation/patch_w/
@@ -81,6 +86,6 @@ python tests/smoke_test_v8.py
 ## 关键检查点
 
 1. **R0 > B0 ？**（LoRA 是否真的训练：requires_grad / 梯度 / qkv 被替换）
-2. **模块独立性**：B1 的 DG-MPQ 输入 == Full 的 DG-MPQ 输入（已由 smoke test 验证）
+2. **模块独立性**：B1 的 DG-MPQ 输入 == Full 的 DG-MPQ 输入；B2 的 HCMI 输入 == Full 的 HCMI 输入（smoke test 验证）
 3. **分支活性**：Full 中 quality_ratio / align_ratio 均非 0
 4. **判据**：R0>B0, B1>R0, B2>R0, Full ≥ 最好单模块；不追求每指标第一

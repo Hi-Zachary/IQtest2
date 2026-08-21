@@ -1,8 +1,8 @@
 """Shared attention primitives for DG-MPQ / HCMI-ViT (v8).
 
 Adapted (not copied verbatim) from:
-  - CrossAttention / MSA_T: CHPNet (github.com/NUIST-Videocoding/CHPNet)
-    `models/SV_interaction.py`, `models/SV_MS.py`.
+  - CrossAttention: CHPNet (github.com/NUIST-Videocoding/CHPNet)
+    `models/SV_interaction.py`.
   - The same primitives were validated in the v7 project (MSQR_SHCMI_TAF).
 
 Design rules (from 调整/改进1.md):
@@ -85,33 +85,6 @@ class CrossAttention(nn.Module):
         out = attn @ v                                    # [B, H, Nq, dh]
         out = out.permute(0, 2, 1, 3).reshape(B, Nq, -1)
         return self.to_out(out)
-
-
-class MSA_T(nn.Module):
-    """Multi-kernel text enhancement on token sequences [B, L, D].
-
-    Adapted from CHPNet MSA_T (models/SV_MS.py): Conv1d k=3/5/7 -> concat ->
-    1x1 conv. Returns the enhancement ``Delta``; caller adds ``x + eta*Delta``.
-    """
-
-    def __init__(self, in_channels, out_channels, drop=0.0):
-        super().__init__()
-        self.conv1 = nn.Conv1d(in_channels, in_channels, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv1d(in_channels, in_channels, kernel_size=5, padding=2)
-        self.conv3 = nn.Conv1d(in_channels, in_channels, kernel_size=7, padding=3)
-        self.conv1x1 = nn.Conv1d(in_channels * 3, out_channels, kernel_size=1)
-        self.gelu = nn.GELU()
-
-    def forward(self, x):
-        # x: [B, L, D]
-        xt = x.permute(0, 2, 1)          # [B, D, L]
-        x1 = self.conv1(xt)
-        x2 = self.conv2(xt)
-        x3 = self.conv3(xt)
-        x_cat = torch.cat([x1, x2, x3], dim=1)
-        x_out = self.conv1x1(x_cat)
-        x_out = x_out.permute(0, 2, 1)   # [B, L, D]
-        return self.gelu(x_out)
 
 
 def masked_mean_pool(x, mask):

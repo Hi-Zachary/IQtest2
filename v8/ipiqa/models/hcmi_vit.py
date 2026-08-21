@@ -1,10 +1,11 @@
 """HCMI-ViT -- Prompt-conditioned Hierarchical Cross-Modal Interaction for ViT
-(v8 Module 2, V8-Slim).
+(v8 Module 2, V8-Slim Final).
 
-调整/改进2.md (V8-Slim):
-  - 删除 discrepancy-guided attention bias（日志显示 beta_align≈0.002 几乎无贡献）；
-  - 删除后不再使用 DP 前缀，改名为 HCMI-ViT；
-  - CrossAttention 不再接收 attn_bias。
+调整/改进2.md + 改进3.md (V8-Slim Final):
+  - 删除 discrepancy-guided attention bias（beta_align≈0.002 无贡献）；
+  - 删除 MSA-T multi-kernel text enhancement（S2 显示删除后 A-SRCC 不降反升 +0.0012，
+    省 ~1.18M 参数）；
+  - 删除后不再使用 DP 前缀，改名为 HCMI-ViT。
 
 Hierarchy 来自 ViT 语义深度：
     Detail-level   : Layer 6  patch tokens   (detail_proj)
@@ -13,8 +14,7 @@ Hierarchy 来自 ViT 语义深度：
 Pipeline (per level, bidirectional visual <-> prompt interaction):
     T = text_token_proj(text_tokens)                       [B,77,D]
     T = prompt_weight(T)                   # mask + scale preservation
-    T_e = T + eta * MSA_T(T)               # multi-kernel text enhancement
-    V' = V + alpha * CrossAttn(V, T_e);  T' = T_e + beta*CrossAttn(T_e, V)
+    V' = V + alpha * CrossAttn(V, T);  T' = T + beta*CrossAttn(T, V)
     C_detail / C_semantic = MLP(mean_pool(V'), masked_mean_pool(T'))
     g_h = sigmoid(hierarchy_gate([C_detail, C_semantic]))
     delta_a = g_h * C_detail + (1-g_h) * C_semantic       # adaptive fusion
@@ -29,7 +29,6 @@ import torch.nn.functional as F
 
 from ipiqa.models.attention import (
     CrossAttention,
-    MSA_T,
     Mlp,
     masked_mean_pool,
 )
@@ -44,13 +43,11 @@ class HcmiVit(nn.Module):
             num_heads=4,
             mlp_ratio=1.0,
             drop=0.1,
-            use_multi_kernel=True,
             use_prompt_weight=True,
             gamma_init=0.01,
     ):
         super().__init__()
         self.dim = dim
-        self.use_multi_kernel = use_multi_kernel
         self.use_prompt_weight = use_prompt_weight
 
         # ViT semantic-depth hierarchy projections
@@ -71,11 +68,6 @@ class HcmiVit(nn.Module):
                 nn.GELU(),
                 nn.Linear(max(dim // 2, 8), 1),
             )
-
-        # multi-kernel text enhancement
-        if use_multi_kernel:
-            self.msa_t = MSA_T(dim, dim, drop)
-        self.eta = nn.Parameter(torch.tensor(float(gamma_init)))
 
         # detail-level bidirectional cross-modal
         self.detail_cross_v = CrossAttention(dim, dim, heads=num_heads, dropout=drop)
@@ -136,21 +128,15 @@ class HcmiVit(nn.Module):
             }
             T = T * weight.unsqueeze(-1)
 
-        # multi-kernel text enhancement (residual)
-        if self.use_multi_kernel:
-            T_e = T + self.eta * self.msa_t(T)
-        else:
-            T_e = T
-
         # detail-level bidirectional interaction
         V_d = detail_base + self.alpha_d * self.detail_cross_v(
-            detail_base, T_e, mask=text_mask)
-        T_d = T_e + self.beta_d * self.detail_cross_t(T_e, detail_base)
+            detail_base, T, mask=text_mask)
+        T_d = T + self.beta_d * self.detail_cross_t(T, detail_base)
 
         # semantic-level bidirectional interaction
         V_s = semantic_base + self.alpha_s * self.semantic_cross_v(
-            semantic_base, T_e, mask=text_mask)
-        T_s = T_e + self.beta_s * self.semantic_cross_t(T_e, semantic_base)
+            semantic_base, T, mask=text_mask)
+        T_s = T + self.beta_s * self.semantic_cross_t(T, semantic_base)
 
         # per-level cross-modal representations
         C_d = self.mlp_d(torch.cat([V_d.mean(dim=1), masked_mean_pool(T_d, text_mask)], dim=-1))

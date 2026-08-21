@@ -378,7 +378,7 @@ class Trainer:
         # best-joint: argmax(qual_SROCC + qual_PLCC + align_SROCC + align_PLCC)
         best_joint_score = -1e9
         best_joint_epoch = 0
-        best_agg_metric = 0
+        best_agg_metric = -1e9
         best_epoch = 0
         best_metrics = {}
 

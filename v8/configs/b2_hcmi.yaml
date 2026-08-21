@@ -24,7 +24,6 @@ model:
   lora_dropout: 0.0
   use_dg_mpq: False
   use_hcmi: True
-  hcmi_use_multi_kernel: True
   use_prompt_weight: True
 
 dataset:
@@ -58,7 +57,7 @@ run:
   batch_size_val: 64
   num_worker: 12
 
-  max_epoch: 30
+  max_epoch: 50
   log_freq: 20
   accum_grad_iters: 1
   grad_norm_clip: null

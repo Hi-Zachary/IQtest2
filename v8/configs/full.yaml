@@ -1,4 +1,4 @@
-# Full (v8 slim): R0 + DG-MPQ + HCMI-ViT
+# Full (V8-Slim Final): R0 + DG-MPQ + HCMI-ViT (no discrepancy, no MSA-T, mlp_ratio=1)
 # 调整/改进1.md: 最终模型, 双模块并行 + LoRA + 共享 fusion + 双头
 model:
   arch: "msqr_dgmpq_hcmi_v8"
@@ -23,7 +23,6 @@ model:
   lora_dropout: 0.0
   use_dg_mpq: True
   use_hcmi: True
-  hcmi_use_multi_kernel: True
   use_prompt_weight: True
 
 dataset:
@@ -57,7 +56,7 @@ run:
   batch_size_val: 64
   num_worker: 12
 
-  max_epoch: 30
+  max_epoch: 100
   log_freq: 20
   accum_grad_iters: 1
   grad_norm_clip: null

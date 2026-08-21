@@ -119,7 +119,27 @@ def main():
         d6 = (feat_b1["vision_hidden"][6][:, 1:, :] - feat_full["vision_hidden"][6][:, 1:, :]).abs().max().item()
         d12 = (feat_b1["vision_hidden"][12][:, 1:, :] - feat_full["vision_hidden"][12][:, 1:, :]).abs().max().item()
         print(f"  max|H6 patch diff| = {d6:.2e}   max|H12 patch diff| = {d12:.2e}")
-    print("  module input independence OK")
+    print("  DG-MPQ input independence OK")
+
+    # ---- HCMI input independence: B2 HCMI input == Full HCMI input ----
+    print("\n=== HCMI input independence (B2 == Full) ===")
+    b2 = build(use_lora=True, use_dg_mpq=False, use_hcmi=True)
+    full2 = build(use_lora=True, use_dg_mpq=True, use_hcmi=True)
+    b2.eval(); full2.eval()
+    with torch.no_grad():
+        feat_b2 = b2.backbone(x, ids, mask)
+        feat_full2 = full2.backbone(x, ids, mask)
+        for key in ["text_tokens"]:
+            d = (feat_b2[key] - feat_full2[key]).abs().max().item()
+            assert d < 1e-6, f"{key} differs between B2 and Full: {d}"
+        d6 = (feat_b2["vision_hidden"][6][:, 1:, :] - feat_full2["vision_hidden"][6][:, 1:, :]).abs().max().item()
+        d12 = (feat_b2["vision_hidden"][12][:, 1:, :] - feat_full2["vision_hidden"][12][:, 1:, :]).abs().max().item()
+        dt = (feat_b2["text_tokens"] - feat_full2["text_tokens"]).abs().max().item()
+        dm = (feat_b2["text_mask"].float() - feat_full2["text_mask"].float()).abs().max().item()
+        print(f"  max|H6 patch|={d6:.2e}  max|H12 patch|={d12:.2e}  max|text tokens|={dt:.2e}  max|mask|={dm:.2e}")
+    print("  HCMI input independence OK")
+    del b1, full, b2, full2
+    torch.cuda.empty_cache()
 
     print("\nALL SMOKE TESTS PASSED")
 

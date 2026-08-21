@@ -8,7 +8,8 @@
     B2 = R0 + HCMI-ViT                            (alignment module)
     Full = R0 + DG-MPQ + HCMI-ViT
 
-  - V8-Slim：删除 discrepancy-guided attention bias（beta_align≈0.002 无贡献），
+  - V8-Slim Final：删除 discrepancy-guided attention bias（beta_align≈0.002 无贡献）、
+    删除 MSA-T multi-kernel text enhancement（省 ~1.18M 参数，A-SRCC 不降反升），
     HCMI mlp_ratio=1（FFN 收窄），LoRA dropout=0（与 train() 强制 eval 的实际行为一致）。
   - 模块严格并行：DG-MPQ 与 HCMI-ViT 都直接从 backbone hidden states 出发，
     互不串行（B1/B2 与 Full 的模块输入完全一致，消除 hidden input change）。
@@ -56,7 +57,6 @@ class MSQRNetV8(BaseModel):
             lora_dropout=0.0,
             use_dg_mpq=True,
             use_hcmi=True,
-            hcmi_use_multi_kernel=True,
             use_prompt_weight=True,
             freeze_visual=True,
             freeze_text=True,
@@ -117,7 +117,6 @@ class MSQRNetV8(BaseModel):
                 num_heads=num_heads,
                 mlp_ratio=mlp_ratio,
                 drop=drop,
-                use_multi_kernel=hcmi_use_multi_kernel,
                 use_prompt_weight=use_prompt_weight,
                 gamma_init=self.outer_gate_init,
             )
@@ -302,7 +301,6 @@ class MSQRNetV8(BaseModel):
         lora_dropout = cfg.get('lora_dropout', 0.0)
         use_dg_mpq = cfg.get('use_dg_mpq', True)
         use_hcmi = cfg.get('use_hcmi', True)
-        hcmi_use_multi_kernel = cfg.get('hcmi_use_multi_kernel', True)
         use_prompt_weight = cfg.get('use_prompt_weight', True)
         freeze_visual = cfg.get('freeze_visual', True)
         freeze_text = cfg.get('freeze_text', True)
@@ -324,7 +322,6 @@ class MSQRNetV8(BaseModel):
             lora_dropout=lora_dropout,
             use_dg_mpq=use_dg_mpq,
             use_hcmi=use_hcmi,
-            hcmi_use_multi_kernel=hcmi_use_multi_kernel,
             use_prompt_weight=use_prompt_weight,
             freeze_visual=freeze_visual,
             freeze_text=freeze_text,
