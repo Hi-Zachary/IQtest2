@@ -13,12 +13,14 @@ from ipiqa.common.registry import registry
 from ipiqa.models.base_model import BaseModel
 
 from ipiqa.models.model_v8 import MSQRNetV8
+from ipiqa.models.model_v9 import MSQRNetV9
 
 
 __all__ = [
     "load_model",
     "BaseModel",
     "MSQRNetV8",
+    "MSQRNetV9",
 ]
 
 
