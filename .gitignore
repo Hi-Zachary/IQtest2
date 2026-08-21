@@ -1,0 +1,13 @@
+# 模型权重（symlink 到 Test2/v8/ckpt，不入库）
+v8/ckpt
+
+# 数据软链接（绝对路径，本机专用）
+v8/data
+
+# 训练输出：只排除权重 checkpoint，日志(log.txt/*.log)保留
+v8/run/*/checkpoint_*.pth
+v8/run/*/*/*.pth
+
+# Python 缓存
+__pycache__/
+*.pyc
