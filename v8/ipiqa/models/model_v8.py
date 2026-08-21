@@ -23,8 +23,9 @@ Data flow:
     delta_q = dg_mpq(H3, H6, H9, H12)                    (use_dg_mpq)
     delta_a = hcmi(H6[:,1:], H12[:,1:], T, mask)         (use_hcmi)
     v = v0 + tanh(lambda_q)*delta_q;  c = t0 + tanh(lambda_a)*delta_a
-    h = heads.shared_fusion(concat[v, c])
-    q = heads.quality_head(h);  a = heads.align_head(h)
+    # task-oriented routing (改进4.md): 零新增参数
+    h_q = heads.shared_fusion(concat[v, t0]);  q = heads.quality_head(h_q)
+    h_a = heads.shared_fusion(concat[v, c]);   a = heads.align_head(h_a)
 """
 
 import torch
@@ -185,10 +186,13 @@ class MSQRNetV8(BaseModel):
                 (a_scale * delta_a).norm(dim=-1).mean() / t0.norm(dim=-1).mean()
             ).item()
 
-        # ===================== shared fusion + dual heads =====================
-        h = self.heads.shared_fusion(torch.cat([v, c], dim=-1))   # [B, D]
-        q = self.heads.quality_head(h)
-        a = self.heads.align_head(h)
+        # ===================== task-oriented routing + dual heads =====================
+        # 改进4.md: 质量用 DG-MPQ 增强视觉 v + 原始文本锚点 t0（不受 HCMI 对齐残差干扰）；
+        # 对齐用 v + HCMI 增强表示 c。shared_fusion 只有一套参数，零新增参数。
+        h_q = self.heads.shared_fusion(torch.cat([v, t0], dim=-1))   # [B, D]
+        h_a = self.heads.shared_fusion(torch.cat([v, c], dim=-1))    # [B, D]
+        q = self.heads.quality_head(h_q)
+        a = self.heads.align_head(h_a)
 
         self._last_ratios = ratios
         return torch.cat([q, a], dim=-1)
