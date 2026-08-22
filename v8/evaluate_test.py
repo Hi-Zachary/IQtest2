@@ -78,6 +78,7 @@ def main():
     which = _sys.argv[1] if len(_sys.argv) > 1 else "v17"
     if which == "v26":
         variants = [
+            ("F0_frozen_no_lora", "configs/v26_aigiqa20k/f0_frozen_no_lora.yaml", ""),
             ("B0_baseline", "configs/v26_aigiqa20k/b0.yaml", ""),
             ("B1_lqea", "configs/v26_aigiqa20k/b1.yaml", ""),
             ("B2_csae", "configs/v26_aigiqa20k/b2.yaml", ""),
