@@ -76,7 +76,14 @@ def evaluate(tag, config_path, sub="_V17_20k"):
 def main():
     import sys as _sys
     which = _sys.argv[1] if len(_sys.argv) > 1 else "v17"
-    if which == "v20":
+    if which == "v26":
+        variants = [
+            ("B0_baseline", "configs/v26_aigiqa20k/b0.yaml", ""),
+            ("B1_lqea", "configs/v26_aigiqa20k/b1.yaml", ""),
+            ("B2_csae", "configs/v26_aigiqa20k/b2.yaml", ""),
+            ("B3_full", "configs/v26_aigiqa20k/b3.yaml", ""),
+        ]
+    elif which == "v20":
         variants = [
             ("E1_HMQE_20k", "configs/aigiqa20k/v20/e1.yaml", ""),
             ("E2_DCGA_20k", "configs/aigiqa20k/v20/e2.yaml", ""),
@@ -110,6 +117,10 @@ def main():
     if "B2_CADR" in results:
         dcadr = results["Full"]["MainScore_official"] - results["B1"]["MainScore_official"]
         print(f"TEST ΔCADR (Full-B1)  MainScore = {dcadr:+.4f}   SRCC = {results['Full']['SRCC']-results['B1']['SRCC']:+.4f}")
+    elif "B1_lqea" in results:
+        for a, b in [("B1_lqea","B0_baseline"), ("B2_csae","B0_baseline"),
+                     ("B3_full","B0_baseline"), ("B3_full","B1_lqea"), ("B3_full","B2_csae")]:
+            print(f"TEST Δ{a.split('_')[0]}-{b.split('_')[0]}  MainScore = {results[a]['MainScore_official']-results[b]['MainScore_official']:+.4f}   SRCC = {results[a]['SRCC']-results[b]['SRCC']:+.4f}")
     else:
         dq = results["Full"]["MainScore_official"] - results["B1"]["MainScore_official"]
         print(f"TEST ΔQARD (Full-B1)  MainScore = {dq:+.4f}   SRCC = {results['Full']['SRCC']-results['B1']['SRCC']:+.4f}")

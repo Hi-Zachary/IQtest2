@@ -1,0 +1,400 @@
+2026-08-23 00:36:09,305 [INFO] Loaded init weights from init_ckpt/v26_aigiqa20k_seed42.pth
+2026-08-23 00:36:09,305 [INFO] Start training
+2026-08-23 00:36:09,320 [INFO] number of trainable parameters: 1501444
+Not using distributed mode
+['lace_aigiqa20k_v26', 'msqr_dgmpq_abl_v21', 'msqr_dgmpq_cadr_v18', 'msqr_dgmpq_daps_v16', 'msqr_dgmpq_hcmi_v8', 'msqr_dgmpq_hmqe_dcga_v20', 'msqr_dgmpq_mscm_v10', 'msqr_dgmpq_mscm_v11', 'msqr_dgmpq_mscm_v12', 'msqr_dgmpq_msrc_v14', 'msqr_dgmpq_ptlc_v15', 'msqr_dgmpq_qard_v17', 'msqr_dgmpq_tcap_v9', 'msqr_dgmpqplus_dcar_v19', 'msqr_mlpq_mgsc_v23', 'msqr_mlpq_mgsc_v23_final', 'msqr_mlpq_mgsc_v23_refined', 'msqr_qare_csae_v24']
+2026-08-23 00:36:09,759 [INFO] Start training epoch 0, 218 iters per inner epoch.
+2026-08-23 00:36:55,765 [INFO] Averaged stats: lr: 0.000088  loss: 2.707234
+2026-08-23 00:36:55,835 [INFO] gates: {"epoch": 0, "quality_gate": 0.0149, "patch_w_mean": 0.5343, "patch_w_std": 0.0316, "csae_global_sim_mean": 0.2583, "csae_global_sim_std": 0.0435, "csae_local_sim_mean": 0.1378, "csae_local_sim_std": 0.0267, "csae_frag_count": 4, "csae_frag_w_entropy": 1.381, "csae_gl_gap_mean": 0.1205, "csae_gl_gap_std": 0.0453}
+2026-08-23 00:36:55,836 [INFO] Evaluating on val.
+Train: data epoch: [0]  [  0/218]  eta: 0:12:01  lr: 0.000000  loss: 16.4180  time: 3.3097  data: 0.0001  max mem: 5151
+Train: data epoch: [0]  [ 20/218]  eta: 0:01:11  lr: 0.000040  loss: 13.5891  time: 0.2162  data: 0.0000  max mem: 5162
+Train: data epoch: [0]  [ 40/218]  eta: 0:00:50  lr: 0.000080  loss: 5.3754  time: 0.1944  data: 0.0000  max mem: 5162
+Train: data epoch: [0]  [ 60/218]  eta: 0:00:39  lr: 0.000100  loss: 0.5134  time: 0.1958  data: 0.0000  max mem: 5162
+Train: data epoch: [0]  [ 80/218]  eta: 0:00:33  lr: 0.000100  loss: 0.2267  time: 0.1999  data: 0.0000  max mem: 5162
+Train: data epoch: [0]  [100/218]  eta: 0:00:27  lr: 0.000100  loss: 0.5031  time: 0.1961  data: 0.0000  max mem: 5162
+Train: data epoch: [0]  [120/218]  eta: 0:00:22  lr: 0.000100  loss: 0.3470  time: 0.1946  data: 0.0000  max mem: 5162
+Train: data epoch: [0]  [140/218]  eta: 0:00:17  lr: 0.000100  loss: 0.1742  time: 0.1991  data: 0.0000  max mem: 5162
+Train: data epoch: [0]  [160/218]  eta: 0:00:12  lr: 0.000100  loss: 0.1893  time: 0.1924  data: 0.0000  max mem: 5162
+Train: data epoch: [0]  [180/218]  eta: 0:00:08  lr: 0.000100  loss: 0.2092  time: 0.1932  data: 0.0000  max mem: 5162
+Train: data epoch: [0]  [200/218]  eta: 0:00:03  lr: 0.000100  loss: 0.2078  time: 0.1918  data: 0.0000  max mem: 5162
+Train: data epoch: [0]  [217/218]  eta: 0:00:00  lr: 0.000100  loss: 0.1566  time: 0.1895  data: 0.0000  max mem: 5162
+Train: data epoch: [0] Total time: 0:00:46 (0.2110 s / it)
+2026-08-23 00:37:06,819 [INFO] AIGIQA-20K: EPOCH[0] -> SRCC 0.7537 PLCC_raw 0.8310 PLCC_mapped 0.8416 KRCC 0.5645 MainScore_official 0.7977
+2026-08-23 00:37:06,833 [INFO] Saving checkpoint at epoch 0 to run/20260823003_B3_full/checkpoint_best.pth.
+2026-08-23 00:37:06,876 [INFO] Saving checkpoint at epoch 0 to run/20260823003_B3_full/checkpoint_best_joint.pth.
+2026-08-23 00:37:06,916 [INFO] Saving checkpoint at epoch 0 to run/20260823003_B3_full/checkpoint_best_main.pth.
+2026-08-23 00:37:06,949 [INFO] Start training
+2026-08-23 00:37:07,216 [INFO] Start training epoch 1, 218 iters per inner epoch.
+2026-08-23 00:37:51,290 [INFO] Averaged stats: lr: 0.000099  loss: 0.117992
+2026-08-23 00:37:51,391 [INFO] gates: {"epoch": 1, "quality_gate": 0.0171, "patch_w_mean": 0.5317, "patch_w_std": 0.051, "csae_global_sim_mean": 0.2693, "csae_global_sim_std": 0.0333, "csae_local_sim_mean": 0.1457, "csae_local_sim_std": 0.0265, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3809, "csae_gl_gap_mean": 0.1236, "csae_gl_gap_std": 0.0416}
+2026-08-23 00:37:51,391 [INFO] Evaluating on val.
+Train: data epoch: [1]  [  0/218]  eta: 0:07:36  lr: 0.000099  loss: 0.1817  time: 2.0934  data: 0.0001  max mem: 5162
+Train: data epoch: [1]  [ 20/218]  eta: 0:00:58  lr: 0.000099  loss: 0.1793  time: 0.2050  data: 0.0000  max mem: 5162
+Train: data epoch: [1]  [ 40/218]  eta: 0:00:43  lr: 0.000099  loss: 0.1365  time: 0.1966  data: 0.0000  max mem: 5162
+Train: data epoch: [1]  [ 60/218]  eta: 0:00:36  lr: 0.000099  loss: 0.1017  time: 0.1976  data: 0.0000  max mem: 5162
+Train: data epoch: [1]  [ 80/218]  eta: 0:00:30  lr: 0.000099  loss: 0.1236  time: 0.1992  data: 0.0000  max mem: 5162
+Train: data epoch: [1]  [100/218]  eta: 0:00:25  lr: 0.000099  loss: 0.1298  time: 0.1919  data: 0.0000  max mem: 5162
+Train: data epoch: [1]  [120/218]  eta: 0:00:20  lr: 0.000099  loss: 0.1420  time: 0.1916  data: 0.0000  max mem: 5162
+Train: data epoch: [1]  [140/218]  eta: 0:00:16  lr: 0.000099  loss: 0.0896  time: 0.1909  data: 0.0000  max mem: 5162
+Train: data epoch: [1]  [160/218]  eta: 0:00:12  lr: 0.000099  loss: 0.0943  time: 0.1891  data: 0.0000  max mem: 5162
+Train: data epoch: [1]  [180/218]  eta: 0:00:07  lr: 0.000099  loss: 0.1216  time: 0.1882  data: 0.0000  max mem: 5162
+Train: data epoch: [1]  [200/218]  eta: 0:00:03  lr: 0.000099  loss: 0.1009  time: 0.1886  data: 0.0000  max mem: 5162
+Train: data epoch: [1]  [217/218]  eta: 0:00:00  lr: 0.000099  loss: 0.1124  time: 0.1884  data: 0.0000  max mem: 5162
+Train: data epoch: [1] Total time: 0:00:44 (0.2022 s / it)
+2026-08-23 00:38:01,701 [INFO] AIGIQA-20K: EPOCH[1] -> SRCC 0.8282 PLCC_raw 0.8861 PLCC_mapped 0.8867 KRCC 0.6411 MainScore_official 0.8575
+2026-08-23 00:38:01,714 [INFO] Saving checkpoint at epoch 1 to run/20260823003_B3_full/checkpoint_best_main.pth.
+2026-08-23 00:38:01,770 [INFO] Start training
+2026-08-23 00:38:02,043 [INFO] Start training epoch 2, 218 iters per inner epoch.
+2026-08-23 00:38:46,124 [INFO] Averaged stats: lr: 0.000098  loss: 0.091847
+2026-08-23 00:38:46,206 [INFO] gates: {"epoch": 2, "quality_gate": 0.0188, "patch_w_mean": 0.5032, "patch_w_std": 0.0861, "csae_global_sim_mean": 0.2524, "csae_global_sim_std": 0.0373, "csae_local_sim_mean": 0.1423, "csae_local_sim_std": 0.0287, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3791, "csae_gl_gap_mean": 0.1101, "csae_gl_gap_std": 0.046}
+2026-08-23 00:38:46,206 [INFO] Evaluating on val.
+Train: data epoch: [2]  [  0/218]  eta: 0:07:24  lr: 0.000098  loss: 0.0959  time: 2.0411  data: 0.0001  max mem: 5162
+Train: data epoch: [2]  [ 20/218]  eta: 0:00:56  lr: 0.000098  loss: 0.1207  time: 0.1986  data: 0.0000  max mem: 5162
+Train: data epoch: [2]  [ 40/218]  eta: 0:00:42  lr: 0.000098  loss: 0.0736  time: 0.1901  data: 0.0000  max mem: 5162
+Train: data epoch: [2]  [ 60/218]  eta: 0:00:35  lr: 0.000098  loss: 0.0776  time: 0.1904  data: 0.0000  max mem: 5162
+Train: data epoch: [2]  [ 80/218]  eta: 0:00:29  lr: 0.000098  loss: 0.1018  time: 0.1939  data: 0.0000  max mem: 5162
+Train: data epoch: [2]  [100/218]  eta: 0:00:25  lr: 0.000098  loss: 0.1122  time: 0.1950  data: 0.0000  max mem: 5162
+Train: data epoch: [2]  [120/218]  eta: 0:00:20  lr: 0.000098  loss: 0.1038  time: 0.1956  data: 0.0000  max mem: 5162
+Train: data epoch: [2]  [140/218]  eta: 0:00:16  lr: 0.000098  loss: 0.0809  time: 0.1955  data: 0.0000  max mem: 5162
+Train: data epoch: [2]  [160/218]  eta: 0:00:11  lr: 0.000098  loss: 0.1298  time: 0.1993  data: 0.0000  max mem: 5162
+Train: data epoch: [2]  [180/218]  eta: 0:00:07  lr: 0.000098  loss: 0.0855  time: 0.1939  data: 0.0000  max mem: 5162
+Train: data epoch: [2]  [200/218]  eta: 0:00:03  lr: 0.000098  loss: 0.0940  time: 0.1895  data: 0.0000  max mem: 5162
+Train: data epoch: [2]  [217/218]  eta: 0:00:00  lr: 0.000098  loss: 0.1193  time: 0.1881  data: 0.0000  max mem: 5162
+Train: data epoch: [2] Total time: 0:00:44 (0.2022 s / it)
+2026-08-23 00:38:56,519 [INFO] AIGIQA-20K: EPOCH[2] -> SRCC 0.8452 PLCC_raw 0.8974 PLCC_mapped 0.8981 KRCC 0.6609 MainScore_official 0.8717
+2026-08-23 00:38:56,531 [INFO] Saving checkpoint at epoch 2 to run/20260823003_B3_full/checkpoint_best_main.pth.
+2026-08-23 00:38:56,581 [INFO] Start training
+2026-08-23 00:38:56,851 [INFO] Start training epoch 3, 218 iters per inner epoch.
+2026-08-23 00:39:41,120 [INFO] Averaged stats: lr: 0.000095  loss: 0.081285
+2026-08-23 00:39:41,198 [INFO] gates: {"epoch": 3, "quality_gate": 0.0204, "patch_w_mean": 0.4699, "patch_w_std": 0.1066, "csae_global_sim_mean": 0.2596, "csae_global_sim_std": 0.0419, "csae_local_sim_mean": 0.1373, "csae_local_sim_std": 0.0286, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3802, "csae_gl_gap_mean": 0.1223, "csae_gl_gap_std": 0.0493}
+2026-08-23 00:39:41,199 [INFO] Evaluating on val.
+Train: data epoch: [3]  [  0/218]  eta: 0:08:50  lr: 0.000095  loss: 0.0929  time: 2.4329  data: 0.0001  max mem: 5162
+Train: data epoch: [3]  [ 20/218]  eta: 0:00:58  lr: 0.000095  loss: 0.0932  time: 0.1907  data: 0.0000  max mem: 5162
+Train: data epoch: [3]  [ 40/218]  eta: 0:00:44  lr: 0.000095  loss: 0.0922  time: 0.1971  data: 0.0000  max mem: 5162
+Train: data epoch: [3]  [ 60/218]  eta: 0:00:36  lr: 0.000095  loss: 0.1037  time: 0.1906  data: 0.0000  max mem: 5162
+Train: data epoch: [3]  [ 80/218]  eta: 0:00:30  lr: 0.000095  loss: 0.0589  time: 0.1922  data: 0.0000  max mem: 5162
+Train: data epoch: [3]  [100/218]  eta: 0:00:25  lr: 0.000095  loss: 0.1163  time: 0.1907  data: 0.0000  max mem: 5162
+Train: data epoch: [3]  [120/218]  eta: 0:00:20  lr: 0.000095  loss: 0.0904  time: 0.1917  data: 0.0000  max mem: 5162
+Train: data epoch: [3]  [140/218]  eta: 0:00:16  lr: 0.000095  loss: 0.1165  time: 0.1930  data: 0.0000  max mem: 5162
+Train: data epoch: [3]  [160/218]  eta: 0:00:11  lr: 0.000095  loss: 0.1267  time: 0.1978  data: 0.0000  max mem: 5162
+Train: data epoch: [3]  [180/218]  eta: 0:00:07  lr: 0.000095  loss: 0.0629  time: 0.1926  data: 0.0000  max mem: 5162
+Train: data epoch: [3]  [200/218]  eta: 0:00:03  lr: 0.000095  loss: 0.1133  time: 0.1944  data: 0.0000  max mem: 5162
+Train: data epoch: [3]  [217/218]  eta: 0:00:00  lr: 0.000095  loss: 0.0729  time: 0.1895  data: 0.0000  max mem: 5162
+Train: data epoch: [3] Total time: 0:00:44 (0.2031 s / it)
+2026-08-23 00:39:52,607 [INFO] AIGIQA-20K: EPOCH[3] -> SRCC 0.8544 PLCC_raw 0.9026 PLCC_mapped 0.9037 KRCC 0.6716 MainScore_official 0.8791
+2026-08-23 00:39:52,620 [INFO] Saving checkpoint at epoch 3 to run/20260823003_B3_full/checkpoint_best_main.pth.
+2026-08-23 00:39:52,670 [INFO] Start training
+2026-08-23 00:39:52,945 [INFO] Start training epoch 4, 218 iters per inner epoch.
+2026-08-23 00:40:37,098 [INFO] Averaged stats: lr: 0.000091  loss: 0.074804
+2026-08-23 00:40:37,176 [INFO] gates: {"epoch": 4, "quality_gate": 0.0221, "patch_w_mean": 0.4414, "patch_w_std": 0.1315, "csae_global_sim_mean": 0.2642, "csae_global_sim_std": 0.0306, "csae_local_sim_mean": 0.1427, "csae_local_sim_std": 0.0232, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3795, "csae_gl_gap_mean": 0.1216, "csae_gl_gap_std": 0.0415}
+2026-08-23 00:40:37,176 [INFO] Evaluating on val.
+Train: data epoch: [4]  [  0/218]  eta: 0:08:22  lr: 0.000091  loss: 0.0660  time: 2.3034  data: 0.0001  max mem: 5162
+Train: data epoch: [4]  [ 20/218]  eta: 0:00:58  lr: 0.000091  loss: 0.0668  time: 0.1965  data: 0.0000  max mem: 5162
+Train: data epoch: [4]  [ 40/218]  eta: 0:00:43  lr: 0.000091  loss: 0.0580  time: 0.1904  data: 0.0000  max mem: 5162
+Train: data epoch: [4]  [ 60/218]  eta: 0:00:35  lr: 0.000091  loss: 0.0515  time: 0.1917  data: 0.0000  max mem: 5162
+Train: data epoch: [4]  [ 80/218]  eta: 0:00:30  lr: 0.000091  loss: 0.0614  time: 0.1969  data: 0.0000  max mem: 5162
+Train: data epoch: [4]  [100/218]  eta: 0:00:25  lr: 0.000091  loss: 0.0681  time: 0.1952  data: 0.0000  max mem: 5162
+Train: data epoch: [4]  [120/218]  eta: 0:00:20  lr: 0.000091  loss: 0.0675  time: 0.1909  data: 0.0000  max mem: 5162
+Train: data epoch: [4]  [140/218]  eta: 0:00:16  lr: 0.000091  loss: 0.0375  time: 0.1919  data: 0.0000  max mem: 5162
+Train: data epoch: [4]  [160/218]  eta: 0:00:11  lr: 0.000091  loss: 0.0787  time: 0.1968  data: 0.0000  max mem: 5162
+Train: data epoch: [4]  [180/218]  eta: 0:00:07  lr: 0.000091  loss: 0.0730  time: 0.1933  data: 0.0000  max mem: 5162
+Train: data epoch: [4]  [200/218]  eta: 0:00:03  lr: 0.000091  loss: 0.0629  time: 0.1897  data: 0.0000  max mem: 5162
+Train: data epoch: [4]  [217/218]  eta: 0:00:00  lr: 0.000091  loss: 0.0865  time: 0.1872  data: 0.0000  max mem: 5162
+Train: data epoch: [4] Total time: 0:00:44 (0.2025 s / it)
+2026-08-23 00:40:47,566 [INFO] AIGIQA-20K: EPOCH[4] -> SRCC 0.8597 PLCC_raw 0.9055 PLCC_mapped 0.9062 KRCC 0.6779 MainScore_official 0.8829
+2026-08-23 00:40:47,583 [INFO] Saving checkpoint at epoch 4 to run/20260823003_B3_full/checkpoint_best_main.pth.
+2026-08-23 00:40:47,624 [INFO] Start training
+2026-08-23 00:40:47,902 [INFO] Start training epoch 5, 218 iters per inner epoch.
+2026-08-23 00:41:31,918 [INFO] Averaged stats: lr: 0.000086  loss: 0.068660
+2026-08-23 00:41:31,994 [INFO] gates: {"epoch": 5, "quality_gate": 0.0239, "patch_w_mean": 0.3892, "patch_w_std": 0.1618, "csae_global_sim_mean": 0.26, "csae_global_sim_std": 0.036, "csae_local_sim_mean": 0.1426, "csae_local_sim_std": 0.0298, "csae_frag_count": 4, "csae_frag_w_entropy": 1.38, "csae_gl_gap_mean": 0.1174, "csae_gl_gap_std": 0.0435}
+2026-08-23 00:41:31,994 [INFO] Evaluating on val.
+Train: data epoch: [5]  [  0/218]  eta: 0:07:13  lr: 0.000086  loss: 0.0778  time: 1.9892  data: 0.0001  max mem: 5162
+Train: data epoch: [5]  [ 20/218]  eta: 0:00:58  lr: 0.000086  loss: 0.0642  time: 0.2087  data: 0.0000  max mem: 5162
+Train: data epoch: [5]  [ 40/218]  eta: 0:00:43  lr: 0.000086  loss: 0.0646  time: 0.1940  data: 0.0000  max mem: 5162
+Train: data epoch: [5]  [ 60/218]  eta: 0:00:36  lr: 0.000086  loss: 0.0712  time: 0.1940  data: 0.0000  max mem: 5162
+Train: data epoch: [5]  [ 80/218]  eta: 0:00:30  lr: 0.000086  loss: 0.1209  time: 0.1904  data: 0.0000  max mem: 5162
+Train: data epoch: [5]  [100/218]  eta: 0:00:25  lr: 0.000086  loss: 0.0701  time: 0.1939  data: 0.0000  max mem: 5162
+Train: data epoch: [5]  [120/218]  eta: 0:00:20  lr: 0.000086  loss: 0.0618  time: 0.1902  data: 0.0000  max mem: 5162
+Train: data epoch: [5]  [140/218]  eta: 0:00:16  lr: 0.000086  loss: 0.0517  time: 0.1910  data: 0.0000  max mem: 5162
+Train: data epoch: [5]  [160/218]  eta: 0:00:11  lr: 0.000086  loss: 0.0577  time: 0.1910  data: 0.0000  max mem: 5162
+Train: data epoch: [5]  [180/218]  eta: 0:00:07  lr: 0.000086  loss: 0.0502  time: 0.1908  data: 0.0000  max mem: 5162
+Train: data epoch: [5]  [200/218]  eta: 0:00:03  lr: 0.000086  loss: 0.0493  time: 0.1940  data: 0.0000  max mem: 5162
+Train: data epoch: [5]  [217/218]  eta: 0:00:00  lr: 0.000086  loss: 0.0879  time: 0.1927  data: 0.0000  max mem: 5162
+Train: data epoch: [5] Total time: 0:00:44 (0.2019 s / it)
+2026-08-23 00:41:43,015 [INFO] AIGIQA-20K: EPOCH[5] -> SRCC 0.8631 PLCC_raw 0.9069 PLCC_mapped 0.9082 KRCC 0.6815 MainScore_official 0.8856
+2026-08-23 00:41:43,027 [INFO] Saving checkpoint at epoch 5 to run/20260823003_B3_full/checkpoint_best_main.pth.
+2026-08-23 00:41:43,074 [INFO] Start training
+2026-08-23 00:41:43,365 [INFO] Start training epoch 6, 218 iters per inner epoch.
+2026-08-23 00:42:27,157 [INFO] Averaged stats: lr: 0.000080  loss: 0.064625
+2026-08-23 00:42:27,254 [INFO] gates: {"epoch": 6, "quality_gate": 0.0254, "patch_w_mean": 0.3553, "patch_w_std": 0.1655, "csae_global_sim_mean": 0.2574, "csae_global_sim_std": 0.0413, "csae_local_sim_mean": 0.1445, "csae_local_sim_std": 0.0271, "csae_frag_count": 4, "csae_frag_w_entropy": 1.38, "csae_gl_gap_mean": 0.1129, "csae_gl_gap_std": 0.0536}
+2026-08-23 00:42:27,254 [INFO] Evaluating on val.
+Train: data epoch: [6]  [  0/218]  eta: 0:07:35  lr: 0.000080  loss: 0.0541  time: 2.0894  data: 0.0003  max mem: 5162
+Train: data epoch: [6]  [ 20/218]  eta: 0:00:56  lr: 0.000080  loss: 0.0629  time: 0.1956  data: 0.0000  max mem: 5162
+Train: data epoch: [6]  [ 40/218]  eta: 0:00:42  lr: 0.000080  loss: 0.0559  time: 0.1943  data: 0.0000  max mem: 5162
+Train: data epoch: [6]  [ 60/218]  eta: 0:00:35  lr: 0.000080  loss: 0.0678  time: 0.1911  data: 0.0000  max mem: 5162
+Train: data epoch: [6]  [ 80/218]  eta: 0:00:29  lr: 0.000080  loss: 0.0649  time: 0.1919  data: 0.0000  max mem: 5162
+Train: data epoch: [6]  [100/218]  eta: 0:00:24  lr: 0.000080  loss: 0.0623  time: 0.1915  data: 0.0000  max mem: 5162
+Train: data epoch: [6]  [120/218]  eta: 0:00:20  lr: 0.000080  loss: 0.0659  time: 0.1924  data: 0.0000  max mem: 5162
+Train: data epoch: [6]  [140/218]  eta: 0:00:16  lr: 0.000080  loss: 0.0551  time: 0.1921  data: 0.0000  max mem: 5162
+Train: data epoch: [6]  [160/218]  eta: 0:00:11  lr: 0.000080  loss: 0.0597  time: 0.1915  data: 0.0000  max mem: 5162
+Train: data epoch: [6]  [180/218]  eta: 0:00:07  lr: 0.000080  loss: 0.0716  time: 0.1919  data: 0.0000  max mem: 5162
+Train: data epoch: [6]  [200/218]  eta: 0:00:03  lr: 0.000080  loss: 0.0846  time: 0.1914  data: 0.0000  max mem: 5162
+Train: data epoch: [6]  [217/218]  eta: 0:00:00  lr: 0.000080  loss: 0.0687  time: 0.1898  data: 0.0000  max mem: 5162
+Train: data epoch: [6] Total time: 0:00:43 (0.2009 s / it)
+2026-08-23 00:42:38,475 [INFO] AIGIQA-20K: EPOCH[6] -> SRCC 0.8629 PLCC_raw 0.9078 PLCC_mapped 0.9083 KRCC 0.6816 MainScore_official 0.8856
+2026-08-23 00:42:38,476 [INFO] Start training
+2026-08-23 00:42:38,750 [INFO] Start training epoch 7, 218 iters per inner epoch.
+2026-08-23 00:43:22,910 [INFO] Averaged stats: lr: 0.000073  loss: 0.059985
+2026-08-23 00:43:22,987 [INFO] gates: {"epoch": 7, "quality_gate": 0.0269, "patch_w_mean": 0.2937, "patch_w_std": 0.159, "csae_global_sim_mean": 0.2517, "csae_global_sim_std": 0.0372, "csae_local_sim_mean": 0.1341, "csae_local_sim_std": 0.0308, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3794, "csae_gl_gap_mean": 0.1176, "csae_gl_gap_std": 0.0443}
+2026-08-23 00:43:22,987 [INFO] Evaluating on val.
+Train: data epoch: [7]  [  0/218]  eta: 0:08:03  lr: 0.000073  loss: 0.0564  time: 2.2188  data: 0.0001  max mem: 5162
+Train: data epoch: [7]  [ 20/218]  eta: 0:01:00  lr: 0.000073  loss: 0.0490  time: 0.2107  data: 0.0000  max mem: 5162
+Train: data epoch: [7]  [ 40/218]  eta: 0:00:44  lr: 0.000073  loss: 0.0405  time: 0.1918  data: 0.0000  max mem: 5162
+Train: data epoch: [7]  [ 60/218]  eta: 0:00:36  lr: 0.000073  loss: 0.0493  time: 0.1959  data: 0.0000  max mem: 5162
+Train: data epoch: [7]  [ 80/218]  eta: 0:00:30  lr: 0.000073  loss: 0.0377  time: 0.1910  data: 0.0000  max mem: 5162
+Train: data epoch: [7]  [100/218]  eta: 0:00:25  lr: 0.000073  loss: 0.0557  time: 0.1923  data: 0.0000  max mem: 5162
+Train: data epoch: [7]  [120/218]  eta: 0:00:20  lr: 0.000073  loss: 0.0697  time: 0.1906  data: 0.0000  max mem: 5162
+Train: data epoch: [7]  [140/218]  eta: 0:00:16  lr: 0.000073  loss: 0.0491  time: 0.1912  data: 0.0000  max mem: 5162
+Train: data epoch: [7]  [160/218]  eta: 0:00:11  lr: 0.000073  loss: 0.0530  time: 0.1906  data: 0.0000  max mem: 5162
+Train: data epoch: [7]  [180/218]  eta: 0:00:07  lr: 0.000073  loss: 0.0852  time: 0.1925  data: 0.0000  max mem: 5162
+Train: data epoch: [7]  [200/218]  eta: 0:00:03  lr: 0.000073  loss: 0.0544  time: 0.1903  data: 0.0000  max mem: 5162
+Train: data epoch: [7]  [217/218]  eta: 0:00:00  lr: 0.000073  loss: 0.0622  time: 0.1884  data: 0.0000  max mem: 5162
+Train: data epoch: [7] Total time: 0:00:44 (0.2026 s / it)
+2026-08-23 00:43:33,431 [INFO] AIGIQA-20K: EPOCH[7] -> SRCC 0.8644 PLCC_raw 0.9088 PLCC_mapped 0.9094 KRCC 0.6838 MainScore_official 0.8869
+2026-08-23 00:43:33,448 [INFO] Saving checkpoint at epoch 7 to run/20260823003_B3_full/checkpoint_best_main.pth.
+2026-08-23 00:43:33,488 [INFO] Start training
+2026-08-23 00:43:33,762 [INFO] Start training epoch 8, 218 iters per inner epoch.
+2026-08-23 00:44:17,820 [INFO] Averaged stats: lr: 0.000066  loss: 0.057155
+2026-08-23 00:44:17,923 [INFO] gates: {"epoch": 8, "quality_gate": 0.0282, "patch_w_mean": 0.2442, "patch_w_std": 0.1578, "csae_global_sim_mean": 0.253, "csae_global_sim_std": 0.037, "csae_local_sim_mean": 0.1372, "csae_local_sim_std": 0.0265, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3804, "csae_gl_gap_mean": 0.1158, "csae_gl_gap_std": 0.0424}
+2026-08-23 00:44:17,923 [INFO] Evaluating on val.
+Train: data epoch: [8]  [  0/218]  eta: 0:09:13  lr: 0.000066  loss: 0.0647  time: 2.5406  data: 0.0001  max mem: 5162
+Train: data epoch: [8]  [ 20/218]  eta: 0:01:01  lr: 0.000066  loss: 0.0554  time: 0.1978  data: 0.0000  max mem: 5162
+Train: data epoch: [8]  [ 40/218]  eta: 0:00:44  lr: 0.000066  loss: 0.0477  time: 0.1908  data: 0.0000  max mem: 5162
+Train: data epoch: [8]  [ 60/218]  eta: 0:00:36  lr: 0.000066  loss: 0.0523  time: 0.1909  data: 0.0000  max mem: 5162
+Train: data epoch: [8]  [ 80/218]  eta: 0:00:30  lr: 0.000066  loss: 0.0670  time: 0.1909  data: 0.0000  max mem: 5162
+Train: data epoch: [8]  [100/218]  eta: 0:00:25  lr: 0.000066  loss: 0.0416  time: 0.1904  data: 0.0000  max mem: 5162
+Train: data epoch: [8]  [120/218]  eta: 0:00:20  lr: 0.000066  loss: 0.0326  time: 0.1909  data: 0.0000  max mem: 5162
+Train: data epoch: [8]  [140/218]  eta: 0:00:16  lr: 0.000066  loss: 0.0824  time: 0.1940  data: 0.0000  max mem: 5162
+Train: data epoch: [8]  [160/218]  eta: 0:00:11  lr: 0.000066  loss: 0.0557  time: 0.1890  data: 0.0000  max mem: 5162
+Train: data epoch: [8]  [180/218]  eta: 0:00:07  lr: 0.000066  loss: 0.0523  time: 0.1903  data: 0.0000  max mem: 5162
+Train: data epoch: [8]  [200/218]  eta: 0:00:03  lr: 0.000066  loss: 0.0735  time: 0.1897  data: 0.0000  max mem: 5162
+Train: data epoch: [8]  [217/218]  eta: 0:00:00  lr: 0.000066  loss: 0.0764  time: 0.1893  data: 0.0000  max mem: 5162
+Train: data epoch: [8] Total time: 0:00:44 (0.2021 s / it)
+2026-08-23 00:44:29,061 [INFO] AIGIQA-20K: EPOCH[8] -> SRCC 0.8652 PLCC_raw 0.9081 PLCC_mapped 0.9093 KRCC 0.6845 MainScore_official 0.8873
+2026-08-23 00:44:29,077 [INFO] Saving checkpoint at epoch 8 to run/20260823003_B3_full/checkpoint_best_main.pth.
+2026-08-23 00:44:29,129 [INFO] Start training
+2026-08-23 00:44:29,413 [INFO] Start training epoch 9, 218 iters per inner epoch.
+2026-08-23 00:45:13,748 [INFO] Averaged stats: lr: 0.000058  loss: 0.053522
+2026-08-23 00:45:13,845 [INFO] gates: {"epoch": 9, "quality_gate": 0.0294, "patch_w_mean": 0.1988, "patch_w_std": 0.1572, "csae_global_sim_mean": 0.2545, "csae_global_sim_std": 0.0422, "csae_local_sim_mean": 0.1397, "csae_local_sim_std": 0.0264, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3808, "csae_gl_gap_mean": 0.1148, "csae_gl_gap_std": 0.0499}
+2026-08-23 00:45:13,846 [INFO] Evaluating on val.
+Train: data epoch: [9]  [  0/218]  eta: 0:09:31  lr: 0.000058  loss: 0.0578  time: 2.6215  data: 0.0001  max mem: 5162
+Train: data epoch: [9]  [ 20/218]  eta: 0:01:02  lr: 0.000058  loss: 0.0417  time: 0.1989  data: 0.0000  max mem: 5162
+Train: data epoch: [9]  [ 40/218]  eta: 0:00:45  lr: 0.000058  loss: 0.0520  time: 0.1915  data: 0.0000  max mem: 5162
+Train: data epoch: [9]  [ 60/218]  eta: 0:00:37  lr: 0.000058  loss: 0.0412  time: 0.1929  data: 0.0000  max mem: 5162
+Train: data epoch: [9]  [ 80/218]  eta: 0:00:30  lr: 0.000058  loss: 0.0791  time: 0.1918  data: 0.0000  max mem: 5162
+Train: data epoch: [9]  [100/218]  eta: 0:00:25  lr: 0.000058  loss: 0.0391  time: 0.1918  data: 0.0000  max mem: 5162
+Train: data epoch: [9]  [120/218]  eta: 0:00:20  lr: 0.000058  loss: 0.0526  time: 0.1929  data: 0.0000  max mem: 5162
+Train: data epoch: [9]  [140/218]  eta: 0:00:16  lr: 0.000058  loss: 0.0581  time: 0.1907  data: 0.0000  max mem: 5162
+Train: data epoch: [9]  [160/218]  eta: 0:00:12  lr: 0.000058  loss: 0.0519  time: 0.1915  data: 0.0000  max mem: 5162
+Train: data epoch: [9]  [180/218]  eta: 0:00:07  lr: 0.000058  loss: 0.0429  time: 0.1920  data: 0.0000  max mem: 5162
+Train: data epoch: [9]  [200/218]  eta: 0:00:03  lr: 0.000058  loss: 0.0692  time: 0.1909  data: 0.0000  max mem: 5162
+Train: data epoch: [9]  [217/218]  eta: 0:00:00  lr: 0.000058  loss: 0.0459  time: 0.1887  data: 0.0000  max mem: 5162
+Train: data epoch: [9] Total time: 0:00:44 (0.2034 s / it)
+2026-08-23 00:45:24,415 [INFO] AIGIQA-20K: EPOCH[9] -> SRCC 0.8654 PLCC_raw 0.9089 PLCC_mapped 0.9095 KRCC 0.6845 MainScore_official 0.8874
+2026-08-23 00:45:24,428 [INFO] Saving checkpoint at epoch 9 to run/20260823003_B3_full/checkpoint_best_main.pth.
+2026-08-23 00:45:24,468 [INFO] Start training
+2026-08-23 00:45:24,743 [INFO] Start training epoch 10, 218 iters per inner epoch.
+2026-08-23 00:46:09,368 [INFO] Averaged stats: lr: 0.000051  loss: 0.050501
+2026-08-23 00:46:09,433 [INFO] gates: {"epoch": 10, "quality_gate": 0.0307, "patch_w_mean": 0.1766, "patch_w_std": 0.1425, "csae_global_sim_mean": 0.2624, "csae_global_sim_std": 0.0373, "csae_local_sim_mean": 0.141, "csae_local_sim_std": 0.0262, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3805, "csae_gl_gap_mean": 0.1214, "csae_gl_gap_std": 0.0448}
+2026-08-23 00:46:09,433 [INFO] Evaluating on val.
+Train: data epoch: [10]  [  0/218]  eta: 0:09:35  lr: 0.000051  loss: 0.0434  time: 2.6388  data: 0.0001  max mem: 5162
+Train: data epoch: [10]  [ 20/218]  eta: 0:01:01  lr: 0.000051  loss: 0.0481  time: 0.1968  data: 0.0000  max mem: 5162
+Train: data epoch: [10]  [ 40/218]  eta: 0:00:45  lr: 0.000051  loss: 0.0346  time: 0.1912  data: 0.0000  max mem: 5162
+Train: data epoch: [10]  [ 60/218]  eta: 0:00:36  lr: 0.000051  loss: 0.0555  time: 0.1911  data: 0.0000  max mem: 5162
+Train: data epoch: [10]  [ 80/218]  eta: 0:00:30  lr: 0.000051  loss: 0.0389  time: 0.1908  data: 0.0000  max mem: 5162
+Train: data epoch: [10]  [100/218]  eta: 0:00:25  lr: 0.000051  loss: 0.0500  time: 0.1912  data: 0.0000  max mem: 5162
+Train: data epoch: [10]  [120/218]  eta: 0:00:20  lr: 0.000051  loss: 0.0676  time: 0.1909  data: 0.0000  max mem: 5162
+Train: data epoch: [10]  [140/218]  eta: 0:00:16  lr: 0.000051  loss: 0.0335  time: 0.1968  data: 0.0000  max mem: 5162
+Train: data epoch: [10]  [160/218]  eta: 0:00:12  lr: 0.000051  loss: 0.0390  time: 0.2002  data: 0.0000  max mem: 5162
+Train: data epoch: [10]  [180/218]  eta: 0:00:07  lr: 0.000051  loss: 0.0570  time: 0.1926  data: 0.0000  max mem: 5162
+Train: data epoch: [10]  [200/218]  eta: 0:00:03  lr: 0.000051  loss: 0.0351  time: 0.1943  data: 0.0000  max mem: 5162
+Train: data epoch: [10]  [217/218]  eta: 0:00:00  lr: 0.000051  loss: 0.0490  time: 0.1914  data: 0.0000  max mem: 5162
+Train: data epoch: [10] Total time: 0:00:44 (0.2047 s / it)
+2026-08-23 00:46:20,030 [INFO] AIGIQA-20K: EPOCH[10] -> SRCC 0.8640 PLCC_raw 0.9081 PLCC_mapped 0.9086 KRCC 0.6830 MainScore_official 0.8863
+2026-08-23 00:46:20,042 [INFO] Saving checkpoint at epoch 10 to run/20260823003_B3_full/checkpoint_latest.pth.
+2026-08-23 00:46:20,079 [INFO] Start training
+2026-08-23 00:46:20,353 [INFO] Start training epoch 11, 218 iters per inner epoch.
+2026-08-23 00:47:04,011 [INFO] Averaged stats: lr: 0.000043  loss: 0.048006
+2026-08-23 00:47:04,094 [INFO] gates: {"epoch": 11, "quality_gate": 0.0316, "patch_w_mean": 0.1551, "patch_w_std": 0.136, "csae_global_sim_mean": 0.2579, "csae_global_sim_std": 0.0367, "csae_local_sim_mean": 0.1429, "csae_local_sim_std": 0.025, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3809, "csae_gl_gap_mean": 0.115, "csae_gl_gap_std": 0.0473}
+2026-08-23 00:47:04,094 [INFO] Evaluating on val.
+Train: data epoch: [11]  [  0/218]  eta: 0:09:03  lr: 0.000043  loss: 0.0392  time: 2.4924  data: 0.0001  max mem: 5162
+Train: data epoch: [11]  [ 20/218]  eta: 0:00:59  lr: 0.000043  loss: 0.0459  time: 0.1934  data: 0.0000  max mem: 5162
+Train: data epoch: [11]  [ 40/218]  eta: 0:00:43  lr: 0.000043  loss: 0.0412  time: 0.1885  data: 0.0000  max mem: 5162
+Train: data epoch: [11]  [ 60/218]  eta: 0:00:36  lr: 0.000043  loss: 0.0488  time: 0.1890  data: 0.0000  max mem: 5162
+Train: data epoch: [11]  [ 80/218]  eta: 0:00:30  lr: 0.000043  loss: 0.0503  time: 0.1890  data: 0.0000  max mem: 5162
+Train: data epoch: [11]  [100/218]  eta: 0:00:25  lr: 0.000043  loss: 0.0421  time: 0.1892  data: 0.0000  max mem: 5162
+Train: data epoch: [11]  [120/218]  eta: 0:00:20  lr: 0.000043  loss: 0.0475  time: 0.1896  data: 0.0000  max mem: 5162
+Train: data epoch: [11]  [140/218]  eta: 0:00:16  lr: 0.000043  loss: 0.0448  time: 0.1897  data: 0.0000  max mem: 5162
+Train: data epoch: [11]  [160/218]  eta: 0:00:11  lr: 0.000043  loss: 0.0460  time: 0.1895  data: 0.0000  max mem: 5162
+Train: data epoch: [11]  [180/218]  eta: 0:00:07  lr: 0.000043  loss: 0.0412  time: 0.1902  data: 0.0000  max mem: 5162
+Train: data epoch: [11]  [200/218]  eta: 0:00:03  lr: 0.000043  loss: 0.0547  time: 0.1899  data: 0.0000  max mem: 5162
+Train: data epoch: [11]  [217/218]  eta: 0:00:00  lr: 0.000043  loss: 0.0467  time: 0.1885  data: 0.0000  max mem: 5162
+Train: data epoch: [11] Total time: 0:00:43 (0.2003 s / it)
+2026-08-23 00:47:14,745 [INFO] AIGIQA-20K: EPOCH[11] -> SRCC 0.8620 PLCC_raw 0.9075 PLCC_mapped 0.9079 KRCC 0.6805 MainScore_official 0.8849
+2026-08-23 00:47:14,746 [INFO] Start training
+2026-08-23 00:47:15,014 [INFO] Start training epoch 12, 218 iters per inner epoch.
+2026-08-23 00:47:59,800 [INFO] Averaged stats: lr: 0.000035  loss: 0.045395
+2026-08-23 00:47:59,894 [INFO] gates: {"epoch": 12, "quality_gate": 0.0325, "patch_w_mean": 0.1282, "patch_w_std": 0.1239, "csae_global_sim_mean": 0.2584, "csae_global_sim_std": 0.0333, "csae_local_sim_mean": 0.1358, "csae_local_sim_std": 0.0277, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3807, "csae_gl_gap_mean": 0.1225, "csae_gl_gap_std": 0.0389}
+2026-08-23 00:47:59,894 [INFO] Evaluating on val.
+Train: data epoch: [12]  [  0/218]  eta: 0:09:04  lr: 0.000035  loss: 0.0383  time: 2.4959  data: 0.0001  max mem: 5162
+Train: data epoch: [12]  [ 20/218]  eta: 0:01:01  lr: 0.000035  loss: 0.0544  time: 0.2013  data: 0.0000  max mem: 5162
+Train: data epoch: [12]  [ 40/218]  eta: 0:00:44  lr: 0.000035  loss: 0.0398  time: 0.1901  data: 0.0000  max mem: 5162
+Train: data epoch: [12]  [ 60/218]  eta: 0:00:36  lr: 0.000035  loss: 0.0696  time: 0.1926  data: 0.0000  max mem: 5162
+Train: data epoch: [12]  [ 80/218]  eta: 0:00:31  lr: 0.000035  loss: 0.0289  time: 0.2010  data: 0.0000  max mem: 5162
+Train: data epoch: [12]  [100/218]  eta: 0:00:25  lr: 0.000035  loss: 0.0304  time: 0.1944  data: 0.0000  max mem: 5162
+Train: data epoch: [12]  [120/218]  eta: 0:00:21  lr: 0.000035  loss: 0.0567  time: 0.1931  data: 0.0000  max mem: 5162
+Train: data epoch: [12]  [140/218]  eta: 0:00:16  lr: 0.000035  loss: 0.0406  time: 0.1929  data: 0.0000  max mem: 5162
+Train: data epoch: [12]  [160/218]  eta: 0:00:12  lr: 0.000035  loss: 0.0629  time: 0.1975  data: 0.0000  max mem: 5162
+Train: data epoch: [12]  [180/218]  eta: 0:00:07  lr: 0.000035  loss: 0.0363  time: 0.1986  data: 0.0000  max mem: 5162
+Train: data epoch: [12]  [200/218]  eta: 0:00:03  lr: 0.000035  loss: 0.0484  time: 0.1923  data: 0.0000  max mem: 5162
+Train: data epoch: [12]  [217/218]  eta: 0:00:00  lr: 0.000035  loss: 0.0403  time: 0.1888  data: 0.0000  max mem: 5162
+Train: data epoch: [12] Total time: 0:00:44 (0.2054 s / it)
+2026-08-23 00:48:10,352 [INFO] AIGIQA-20K: EPOCH[12] -> SRCC 0.8620 PLCC_raw 0.9071 PLCC_mapped 0.9077 KRCC 0.6804 MainScore_official 0.8849
+2026-08-23 00:48:10,353 [INFO] Start training
+2026-08-23 00:48:10,625 [INFO] Start training epoch 13, 218 iters per inner epoch.
+2026-08-23 00:48:54,166 [INFO] Averaged stats: lr: 0.000028  loss: 0.043781
+2026-08-23 00:48:54,245 [INFO] gates: {"epoch": 13, "quality_gate": 0.0333, "patch_w_mean": 0.1131, "patch_w_std": 0.1172, "csae_global_sim_mean": 0.2617, "csae_global_sim_std": 0.0379, "csae_local_sim_mean": 0.1417, "csae_local_sim_std": 0.026, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3801, "csae_gl_gap_mean": 0.12, "csae_gl_gap_std": 0.0478}
+2026-08-23 00:48:54,245 [INFO] Evaluating on val.
+Train: data epoch: [13]  [  0/218]  eta: 0:06:39  lr: 0.000028  loss: 0.0373  time: 1.8306  data: 0.0001  max mem: 5162
+Train: data epoch: [13]  [ 20/218]  eta: 0:00:53  lr: 0.000028  loss: 0.0446  time: 0.1917  data: 0.0000  max mem: 5162
+Train: data epoch: [13]  [ 40/218]  eta: 0:00:41  lr: 0.000028  loss: 0.0347  time: 0.1960  data: 0.0000  max mem: 5162
+Train: data epoch: [13]  [ 60/218]  eta: 0:00:34  lr: 0.000028  loss: 0.0407  time: 0.1912  data: 0.0000  max mem: 5162
+Train: data epoch: [13]  [ 80/218]  eta: 0:00:29  lr: 0.000028  loss: 0.0501  time: 0.1950  data: 0.0000  max mem: 5162
+Train: data epoch: [13]  [100/218]  eta: 0:00:24  lr: 0.000028  loss: 0.0554  time: 0.1928  data: 0.0000  max mem: 5162
+Train: data epoch: [13]  [120/218]  eta: 0:00:20  lr: 0.000028  loss: 0.0521  time: 0.1918  data: 0.0000  max mem: 5162
+Train: data epoch: [13]  [140/218]  eta: 0:00:15  lr: 0.000028  loss: 0.0378  time: 0.1915  data: 0.0000  max mem: 5162
+Train: data epoch: [13]  [160/218]  eta: 0:00:11  lr: 0.000028  loss: 0.0312  time: 0.1915  data: 0.0000  max mem: 5162
+Train: data epoch: [13]  [180/218]  eta: 0:00:07  lr: 0.000028  loss: 0.0402  time: 0.1913  data: 0.0000  max mem: 5162
+Train: data epoch: [13]  [200/218]  eta: 0:00:03  lr: 0.000028  loss: 0.0322  time: 0.1917  data: 0.0000  max mem: 5162
+Train: data epoch: [13]  [217/218]  eta: 0:00:00  lr: 0.000028  loss: 0.0453  time: 0.1891  data: 0.0000  max mem: 5162
+Train: data epoch: [13] Total time: 0:00:43 (0.1997 s / it)
+2026-08-23 00:49:05,552 [INFO] AIGIQA-20K: EPOCH[13] -> SRCC 0.8608 PLCC_raw 0.9063 PLCC_mapped 0.9068 KRCC 0.6790 MainScore_official 0.8838
+2026-08-23 00:49:05,553 [INFO] Start training
+2026-08-23 00:49:05,825 [INFO] Start training epoch 14, 218 iters per inner epoch.
+2026-08-23 00:49:50,191 [INFO] Averaged stats: lr: 0.000021  loss: 0.042268
+2026-08-23 00:49:50,287 [INFO] gates: {"epoch": 14, "quality_gate": 0.0339, "patch_w_mean": 0.1028, "patch_w_std": 0.1099, "csae_global_sim_mean": 0.2553, "csae_global_sim_std": 0.0357, "csae_local_sim_mean": 0.1443, "csae_local_sim_std": 0.0249, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3803, "csae_gl_gap_mean": 0.111, "csae_gl_gap_std": 0.043}
+2026-08-23 00:49:50,288 [INFO] Evaluating on val.
+Train: data epoch: [14]  [  0/218]  eta: 0:10:13  lr: 0.000021  loss: 0.0566  time: 2.8152  data: 0.0001  max mem: 5162
+Train: data epoch: [14]  [ 20/218]  eta: 0:01:02  lr: 0.000021  loss: 0.0467  time: 0.1901  data: 0.0000  max mem: 5162
+Train: data epoch: [14]  [ 40/218]  eta: 0:00:45  lr: 0.000021  loss: 0.0315  time: 0.1903  data: 0.0000  max mem: 5162
+Train: data epoch: [14]  [ 60/218]  eta: 0:00:36  lr: 0.000021  loss: 0.0474  time: 0.1908  data: 0.0000  max mem: 5162
+Train: data epoch: [14]  [ 80/218]  eta: 0:00:30  lr: 0.000021  loss: 0.0374  time: 0.1918  data: 0.0000  max mem: 5162
+Train: data epoch: [14]  [100/218]  eta: 0:00:25  lr: 0.000021  loss: 0.0270  time: 0.1947  data: 0.0000  max mem: 5162
+Train: data epoch: [14]  [120/218]  eta: 0:00:20  lr: 0.000021  loss: 0.0448  time: 0.1936  data: 0.0000  max mem: 5162
+Train: data epoch: [14]  [140/218]  eta: 0:00:16  lr: 0.000021  loss: 0.0381  time: 0.1918  data: 0.0000  max mem: 5162
+Train: data epoch: [14]  [160/218]  eta: 0:00:12  lr: 0.000021  loss: 0.0387  time: 0.1904  data: 0.0000  max mem: 5162
+Train: data epoch: [14]  [180/218]  eta: 0:00:07  lr: 0.000021  loss: 0.0409  time: 0.1912  data: 0.0000  max mem: 5162
+Train: data epoch: [14]  [200/218]  eta: 0:00:03  lr: 0.000021  loss: 0.0570  time: 0.1920  data: 0.0000  max mem: 5162
+Train: data epoch: [14]  [217/218]  eta: 0:00:00  lr: 0.000021  loss: 0.0332  time: 0.1891  data: 0.0000  max mem: 5162
+Train: data epoch: [14] Total time: 0:00:44 (0.2035 s / it)
+2026-08-23 00:50:01,907 [INFO] AIGIQA-20K: EPOCH[14] -> SRCC 0.8623 PLCC_raw 0.9066 PLCC_mapped 0.9076 KRCC 0.6808 MainScore_official 0.8850
+2026-08-23 00:50:01,908 [INFO] Start training
+2026-08-23 00:50:02,217 [INFO] Start training epoch 15, 218 iters per inner epoch.
+2026-08-23 00:50:45,776 [INFO] Averaged stats: lr: 0.000015  loss: 0.041075
+2026-08-23 00:50:45,873 [INFO] gates: {"epoch": 15, "quality_gate": 0.0343, "patch_w_mean": 0.0934, "patch_w_std": 0.1034, "csae_global_sim_mean": 0.2562, "csae_global_sim_std": 0.0367, "csae_local_sim_mean": 0.1464, "csae_local_sim_std": 0.0286, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3792, "csae_gl_gap_mean": 0.1098, "csae_gl_gap_std": 0.0477}
+2026-08-23 00:50:45,873 [INFO] Evaluating on val.
+Train: data epoch: [15]  [  0/218]  eta: 0:07:04  lr: 0.000015  loss: 0.0324  time: 1.9470  data: 0.0001  max mem: 5162
+Train: data epoch: [15]  [ 20/218]  eta: 0:00:56  lr: 0.000015  loss: 0.0541  time: 0.2044  data: 0.0000  max mem: 5162
+Train: data epoch: [15]  [ 40/218]  eta: 0:00:42  lr: 0.000015  loss: 0.0558  time: 0.1926  data: 0.0000  max mem: 5162
+Train: data epoch: [15]  [ 60/218]  eta: 0:00:35  lr: 0.000015  loss: 0.0286  time: 0.1936  data: 0.0000  max mem: 5162
+Train: data epoch: [15]  [ 80/218]  eta: 0:00:29  lr: 0.000015  loss: 0.0375  time: 0.1894  data: 0.0000  max mem: 5162
+Train: data epoch: [15]  [100/218]  eta: 0:00:24  lr: 0.000015  loss: 0.0372  time: 0.1898  data: 0.0000  max mem: 5162
+Train: data epoch: [15]  [120/218]  eta: 0:00:20  lr: 0.000015  loss: 0.0392  time: 0.1919  data: 0.0000  max mem: 5162
+Train: data epoch: [15]  [140/218]  eta: 0:00:16  lr: 0.000015  loss: 0.0316  time: 0.1919  data: 0.0000  max mem: 5162
+Train: data epoch: [15]  [160/218]  eta: 0:00:11  lr: 0.000015  loss: 0.0410  time: 0.1904  data: 0.0000  max mem: 5162
+Train: data epoch: [15]  [180/218]  eta: 0:00:07  lr: 0.000015  loss: 0.0541  time: 0.1900  data: 0.0000  max mem: 5162
+Train: data epoch: [15]  [200/218]  eta: 0:00:03  lr: 0.000015  loss: 0.0387  time: 0.1887  data: 0.0000  max mem: 5162
+Train: data epoch: [15]  [217/218]  eta: 0:00:00  lr: 0.000015  loss: 0.0357  time: 0.1859  data: 0.0000  max mem: 5162
+Train: data epoch: [15] Total time: 0:00:43 (0.1998 s / it)
+2026-08-23 00:50:56,188 [INFO] AIGIQA-20K: EPOCH[15] -> SRCC 0.8608 PLCC_raw 0.9061 PLCC_mapped 0.9069 KRCC 0.6790 MainScore_official 0.8838
+2026-08-23 00:50:56,204 [INFO] Saving checkpoint at epoch 15 to run/20260823003_B3_full/checkpoint_latest.pth.
+2026-08-23 00:50:56,263 [INFO] Start training
+2026-08-23 00:50:56,577 [INFO] Start training epoch 16, 218 iters per inner epoch.
+2026-08-23 00:51:41,360 [INFO] Averaged stats: lr: 0.000010  loss: 0.039940
+2026-08-23 00:51:41,455 [INFO] gates: {"epoch": 16, "quality_gate": 0.0346, "patch_w_mean": 0.0878, "patch_w_std": 0.0986, "csae_global_sim_mean": 0.2545, "csae_global_sim_std": 0.0364, "csae_local_sim_mean": 0.1367, "csae_local_sim_std": 0.0297, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3797, "csae_gl_gap_mean": 0.1178, "csae_gl_gap_std": 0.052}
+2026-08-23 00:51:41,456 [INFO] Evaluating on val.
+Train: data epoch: [16]  [  0/218]  eta: 0:09:02  lr: 0.000010  loss: 0.0313  time: 2.4894  data: 0.0001  max mem: 5162
+Train: data epoch: [16]  [ 20/218]  eta: 0:00:59  lr: 0.000010  loss: 0.0372  time: 0.1911  data: 0.0000  max mem: 5162
+Train: data epoch: [16]  [ 40/218]  eta: 0:00:43  lr: 0.000010  loss: 0.0419  time: 0.1908  data: 0.0000  max mem: 5162
+Train: data epoch: [16]  [ 60/218]  eta: 0:00:36  lr: 0.000010  loss: 0.0254  time: 0.1913  data: 0.0000  max mem: 5162
+Train: data epoch: [16]  [ 80/218]  eta: 0:00:30  lr: 0.000010  loss: 0.0357  time: 0.1914  data: 0.0000  max mem: 5162
+Train: data epoch: [16]  [100/218]  eta: 0:00:25  lr: 0.000010  loss: 0.0608  time: 0.2001  data: 0.0000  max mem: 5162
+Train: data epoch: [16]  [120/218]  eta: 0:00:20  lr: 0.000010  loss: 0.0291  time: 0.1995  data: 0.0000  max mem: 5162
+Train: data epoch: [16]  [140/218]  eta: 0:00:16  lr: 0.000010  loss: 0.0387  time: 0.2001  data: 0.0000  max mem: 5162
+Train: data epoch: [16]  [160/218]  eta: 0:00:12  lr: 0.000010  loss: 0.0399  time: 0.2003  data: 0.0000  max mem: 5162
+Train: data epoch: [16]  [180/218]  eta: 0:00:07  lr: 0.000010  loss: 0.0397  time: 0.1991  data: 0.0000  max mem: 5162
+Train: data epoch: [16]  [200/218]  eta: 0:00:03  lr: 0.000010  loss: 0.0317  time: 0.1912  data: 0.0000  max mem: 5162
+Train: data epoch: [16]  [217/218]  eta: 0:00:00  lr: 0.000010  loss: 0.0538  time: 0.1878  data: 0.0000  max mem: 5162
+Train: data epoch: [16] Total time: 0:00:44 (0.2054 s / it)
+2026-08-23 00:51:52,200 [INFO] AIGIQA-20K: EPOCH[16] -> SRCC 0.8607 PLCC_raw 0.9056 PLCC_mapped 0.9066 KRCC 0.6787 MainScore_official 0.8836
+2026-08-23 00:51:52,201 [INFO] Start training
+2026-08-23 00:51:52,484 [INFO] Start training epoch 17, 218 iters per inner epoch.
+2026-08-23 00:52:36,504 [INFO] Averaged stats: lr: 0.000006  loss: 0.039174
+2026-08-23 00:52:36,607 [INFO] gates: {"epoch": 17, "quality_gate": 0.0348, "patch_w_mean": 0.0953, "patch_w_std": 0.1064, "csae_global_sim_mean": 0.255, "csae_global_sim_std": 0.0322, "csae_local_sim_mean": 0.1462, "csae_local_sim_std": 0.0232, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3815, "csae_gl_gap_mean": 0.1088, "csae_gl_gap_std": 0.0418}
+2026-08-23 00:52:36,607 [INFO] Evaluating on val.
+Train: data epoch: [17]  [  0/218]  eta: 0:07:19  lr: 0.000006  loss: 0.0390  time: 2.0162  data: 0.0001  max mem: 5162
+Train: data epoch: [17]  [ 20/218]  eta: 0:00:58  lr: 0.000006  loss: 0.0336  time: 0.2095  data: 0.0000  max mem: 5162
+Train: data epoch: [17]  [ 40/218]  eta: 0:00:43  lr: 0.000006  loss: 0.0451  time: 0.1936  data: 0.0000  max mem: 5162
+Train: data epoch: [17]  [ 60/218]  eta: 0:00:35  lr: 0.000006  loss: 0.0371  time: 0.1903  data: 0.0000  max mem: 5162
+Train: data epoch: [17]  [ 80/218]  eta: 0:00:30  lr: 0.000006  loss: 0.0493  time: 0.1906  data: 0.0000  max mem: 5162
+Train: data epoch: [17]  [100/218]  eta: 0:00:25  lr: 0.000006  loss: 0.0488  time: 0.1971  data: 0.0000  max mem: 5162
+Train: data epoch: [17]  [120/218]  eta: 0:00:20  lr: 0.000006  loss: 0.0371  time: 0.1943  data: 0.0000  max mem: 5162
+Train: data epoch: [17]  [140/218]  eta: 0:00:16  lr: 0.000006  loss: 0.0518  time: 0.1908  data: 0.0000  max mem: 5162
+Train: data epoch: [17]  [160/218]  eta: 0:00:11  lr: 0.000006  loss: 0.0458  time: 0.1911  data: 0.0000  max mem: 5162
+Train: data epoch: [17]  [180/218]  eta: 0:00:07  lr: 0.000006  loss: 0.0476  time: 0.1910  data: 0.0000  max mem: 5162
+Train: data epoch: [17]  [200/218]  eta: 0:00:03  lr: 0.000006  loss: 0.0389  time: 0.1908  data: 0.0000  max mem: 5162
+Train: data epoch: [17]  [217/218]  eta: 0:00:00  lr: 0.000006  loss: 0.0337  time: 0.1892  data: 0.0000  max mem: 5162
+Train: data epoch: [17] Total time: 0:00:44 (0.2019 s / it)
+2026-08-23 00:52:47,933 [INFO] AIGIQA-20K: EPOCH[17] -> SRCC 0.8603 PLCC_raw 0.9056 PLCC_mapped 0.9064 KRCC 0.6784 MainScore_official 0.8833
+2026-08-23 00:52:47,934 [INFO] Start training
+2026-08-23 00:52:48,208 [INFO] Start training epoch 18, 218 iters per inner epoch.
+2026-08-23 00:53:32,246 [INFO] Averaged stats: lr: 0.000003  loss: 0.039077
+2026-08-23 00:53:32,341 [INFO] gates: {"epoch": 18, "quality_gate": 0.0349, "patch_w_mean": 0.0947, "patch_w_std": 0.1044, "csae_global_sim_mean": 0.2618, "csae_global_sim_std": 0.0343, "csae_local_sim_mean": 0.1417, "csae_local_sim_std": 0.0308, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3802, "csae_gl_gap_mean": 0.1202, "csae_gl_gap_std": 0.0486}
+2026-08-23 00:53:32,342 [INFO] Evaluating on val.
+Train: data epoch: [18]  [  0/218]  eta: 0:07:15  lr: 0.000003  loss: 0.0254  time: 1.9997  data: 0.0001  max mem: 5162
+Train: data epoch: [18]  [ 20/218]  eta: 0:00:56  lr: 0.000003  loss: 0.0320  time: 0.1984  data: 0.0000  max mem: 5162
+Train: data epoch: [18]  [ 40/218]  eta: 0:00:42  lr: 0.000003  loss: 0.0395  time: 0.1919  data: 0.0000  max mem: 5162
+Train: data epoch: [18]  [ 60/218]  eta: 0:00:35  lr: 0.000003  loss: 0.0242  time: 0.1918  data: 0.0000  max mem: 5162
+Train: data epoch: [18]  [ 80/218]  eta: 0:00:29  lr: 0.000003  loss: 0.0587  time: 0.1944  data: 0.0000  max mem: 5162
+Train: data epoch: [18]  [100/218]  eta: 0:00:25  lr: 0.000003  loss: 0.0409  time: 0.1942  data: 0.0000  max mem: 5162
+Train: data epoch: [18]  [120/218]  eta: 0:00:20  lr: 0.000003  loss: 0.0367  time: 0.1921  data: 0.0000  max mem: 5162
+Train: data epoch: [18]  [140/218]  eta: 0:00:16  lr: 0.000003  loss: 0.0334  time: 0.1926  data: 0.0000  max mem: 5162
+Train: data epoch: [18]  [160/218]  eta: 0:00:11  lr: 0.000003  loss: 0.0348  time: 0.1958  data: 0.0000  max mem: 5162
+Train: data epoch: [18]  [180/218]  eta: 0:00:07  lr: 0.000003  loss: 0.0410  time: 0.1919  data: 0.0000  max mem: 5162
+Train: data epoch: [18]  [200/218]  eta: 0:00:03  lr: 0.000003  loss: 0.0351  time: 0.1916  data: 0.0000  max mem: 5162
+Train: data epoch: [18]  [217/218]  eta: 0:00:00  lr: 0.000003  loss: 0.0549  time: 0.1958  data: 0.0000  max mem: 5162
+Train: data epoch: [18] Total time: 0:00:44 (0.2020 s / it)
+2026-08-23 00:53:44,085 [INFO] AIGIQA-20K: EPOCH[18] -> SRCC 0.8601 PLCC_raw 0.9055 PLCC_mapped 0.9063 KRCC 0.6780 MainScore_official 0.8832
+2026-08-23 00:53:44,086 [INFO] Start training
+2026-08-23 00:53:44,361 [INFO] Start training epoch 19, 218 iters per inner epoch.
+2026-08-23 00:54:28,462 [INFO] Averaged stats: lr: 0.000002  loss: 0.038618
+2026-08-23 00:54:28,545 [INFO] gates: {"epoch": 19, "quality_gate": 0.035, "patch_w_mean": 0.0842, "patch_w_std": 0.0972, "csae_global_sim_mean": 0.2492, "csae_global_sim_std": 0.0381, "csae_local_sim_mean": 0.1397, "csae_local_sim_std": 0.0327, "csae_frag_count": 4, "csae_frag_w_entropy": 1.3789, "csae_gl_gap_mean": 0.1095, "csae_gl_gap_std": 0.0519}
+2026-08-23 00:54:28,545 [INFO] Evaluating on val.
+Train: data epoch: [19]  [  0/218]  eta: 0:08:32  lr: 0.000002  loss: 0.0469  time: 2.3504  data: 0.0001  max mem: 5162
+Train: data epoch: [19]  [ 20/218]  eta: 0:00:58  lr: 0.000002  loss: 0.0650  time: 0.1925  data: 0.0000  max mem: 5162
+Train: data epoch: [19]  [ 40/218]  eta: 0:00:43  lr: 0.000002  loss: 0.0345  time: 0.1927  data: 0.0000  max mem: 5162
+Train: data epoch: [19]  [ 60/218]  eta: 0:00:35  lr: 0.000002  loss: 0.0399  time: 0.1922  data: 0.0000  max mem: 5162
+Train: data epoch: [19]  [ 80/218]  eta: 0:00:30  lr: 0.000002  loss: 0.0411  time: 0.1962  data: 0.0000  max mem: 5162
+Train: data epoch: [19]  [100/218]  eta: 0:00:25  lr: 0.000002  loss: 0.0323  time: 0.1920  data: 0.0000  max mem: 5162
+Train: data epoch: [19]  [120/218]  eta: 0:00:20  lr: 0.000002  loss: 0.0321  time: 0.1919  data: 0.0000  max mem: 5162
+Train: data epoch: [19]  [140/218]  eta: 0:00:16  lr: 0.000002  loss: 0.0340  time: 0.1915  data: 0.0000  max mem: 5162
+Train: data epoch: [19]  [160/218]  eta: 0:00:11  lr: 0.000002  loss: 0.0447  time: 0.1921  data: 0.0000  max mem: 5162
+Train: data epoch: [19]  [180/218]  eta: 0:00:07  lr: 0.000002  loss: 0.0528  time: 0.1926  data: 0.0000  max mem: 5162
+Train: data epoch: [19]  [200/218]  eta: 0:00:03  lr: 0.000002  loss: 0.0414  time: 0.1918  data: 0.0000  max mem: 5162
+Train: data epoch: [19]  [217/218]  eta: 0:00:00  lr: 0.000002  loss: 0.0315  time: 0.1904  data: 0.0000  max mem: 5162
+Train: data epoch: [19] Total time: 0:00:44 (0.2023 s / it)
+2026-08-23 00:54:39,198 [INFO] AIGIQA-20K: EPOCH[19] -> SRCC 0.8600 PLCC_raw 0.9055 PLCC_mapped 0.9063 KRCC 0.6780 MainScore_official 0.8832
+2026-08-23 00:54:39,210 [INFO] Saving checkpoint at epoch 19 to run/20260823003_B3_full/checkpoint_latest.pth.
+[{'agg_metrics': np.float64(0.8874477839100046), 'main_score_raw': np.float64(0.8871580025925376), 'main_score_official': np.float64(0.8874477839100046), 'srcc': np.float64(0.8653985439986851), 'plcc_raw': np.float64(0.9089174611863902), 'plcc_mapped': np.float64(0.9094970238213239), 'krcc': np.float64(0.6844695770233002), 'mse': 0.09019179374817872, 'loss': 0.09019179374817872}]
+{'agg_metrics': np.float64(0.8874477839100046), 'main_score_raw': np.float64(0.8871580025925376), 'main_score_official': np.float64(0.8874477839100046), 'srcc': np.float64(0.8653985439986851), 'plcc_raw': np.float64(0.9089174611863902), 'plcc_mapped': np.float64(0.9094970238213239), 'krcc': np.float64(0.6844695770233002), 'mse': 0.09019179374817872, 'loss': 0.09019179374817872}

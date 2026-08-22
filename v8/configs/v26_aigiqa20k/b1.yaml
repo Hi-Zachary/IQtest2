@@ -1,0 +1,75 @@
+model:
+  arch: "lace_aigiqa20k_v26"
+  model_name: "ckpt/clip-vit-base-patch16"
+  context_length: 77
+  output_dim: 1
+  dim: 256
+  dropout_rate: 0.0
+  use_lora: True
+  lora_r: 4
+  lora_alpha: 8
+  lora_dropout: 0.0
+  use_lqea: True
+  use_csae: False
+  mgsc_num_fragments: 4
+  mgsc_topk: 3
+  mgsc_mode: "global_local"
+  freeze_visual: True
+  freeze_text: True
+  outer_gate_init: 0.01
+  lora_lr_scale: 1.0
+  module_lr_scale: 1.0
+
+dataset:
+  name: "aigiqa20k"
+  vis_root: "data/aigiqa20k/images"
+  train_meta: "data/aigiqa20k/meta/info_train.csv"
+  val_meta: "data/aigiqa20k/meta/info_val.csv"
+  test_meta: "data/aigiqa20k/meta/info_test.csv"
+  transform_train:
+    name: "image_train_processor"
+    cfg:
+      image_size: 224
+  transform_val:
+    name: "image_eval_processor"
+    cfg:
+      image_size: 224
+
+run:
+  task: "aigiqa_singlescore"
+  resume_ckpt_path: null
+  init_ckpt_path: "init_ckpt/v26_aigiqa20k_seed42.pth"
+
+  lr_sched: "linear_warmup_cosine_lr"
+  lr_decay_rate: null
+  warmup_lr: 0
+  warmup_steps: 50
+  min_lr: 1e-6
+
+  init_lr: 1e-4
+  lr_layer_decay: 1
+  weight_decay: 0
+  beta2: 0.999
+
+  batch_size: 64
+  batch_size_val: 64
+  num_worker: 12
+
+  max_epoch: 20
+  log_freq: 20
+  accum_grad_iters: 1
+  grad_norm_clip: null
+
+  split_file: null
+  output_dir: "run"
+  best_criterion: "main_score"
+  tag: "B1_lqea"
+
+  evaluate: False
+  eval_freq: 1
+  save_freq: 5
+
+  amp: True
+  device: "cuda"
+  distributed: False
+  dist_url: "env://"
