@@ -1,0 +1,78 @@
+# Full (V8-Slim Final): R0 + DG-MPQ + HCMI-ViT (no discrepancy, no MSA-T, mlp_ratio=1)
+# 调整/改进1.md: 最终模型, 双模块并行 + LoRA + 共享 fusion + 双头
+model:
+  arch: "msqr_mlpq_mgsc_v23_refined"
+  model_name: "ckpt/clip-vit-base-patch16"
+  context_length: 77
+  output_dim: 2
+
+  freeze_visual: True
+  freeze_text: True
+
+  dropout_rate: 0.0
+  dim: 256
+  num_heads: 4
+  outer_gate_init: 0.01
+  lora_lr_scale: 1.0
+  module_lr_scale: 1.0
+
+  use_lora: True
+  use_mlpq: True
+  use_mgsc: True
+  mgsc_num_fragments: 4
+  mgsc_topk: 3
+  lora_r: 4
+  lora_alpha: 8
+  lora_dropout: 0.0
+  alignment_stopgrad: True
+
+dataset:
+  data_path: "data/aigc_qa_3k/mos_joint.xlsx"
+  vis_root: "data/aigc_qa_3k/AGIQA-3K/"
+  transform_train:
+    name: "image_train_processor"
+    cfg:
+      image_size: 224
+  transform_val:
+    name: "image_eval_processor"
+    cfg:
+      image_size: 224
+
+run:
+  task: "agiqa_doublescore"
+  resume_ckpt_path: null
+  init_ckpt_path: "init_ckpt/v23_refined_agiqa3k_seed42.pth"
+
+  lr_sched: "linear_warmup_cosine_lr"
+  lr_decay_rate: null
+  warmup_lr: 0
+  warmup_steps: 50
+  min_lr: 1e-6
+
+  init_lr: 1e-4
+  lr_layer_decay: 1
+  weight_decay: 0
+  beta2: 0.999
+
+  batch_size: 64
+  batch_size_val: 64
+  num_worker: 12
+
+  max_epoch: 50
+  log_freq: 20
+  accum_grad_iters: 1
+  grad_norm_clip: null
+
+  split_file: "splits/seed42_split5.json"
+  output_dir: "run"
+  best_criterion: "joint"
+  tag: "E3_full_slim"
+
+  evaluate: False
+  eval_freq: 1
+  save_freq: 5
+
+  amp: True
+  device: "cuda"
+  distributed: False
+  dist_url: "env://"
