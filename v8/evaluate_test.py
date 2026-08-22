@@ -76,7 +76,13 @@ def evaluate(tag, config_path, sub="_V17_20k"):
 def main():
     import sys as _sys
     which = _sys.argv[1] if len(_sys.argv) > 1 else "v17"
-    if which == "v18":
+    if which == "v20":
+        variants = [
+            ("E1_HMQE_20k", "configs/aigiqa20k/v20/e1.yaml", ""),
+            ("E2_DCGA_20k", "configs/aigiqa20k/v20/e2.yaml", ""),
+            ("Full_V20_20k", "configs/aigiqa20k/v20/full.yaml", ""),
+        ]
+    elif which == "v18":
         variants = [
             ("B1", "configs/aigiqa20k/v18/b1_dgmpq.yaml", "_V18_20k"),
             ("B2_CADR", "configs/aigiqa20k/v18/b2_cadr.yaml", "_V18_20k"),
