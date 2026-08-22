@@ -28,6 +28,7 @@ from ipiqa.models.model_v21 import MSQRNetV21
 from ipiqa.models.model_v23 import MSQRNetV23
 from ipiqa.models.model_v23_refined import MSQRNetV23Refined
 from ipiqa.models.model_v23_final import MSQRNetV23Final
+from ipiqa.models.model_v24_qare import MSQRNetV24QARE
 
 
 __all__ = [
@@ -49,6 +50,7 @@ __all__ = [
     "MSQRNetV23",
     "MSQRNetV23Refined",
     "MSQRNetV23Final",
+    "MSQRNetV24QARE",
 ]
 
 
