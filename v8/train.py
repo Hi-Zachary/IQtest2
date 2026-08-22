@@ -20,7 +20,7 @@ from ipiqa.common.dist_utils import (
 )
 from trainer import Trainer
 from ipiqa.processors import load_processor
-from ipiqa.datasets.agiqa_datasets import AGIQA3k
+from ipiqa.datasets.agiqa_datasets import AGIQA3k, AIGIQA20K
 from ipiqa.common.registry import registry
 from ipiqa.common.logger import setup_logger
 from ipiqa.tasks import setup_task
@@ -77,6 +77,15 @@ def get_datasets(config, transforms) -> dict:
 
     dataset_cfg = config.dataset
     split_file = config.run.get("split_file", None)
+
+    # ===================== AIGIQA-20K：官方 train/val metadata =====================
+    if dataset_cfg.get("name", None) == "aigiqa20k":
+        train_info = pd.read_csv(dataset_cfg.train_meta)
+        val_info = pd.read_csv(dataset_cfg.val_meta)
+        return {
+            "train": AIGIQA20K(train_info, transforms["train"], dataset_cfg.vis_root),
+            "val": AIGIQA20K(val_info, transforms["val"], dataset_cfg.vis_root),
+        }
 
     assignment = None
     if split_file:
@@ -154,7 +163,8 @@ if __name__ == "__main__":
 
     print(metric_lst)
 
-    key_lst = ["agg_metrics", 'qual_agg', 'qual_PLCC', 'qual_SROCC', 'qual_KROCC', 'align_agg', 'align_PLCC', 'align_SROCC', 'align_KROCC']
+    # 键集合从实际返回的 metrics 推导（兼容 doublescore / singlescore）
+    key_lst = list(metric_lst[0].keys())
     value_lst = [0] * len(key_lst)
     l = len(key_lst)
 

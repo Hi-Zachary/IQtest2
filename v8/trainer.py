@@ -378,6 +378,9 @@ class Trainer:
         # best-joint: argmax(qual_SROCC + qual_PLCC + align_SROCC + align_PLCC)
         best_joint_score = -1e9
         best_joint_epoch = 0
+        # best-main-score (AIGIQA-20K single-score): argmax(main_score_official)
+        best_main_score = -1e9
+        best_main_epoch = 0
         best_agg_metric = -1e9
         best_epoch = 0
         best_metrics = {}
@@ -438,9 +441,17 @@ class Trainer:
                             best_joint_score, best_joint_epoch = joint_score, cur_epoch
                             self._save_checkpoint(cur_epoch, filename="checkpoint_best_joint.pth")
 
+                        # ---- best-main-score (AIGIQA-20K single-score) ----
+                        main_score = val_log.get("main_score_official", -1e9)
+                        if main_score > best_main_score:
+                            best_main_score, best_main_epoch = main_score, cur_epoch
+                            self._save_checkpoint(cur_epoch, filename="checkpoint_best_main.pth")
+
                         # back-compat 的 is_best 语义按配置的 criterion
                         if best_criterion == "quality":
                             score = qual_score
+                        elif best_criterion == "main_score":
+                            score = main_score
                         else:
                             score = joint_score
                         if score > best_agg_metric:

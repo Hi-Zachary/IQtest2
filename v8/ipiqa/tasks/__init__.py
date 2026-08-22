@@ -7,6 +7,7 @@ from ipiqa.tasks.base_task import BaseTask
 from ipiqa.tasks.image2prompt import Image2PromptTask
 from ipiqa.tasks.agiqa import AGIQATask
 from ipiqa.tasks.agiqa_doublescore import AGIQADoubleScoresTask
+from ipiqa.tasks.aigiqa_singlescore import AIGIQASingleScoreTask
 
 
 def setup_task(cfg):
@@ -24,4 +25,5 @@ __all__ = [
     "Image2PromptTask",
     "AGIQATask",
     "AGIQADoubleScoresTask",
+    "AIGIQASingleScoreTask",
 ]

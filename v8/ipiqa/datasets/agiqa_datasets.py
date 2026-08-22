@@ -70,3 +70,47 @@ class AGIQA3k(Dataset):
         image = Image.open(str(self.vis_root / image_name)).convert("RGB")
 
         return self.transform(image), prompt, torch.tensor(mos,dtype=torch.float32), torch.tensor(align,dtype=torch.float32)
+
+# ===================== AIGIQA-20K (single overall MOS) =====================
+
+class singlescore_collator:
+    def __call__(self, batch):
+        images, prompt, mos = zip(*batch)
+
+        images = torch.stack(images)
+        mos = torch.stack(mos).view(-1, 1)
+
+        return {
+            "images": images,
+            "text": prompt,
+            "score": mos,
+        }
+
+class AIGIQA20K(Dataset):
+    def __init__(self, data_info, transform, vis_root):
+        super().__init__()
+
+        self.vis_root = Path(vis_root)
+        self.transform = transform
+        self.data_info = data_info.reset_index(drop=True)
+
+        self.collator = singlescore_collator()
+
+    def __len__(self):
+        return len(self.data_info)
+
+    def __getitem__(self, index):
+        row = self.data_info.iloc[index]
+
+        image_name = row["name"]
+        prompt = str(row["prompt"])
+        mos = float(row["mos"])
+
+        image = Image.open(str(self.vis_root / image_name)).convert("RGB")
+        image = self.transform(image)
+
+        return (
+            image,
+            prompt,
+            torch.tensor(mos, dtype=torch.float32),
+        )

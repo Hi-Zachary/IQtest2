@@ -42,6 +42,7 @@ class MSQRNetV17(BaseModel):
             qard_ffn_ratio=2,
             qard_gate_init=0.01,
             alignment_stopgrad=True,
+            single_score=False,
             freeze_visual=True,
             freeze_text=True,
             outer_gate_init=0.01,
@@ -55,6 +56,7 @@ class MSQRNetV17(BaseModel):
         self.use_dg_mpq = use_dg_mpq
         self.use_qard = use_qard
         self.alignment_stopgrad = alignment_stopgrad
+        self.single_score = single_score
         self.freeze_visual = freeze_visual
         self.freeze_text = freeze_text
         self.lora_lr_scale = lora_lr_scale
@@ -166,6 +168,11 @@ class MSQRNetV17(BaseModel):
         h_q = self.quality_fusion(torch.cat([v_ref, t_q], dim=-1))
         q = self.quality_head(h_q)
 
+        # AIGIQA-20K single-score：直接返回 q，Alignment 分支不 forward 不训练
+        if self.single_score:
+            self._last_ratios = ratios
+            return q
+
         # ===================== Alignment branch（R0 global baseline；stop-gradient） =====================
         if self.alignment_stopgrad:
             global_v_a = global_v.detach()
@@ -267,6 +274,7 @@ class MSQRNetV17(BaseModel):
             qard_ffn_ratio=cfg.get('qard_ffn_ratio', 2),
             qard_gate_init=cfg.get('qard_gate_init', 0.01),
             alignment_stopgrad=cfg.get('alignment_stopgrad', True),
+            single_score=cfg.get('single_score', False),
             freeze_visual=cfg.get('freeze_visual', True),
             freeze_text=cfg.get('freeze_text', True),
             outer_gate_init=cfg.get('outer_gate_init', 0.01),
