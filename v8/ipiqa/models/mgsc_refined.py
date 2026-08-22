@@ -19,10 +19,12 @@ import torch.nn.functional as F
 
 
 class MGSCRefined(nn.Module):
-    def __init__(self, num_fragments=4, topk=3, dim=256):
+    def __init__(self, num_fragments=4, topk=3, dim=256, mgsc_mode="global_local"):
         super().__init__()
         self.num_fragments = num_fragments
         self.topk = topk
+        assert mgsc_mode in ("global", "local", "global_local")
+        self.mgsc_mode = mgsc_mode
 
         # Global-Local Correspondence Embedding（与原 sem_proj 结构一致，可迁移）
         self.correspondence_proj = nn.Sequential(
@@ -71,7 +73,13 @@ class MGSCRefined(nn.Module):
         s_l = (alpha * frag_scores).sum(dim=-1, keepdim=True)       # [B,1]
 
         # ---- Global-Local Correspondence Embedding ----
-        e_c = self.correspondence_proj(torch.cat([s_g, s_l], dim=-1))  # [B,256]
+        # mgsc_mode 控制进入 embedding 的粒度（消融用，参数结构一致）
+        if self.mgsc_mode == "global":
+            e_c = self.correspondence_proj(torch.cat([s_g, torch.zeros_like(s_l)], dim=-1))
+        elif self.mgsc_mode == "local":
+            e_c = self.correspondence_proj(torch.cat([torch.zeros_like(s_g), s_l], dim=-1))
+        else:  # global_local
+            e_c = self.correspondence_proj(torch.cat([s_g, s_l], dim=-1))
 
         with torch.no_grad():
             gap = s_g - s_l
