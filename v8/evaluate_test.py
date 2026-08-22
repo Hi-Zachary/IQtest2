@@ -32,17 +32,17 @@ def build_test_loader(cfg):
     return dl
 
 
-def find_ckpt(tag):
+def find_ckpt(tag, sub="_V17_20k"):
     import glob
-    cands = sorted(glob.glob(f"{CKPT_DIR}/*_{tag}_V17_20k/checkpoint_best_main.pth"))
-    assert cands, f"no best_main ckpt for {tag}"
+    cands = sorted(glob.glob(f"{CKPT_DIR}/*_{tag}{sub}/checkpoint_best_main.pth"))
+    assert cands, f"no best_main ckpt for {tag}{sub}"
     return cands[-1]
 
 
-def evaluate(tag):
-    cfg = OmegaConf.load(CONFIGS[tag])
+def evaluate(tag, config_path, sub="_V17_20k"):
+    cfg = OmegaConf.load(config_path)
     model = registry.get_model_class(cfg.model.arch).from_config(cfg.model)
-    ckpt = torch.load(find_ckpt(tag), map_location="cpu")
+    ckpt = torch.load(find_ckpt(tag, sub), map_location="cpu")
     model.load_state_dict(ckpt["model"], strict=False)
     model.cuda().eval()
 
@@ -74,19 +74,39 @@ def evaluate(tag):
 
 
 def main():
-    print(f"{'Variant':<6} | {'SRCC':>6} {'PLCC_raw':>8} {'PLCC_map':>8} {'KRCC':>6} {'MSE':>7} {'MainScore_off':>12}")
+    import sys as _sys
+    which = _sys.argv[1] if len(_sys.argv) > 1 else "v17"
+    if which == "v18":
+        variants = [
+            ("B1", "configs/aigiqa20k/v18/b1_dgmpq.yaml", "_V18_20k"),
+            ("B2_CADR", "configs/aigiqa20k/v18/b2_cadr.yaml", "_V18_20k"),
+            ("Full", "configs/aigiqa20k/v18/full_dgmpq_cadr.yaml", "_V18_20k"),
+        ]
+    else:
+        variants = [
+            ("R0", "configs/aigiqa20k/r0_v17.yaml", "_V17_20k"),
+            ("B1", "configs/aigiqa20k/b1_dgmpq_v17.yaml", "_V17_20k"),
+            ("Full", "configs/aigiqa20k/full_dgmpq_qard_v17.yaml", "_V17_20k"),
+        ]
+
+    print(f"{'Variant':<9} | {'SRCC':>6} {'PLCC_raw':>8} {'PLCC_map':>8} {'KRCC':>6} {'MSE':>7} {'MainScore_off':>12}")
     print("-" * 70)
     results = {}
-    for tag in ["R0", "B1", "Full"]:
-        r = evaluate(tag)
+    for tag, cfgp, sub in variants:
+        r = evaluate(tag, cfgp, sub)
         results[tag] = r
-        print(f"{tag:<6} | {r['SRCC']:.4f} {r['PLCC_raw']:.4f} {r['PLCC_mapped']:.4f} "
+        print(f"{tag:<9} | {r['SRCC']:.4f} {r['PLCC_raw']:.4f} {r['PLCC_mapped']:.4f} "
               f"{r['KRCC']:.4f} {r['MSE']:.4f} {r['MainScore_official']:.4f}")
     print("-" * 70)
-    dg = results["B1"]["MainScore_official"] - results["R0"]["MainScore_official"]
-    qard = results["Full"]["MainScore_official"] - results["B1"]["MainScore_official"]
-    print(f"TEST ΔDG   (B1-R0)   MainScore = {dg:+.4f}   SRCC = {results['B1']['SRCC']-results['R0']['SRCC']:+.4f}")
-    print(f"TEST ΔQARD (Full-B1)  MainScore = {qard:+.4f}   SRCC = {results['Full']['SRCC']-results['B1']['SRCC']:+.4f}")
+    if "R0" in results:
+        dg = results["B1"]["MainScore_official"] - results["R0"]["MainScore_official"]
+        print(f"TEST ΔDG   (B1-R0)   MainScore = {dg:+.4f}   SRCC = {results['B1']['SRCC']-results['R0']['SRCC']:+.4f}")
+    if "B2_CADR" in results:
+        dcadr = results["Full"]["MainScore_official"] - results["B1"]["MainScore_official"]
+        print(f"TEST ΔCADR (Full-B1)  MainScore = {dcadr:+.4f}   SRCC = {results['Full']['SRCC']-results['B1']['SRCC']:+.4f}")
+    else:
+        dq = results["Full"]["MainScore_official"] - results["B1"]["MainScore_official"]
+        print(f"TEST ΔQARD (Full-B1)  MainScore = {dq:+.4f}   SRCC = {results['Full']['SRCC']-results['B1']['SRCC']:+.4f}")
 
 
 if __name__ == "__main__":
